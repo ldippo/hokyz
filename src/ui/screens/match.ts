@@ -42,7 +42,7 @@ function startRunMatch(app: App, node: MapNode, bundle: ReturnType<typeof buildM
   const run = app.run!;
   const sim = new MatchSim(
     [
-      { name: bundle.home.name, short: bundle.home.short, color: bundle.home.color, skaters: bundle.home.skaters, goalie: bundle.home.goalie, isHuman: true, difficulty: 2 },
+      { name: bundle.home.name, short: bundle.home.short, color: bundle.home.color, skaters: bundle.home.skaters, goalie: bundle.home.goalie, isHuman: true, difficulty: 2, logo: bundle.home.logo },
       { name: bundle.away.name, short: bundle.away.short, color: bundle.away.color, skaters: bundle.away.skaters, goalie: bundle.away.goalie, isHuman: false, difficulty: bundle.away.difficulty },
     ],
     bundle.mods,

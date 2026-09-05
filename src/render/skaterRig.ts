@@ -493,11 +493,12 @@ export class SkaterRig {
 }
 
 /** Build a jersey spec for a team + player. */
-export function jerseySpecFor(teamColor: string, teamIndex: number, logoSeed: string, initial: string, number: number, name?: string): JerseySpec {
+export function jerseySpecFor(teamColor: string, teamIndex: number, logoSeed: string, initial: string, number: number, name?: string, logoOverride?: string): JerseySpec {
   const { secondary, accent } = teamPalette(teamColor);
   const shapes: LogoShape[] = ['circle', 'shield', 'diamond', 'star', 'hex'];
   let hsh = 0;
   for (let i = 0; i < logoSeed.length; i++) hsh = (hsh * 31 + logoSeed.charCodeAt(i)) >>> 0;
-  return { primary: teamColor, secondary, accent, pattern: ((hsh >> 2) % 4) as StripePattern, logo: shapes[hsh % shapes.length], initial, number, name };
+  const logo = logoOverride && (shapes as string[]).includes(logoOverride) ? (logoOverride as LogoShape) : shapes[hsh % shapes.length];
+  return { primary: teamColor, secondary, accent, pattern: ((hsh >> 2) % 4) as StripePattern, logo, initial, number, name };
 }
 void teamPalette;

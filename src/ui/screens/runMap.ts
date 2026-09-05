@@ -15,6 +15,7 @@ import { RIVAL_BY_ID } from '../../run/teams';
 import { levelUpScreen } from './levelUp';
 import { pendingLevelUps } from '../../run/runState';
 import { skillsScreen } from './skills';
+import { rosterScreen } from './roster';
 import { MUTATOR_BY_ID } from '../../run/mutators';
 
 function xpPct(xp: number, level: number): number {
@@ -24,7 +25,9 @@ function xpPct(xp: number, level: number): number {
   return ((xp - lo) / (hi - lo)) * 100;
 }
 
+let panelApp: App | null = null;
 export function rosterPanel(run: RunState): HTMLElement {
+  const app = panelApp!;
   const line = lineup(run);
   const cards = run.roster.map((s) => {
     const inj = isInjured(s);
@@ -47,6 +50,7 @@ export function rosterPanel(run: RunState): HTMLElement {
   const tagRow = (Object.keys(TAG_INFO) as (keyof typeof TAG_INFO)[]).filter((t) => (counts[t] ?? 0) > 0).map((t) => h('span', { class: `tag ${sets.includes(t) ? 'complete' : ''}`, title: `${TAG_INFO[t].set}: ${TAG_INFO[t].desc}` }, `${TAG_INFO[t].icon} ${t} ${Math.min(SET_SIZE, counts[t] ?? 0)}/${SET_SIZE}`));
   return h('div', { class: 'side' },
     h('h3', {}, `Roster · ${run.teamName}`),
+    h('div', { style: 'margin-bottom:8px' }, btn('Manage lineup', () => rosterScreen(app))),
     ...cards,
     h('h3', {}, `Perks (${perks.length})`),
     tagRow.length ? h('div', { class: 'tags', style: 'margin-bottom:8px' }, ...tagRow) : null,
@@ -72,6 +76,7 @@ export function topBar(app: App, run: RunState, extra?: HTMLElement): HTMLElemen
 }
 
 export function runMapScreen(app: App): void {
+  panelApp = app;
   const run = app.run!;
   if (run.over) {
     runOverScreen(app);
