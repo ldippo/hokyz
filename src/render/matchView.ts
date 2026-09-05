@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import { MatchSim } from '../sim/match';
 import type { MatchEvent, MatchState } from '../sim/types';
 import { SceneRig } from './scene';
@@ -87,6 +87,10 @@ export class MatchView {
         this.particles.spawn({ x: e.pos.x, y: e.pos.y, count: 90, color: [0xffd23f, 0xffffff, parseInt(team.color.slice(1), 16)], speed: 9, life: 1.6, size: 0.16, up: 7 });
         sfx.goal();
         this.excite = 1;
+        if (!this.silent) {
+          this.rig.punch(0.8);
+          this.rig.hitStopHandler?.(5);
+        }
         break;
       }
       case 'hit': {
@@ -95,6 +99,10 @@ export class MatchView {
         sfx.hit(e.big);
         if (e.big) {
           this.hud.announce('BIG HIT!', 'red', st.skaters[e.hitter].name);
+          if (!this.silent) {
+            this.rig.punch(1);
+            this.rig.hitStopHandler?.(4);
+          }
           this.excite = Math.max(this.excite, 0.7);
           sfx.crowdBurst(0.5);
         }
@@ -190,6 +198,9 @@ export class MatchView {
     }
     this.cam.update(dt, fx, fy, st.shake, this.time, spread);
     this.hud.update(st, dt);
-    this.rig.render();
+    let turbo = 0;
+    for (const t of st.teams) if (t.isHuman && t.controlledId) turbo = st.skaters[t.controlledId].turboActive ? 1 : 0;
+    this.rig.setTurbo(turbo);
+    this.rig.render(dt);
   }
 }

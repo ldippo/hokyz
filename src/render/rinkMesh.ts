@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import { RINK } from '../sim/constants';
 import { GOALS } from '../sim/rink';
 import type { RinkTheme } from '../run/meta';

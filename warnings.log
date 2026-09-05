@@ -1,0 +1,5 @@
+Total messages: 15 (Errors: 0, Warnings: 2)
+Returning 2 messages for level "warning"
+
+[WARNING] No available adapters. @ http://localhost:5173/?perf=1:0
+[WARNING] THREE.WebGPURenderer: WebGPU is not available, running under WebGL2 backend. @ http://localhost:5173/@vite/client:532

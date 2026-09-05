@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three/webgpu';
 import { RINK } from '../sim/constants';
 
 export class FollowCamera {
