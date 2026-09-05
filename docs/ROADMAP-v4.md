@@ -57,4 +57,5 @@ Branch `v4/qol`. Pause menu box score + perks, Quick Match home team from unlock
 Branch `v4/endgame`. After the act-3 boss the run may continue into Act 4+ with regenerated maps at rising tiers, records per act reached; ascension 3 (cursed-only epic drafts), 4 (no rest heals), 5 (every boss gets an extra phase). Unlockables and records updated.
 
 ## Status log
-- 2026-09-05: plan written; V4-1 in progress.
+- 2026-09-05: plan written.
+- 2026-09-05: V4-1 Robustness + CI merged: meta/run saves carry a schema number, `migrateMeta` deep-fills every default (v1-era profiles verified), `migrateRun` fills grudges/weekly/flags/XP and rejects runs with unknown node types or versions; window `error`/`unhandledrejection` → view dropped, run saved, toast, title (verified: recovery in ~1 s), fourth failure inside a minute → hard-error card with reload (dead flag stops later recoveries from overwriting it). GitHub Actions on every push/PR: typecheck, tests, build, 4-match balance batch in the job summary (first run green).

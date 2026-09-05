@@ -16,6 +16,7 @@ import { PerfProbe, TIERS, Watchdog, probeTier, type Tier } from './render/quali
 import { h } from './ui/dom';
 import { loadRigs } from './render/skaterRig';
 import { loadRinkTextures } from './render/textures';
+import { titleScreen } from './ui/screens/title';
 import { setupEnvironment } from './render/environment';
 
 export class App {
@@ -38,9 +39,56 @@ export class App {
   assetsLoaded = false;
   private toastEl: HTMLElement | null = null;
 
+  private crashCount = 0;
+  private crashWindowStart = 0;
+  private dead = false;
+
+  /** Global error recovery: log, toast, drop the match view, return to the title. */
+  private installErrorRecovery(): void {
+    const handle = (msg: string) => {
+      const now = performance.now();
+      if (now - this.crashWindowStart > 60000) {
+        this.crashWindowStart = now;
+        this.crashCount = 0;
+      }
+      this.crashCount++;
+      console.error('[recover]', msg);
+      if (this.dead) return;
+      if (this.crashCount > 3) {
+        this.hardError(msg);
+        return;
+      }
+      try {
+        this.onTick = null;
+        this.paused = false;
+        this.loop.speed = 1;
+        this.disposeView();
+        this.showScreen(null);
+        this.saveRun();
+        this.toast('Something broke. Back to the title — your run is saved.');
+        titleScreen(this);
+      } catch (e) {
+        this.hardError(String(e));
+      }
+    };
+    window.addEventListener('error', (e) => handle(e.message || String(e.error)));
+    window.addEventListener('unhandledrejection', (e) => handle(String((e as PromiseRejectionEvent).reason)));
+  }
+  private hardError(msg: string): void {
+    this.dead = true;
+    this.loop.stop();
+    try {
+      this.disposeView();
+    } catch {
+      /* ignore */
+    }
+    this.showScreen(h('div', { class: 'screen' }, h('h2', { class: 'screen-title' }, 'HOKYZ HIT THE BOARDS'), h('p', { class: 'screen-sub' }, 'Repeated errors. Your run and profile are saved.'), h('pre', { style: 'max-width:640px;white-space:pre-wrap;font-size:12px;color:#8fa3d9' }, msg.slice(0, 400)), h('div', { class: 'menu' }, h('button', { class: 'btn primary', 'data-nav': '1', onClick: () => location.reload() }, 'Reload'))));
+  }
+
   constructor(canvas: HTMLCanvasElement, ui: HTMLElement) {
     this.rig = new SceneRig(canvas);
     this.ui = ui;
+    this.installErrorRecovery();
     this.meta = loadMeta();
     sfx.setVolume(this.meta.volume);
     this.input.onAnyPress = () => sfx.resume();
