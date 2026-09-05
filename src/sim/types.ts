@@ -54,6 +54,13 @@ export interface Skater {
   lunge: number;
   checkCooldown: number;
   deke: number;
+  /** 'spin' | 'dragL' | 'dragR' — animation hint for the current deke */
+  dekeKind: 'spin' | 'dragL' | 'dragR';
+  dekeChain: number;
+  dekeWindow: number;
+  /** goalie dive timer + direction (sim y sign) */
+  dive: number;
+  diveDir: number;
   onFire: number; // seconds remaining
   streak: number;
   hp: number;
@@ -83,6 +90,10 @@ export interface Puck {
   /** time since released from a stick */
   freeTime: number;
   isShot: boolean;
+  /** airborne pass: nobody but the target can pick it up until it lands */
+  saucer: boolean;
+  /** charge of the last shot (goalie read) */
+  shotCharge: number;
 }
 
 export interface TeamState {
@@ -99,14 +110,29 @@ export interface TeamState {
   isHuman: boolean;
   difficulty: number;
   shotsOnGoal: number;
+  /** goalie pulled for an extra attacker */
+  pulled: boolean;
+  /** seconds left in the dive window after an opponent's shot (0 = none) */
+  diveWindow: number;
+  /** skater to hand control back to after a goalie dive */
+  diveReturnId: string | null;
+  pullLatch: boolean;
+  pulledGoalieId?: string | null;
 }
 
 export type MatchPhase = 'intro' | 'faceoff' | 'play' | 'goal' | 'periodEnd' | 'over';
 
 export interface Input {
   move: Vec2;
+  /** shot aim (screen-space: x right, y down). Zero = auto-aim. */
+  aim: Vec2;
   turbo: boolean;
+  /** pass button released this tick */
   pass: boolean;
+  /** pass button currently held */
+  passHeld: boolean;
+  /** seconds the pass button was held (at release, or so far) */
+  passHoldTime: number;
   shoot: boolean;
   shootRelease: boolean;
   check: boolean;
@@ -115,8 +141,11 @@ export interface Input {
 
 export const EMPTY_INPUT: Readonly<Input> = Object.freeze({
   move: { x: 0, y: 0 },
+  aim: { x: 0, y: 0 },
   turbo: false,
   pass: false,
+  passHeld: false,
+  passHoldTime: 0,
   shoot: false,
   shootRelease: false,
   check: false,
@@ -126,7 +155,12 @@ export const EMPTY_INPUT: Readonly<Input> = Object.freeze({
 export type MatchEvent =
   | { type: 'goal'; team: TeamId; scorer: string; assist: string | null; pos: Vec2; value: number }
   | { type: 'hit'; hitter: string; victim: string; big: boolean; pos: Vec2 }
-  | { type: 'shot'; shooter: string; power: number; pos: Vec2 }
+  | { type: 'shot'; shooter: string; power: number; pos: Vec2; oneTimer: boolean; zone: string }
+  | { type: 'saucer'; from: string; to: string | null }
+  | { type: 'ankleBreaker'; skater: string; victim: string }
+  | { type: 'bigSave'; goalie: string; pos: Vec2 }
+  | { type: 'divePrompt'; team: TeamId }
+  | { type: 'goaliePulled'; team: TeamId; pulled: boolean }
   | { type: 'save'; goalie: string; pos: Vec2 }
   | { type: 'post'; pos: Vec2 }
   | { type: 'pass'; from: string; to: string | null }

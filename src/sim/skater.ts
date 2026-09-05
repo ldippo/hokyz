@@ -37,6 +37,11 @@ export function makeSkater(
     lunge: 0,
     checkCooldown: 0,
     deke: 0,
+    dekeKind: 'spin',
+    dekeChain: 0,
+    dekeWindow: 0,
+    dive: 0,
+    diveDir: 0,
     onFire: 0,
     streak: 0,
     hp,
@@ -73,6 +78,8 @@ export function stepSkater(sk: Skater, input: Input, st: MatchState, dt: number,
   sk.pickupCooldown = tick(sk.pickupCooldown, dt);
   sk.checkCooldown = tick(sk.checkCooldown, dt);
   sk.deke = tick(sk.deke, dt);
+  sk.dekeWindow = tick(sk.dekeWindow, dt);
+  if (sk.dekeWindow === 0) sk.dekeChain = 0;
   sk.butterfly = tick(sk.butterfly, dt);
   if (sk.onFire > 0) {
     sk.onFire = Math.max(0, sk.onFire - dt);
@@ -159,9 +166,16 @@ export function stickPoint(sk: Skater, out?: Vec2): Vec2 {
   let off = SKATER.possessionOffset;
   let side = 0;
   if (sk.deke > 0) {
-    // puck swings side-to-side during deke
-    side = Math.sin(sk.deke * 18) * 0.7;
-    off *= 0.8;
+    if (sk.dekeKind === 'spin') {
+      // puck swings side-to-side during a spin
+      side = Math.sin(sk.deke * 18) * 0.7;
+      off *= 0.8;
+    } else {
+      // toe drag: pull the puck wide to one side then back
+      const k = Math.sin(Math.min(1, sk.deke / 0.45) * Math.PI);
+      side = (sk.dekeKind === 'dragL' ? 1 : -1) * 0.9 * k;
+      off *= 0.7 + 0.3 * (1 - k);
+    }
   }
   const c = Math.cos(sk.facing),
     s = Math.sin(sk.facing);

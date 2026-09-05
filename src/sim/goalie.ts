@@ -29,6 +29,7 @@ export function stepGoalie(st: MatchState, g: Skater, dt: number, rng: Rng, even
   g.knockdown = Math.max(0, g.knockdown - dt);
   g.stumble = Math.max(0, g.stumble - dt);
   g.pickupCooldown = Math.max(0, g.pickupCooldown - dt);
+  g.dive = Math.max(0, g.dive - dt);
 
   if (g.knockdown > 0) {
     damp(g.vel, 6, dt);
@@ -80,10 +81,16 @@ export function stepGoalie(st: MatchState, g: Skater, dt: number, rng: Rng, even
   } else {
     desired.x = desired.y = 0;
   }
+  if (g.dive > 0) {
+    // committed dive: lateral lunge toward the chosen side
+    desired.x = 0;
+    desired.y = g.diveDir * GOALIE.diveSpeed;
+    g.butterfly = Math.max(g.butterfly, 0.2);
+  }
   let ax = desired.x - g.vel.x,
     ay = desired.y - g.vel.y;
   const al = Math.hypot(ax, ay);
-  const maxA = GOALIE.accel * dt;
+  const maxA = GOALIE.accel * dt * (g.dive > 0 ? 2.5 : 1);
   if (al > maxA) {
     ax *= maxA / al;
     ay *= maxA / al;
@@ -118,15 +125,26 @@ export function stepGoalie(st: MatchState, g: Skater, dt: number, rng: Rng, even
         const ang = Math.abs(Math.atan2(p.pos.y - goal.lineX * 0 - 0, Math.abs(p.pos.x - goal.lineX) + 0.1));
         const angleF = 1 + ang * 0.25;
         const powerF = clamp(1 - (speed - 16) / 60, 0.62, 1.05);
-        const highF = p.z > 0.8 ? 0.82 : 1;
+        const highF = p.z > 0.8 ? 0.9 : 1;
         // screened? opponent skater between puck path and goalie
         let screen = 1;
         for (const oid of st.teams[g.team === 0 ? 1 : 0].skaters) {
           const o = st.skaters[oid];
           if (Math.hypot(o.pos.x - g.pos.x, o.pos.y - g.pos.y) < 2.6) screen = 0.85;
         }
-        const chance = GOALIE.baseSaveChance * SKATER.statScale(g.stats.hands) * m.goalieSaveMul * angleF * powerF * highF * screen * (gm.beaten > 0 ? 0.3 : 1);
+        // read: charged shots telegraph; quick releases beat the goalie
+        const readF = 0.86 + 0.28 * clamp(p.shotCharge, 0, 1);
+        let diveF = 1;
+        let bigSave = false;
+        if (g.dive > 0) {
+          const side = Math.sign(p.pos.y - g.pos.y) || 1;
+          const right = side === Math.sign(g.diveDir || 1);
+          diveF = right ? GOALIE.diveRightMul : GOALIE.diveWrongMul;
+          bigSave = right;
+        }
+        const chance = GOALIE.baseSaveChance * SKATER.statScale(g.stats.hands) * m.goalieSaveMul * angleF * powerF * highF * screen * readF * diveF * (gm.beaten > 0 ? 0.3 : 1);
         if (rng.next() < clamp(chance, 0.15, 0.97)) {
+          if (bigSave) events.push({ type: 'bigSave', goalie: g.id, pos: { ...p.pos } });
           // SAVE
           g.saves++;
           events.push({ type: 'save', goalie: g.id, pos: { ...p.pos } });

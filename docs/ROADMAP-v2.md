@@ -64,8 +64,8 @@ Status 2026-09-05: `render/director.ts` keyframed camera shots (intro fly-in wit
 - Audio: CC0 samples (crowd calm/roar loops, horn, skates, boards, gloves), opus, layered via existing `Sfx`; organ loop on menus.
 - Gate: user playtest of feel; replay never desyncs from the score.
 
-### E — On-ice depth (M)
-Branch `phase/handling`.
+### E — On-ice depth (M) — IN REVIEW (branch `phase/handling`, stacked on D)
+Status 2026-09-05: aim input (arrows / right stick / mouse) picks the post, charge > 0.6 lifts to the top corners with a physically solved launch (found and fixed: the old lift was ~1 m/s so shots never rose; now over-the-bar misses are possible from distance); 3D reticle on the goal mouth. Pass now fires on release: hold ≥ 0.22 s = saucer (airborne, only the target can catch it), hold ≥ 1 s in the last 2:00 = pull goalie (goalie skates out as a 4th attacker, returns at the next faceoff). Opponent shots open a 0.6 s dive window: switch button + up/down snaps to the goalie for a dive (right side ×1.4 saves + BIG SAVE, wrong side ×0.5). Chained dekes (toe-drag L/R or spin, up to 3 in 1 s, turbo cost after the first); a lunging defender who whiffs on a deking carrier gets knocked down and the carrier earns ANKLE BREAKER streak credit. One-timer ring after receiving a pass, PERFECT pop on the shot. Pass lanes drawn as strips for the carrier (Playmakers see farther). Balance batch: goals 6.8 / 8.3 / 10.7 / 11.3 by difficulty.
 - Sim: aim reticle input (`Input.aim`), 5-zone targeting, lift by charge, goalie late-read; goalie dive input + pull-goalie; chained dekes with turbo cost + ANKLE BREAKER streak; saucer pass (z arc) + lane evaluation; one-timer ring.
 - Render/HUD: reticle, lane lines, timing ring, PERFECT pop.
 - Input: right stick / mouse aim; keyboard arrows aim.

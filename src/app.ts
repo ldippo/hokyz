@@ -97,7 +97,9 @@ export class App {
       }
       this.loop.speed = v.timeScale;
       if (!v.holdSim) {
-        const ev = v.sim.step(this.humanPlaying ? { 0: this.input.simInput() } : {});
+        const hi = this.humanPlaying ? this.input.simInput() : null;
+        v.humanInput = hi;
+        const ev = v.sim.step(hi ? { 0: hi } : {});
         v.afterStep(ev);
       }
     }

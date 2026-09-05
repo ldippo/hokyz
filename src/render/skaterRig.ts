@@ -199,7 +199,7 @@ export class SkaterRig {
     // fall / spin / lean state
     const targetFall = sk.knockdown > 0 ? 1 : 0;
     this.fall += (targetFall - this.fall) * Math.min(1, dt * (targetFall ? 14 : 6));
-    if (sk.deke > 0 && !sk.isGoalie) this.spin += dt * 16;
+    if (sk.deke > 0 && !sk.isGoalie && sk.dekeKind === 'spin') this.spin += dt * 16;
     else this.spin += (Math.round(this.spin / (Math.PI * 2)) * Math.PI * 2 - this.spin) * Math.min(1, dt * 12);
     const targetLean = Math.min(0.62, Math.min(0.4, speed * 0.035) + (sk.lunge > 0 ? 0.45 : 0) + (sk.stumble > 0 ? 0.3 : 0));
     this.lean += (targetLean - this.lean) * Math.min(1, dt * 8);
@@ -295,8 +295,15 @@ export class SkaterRig {
       this.rot('shin.L', AX_Z, -0.6 * f);
       this.rot('head', AX_Z, -0.5 * f);
     }
-    // stick wobble while charging
+    // stick wobble while charging; toe-drag swings the stick wide
     if (sk.charging) this.rot('stick', AX_Y, -0.35 * sk.shotCharge);
+    if (sk.deke > 0 && sk.dekeKind !== 'spin') {
+      const k = Math.sin(Math.min(1, sk.deke / 0.45) * Math.PI);
+      const side = sk.dekeKind === 'dragL' ? 1 : -1;
+      this.rot('stick', AX_Y, side * 0.9 * k);
+      this.rot('chest', AX_Y, side * 0.35 * k);
+      this.rot('chest', AX_X, -side * 0.25 * k);
+    }
 
     // indicators
     this.ring.visible = sk.controlled;

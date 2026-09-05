@@ -97,6 +97,8 @@ export function setupFaceoff(st: MatchState, events: MatchEvent[]): void {
       resetGoalieMem(g);
     }
     t.switchLock = 0;
+    t.diveWindow = 0;
+    t.diveReturnId = null;
     // human controls center at faceoff
     if (t.isHuman) {
       if (t.controlledId) st.skaters[t.controlledId].controlled = false;

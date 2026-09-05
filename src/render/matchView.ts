@@ -17,7 +17,10 @@ import { Hud } from '../ui/hud';
 import { sfx as realSfx } from '../audio/sfx';
 const sfx = realSfx;
 const SILENT = new Proxy({}, { get: () => () => {} }) as typeof realSfx;
-import { defendGoal } from '../sim/rink';
+import { defendGoal, attackGoal } from '../sim/rink';
+import { laneBlocked } from '../sim/puck';
+import { PUCK, RINK, GOALIE } from '../sim/constants';
+import type { Input } from '../sim/types';
 import { RINK_THEMES, type RinkTheme } from '../run/meta';
 
 let rigTpl: Awaited<ReturnType<typeof loadRigs>> | null = null;
@@ -42,6 +45,14 @@ export class MatchView {
   private pendingMvp: { at: number; id: string } | null = null;
   private introBeats = 0;
   private lastCam: 'follow' | 'director' = 'follow';
+  /** latest human input, for the aim reticle */
+  humanInput: Input | null = null;
+  private reticle: THREE.Group;
+  private reticleRing: THREE.Mesh;
+  private reticleHigh: THREE.Mesh;
+  private lanes: THREE.Mesh[] = [];
+  private otRing: THREE.Mesh;
+  private pullHint = 0;
   cam: FollowCamera;
   hud: Hud;
   time = 0;
@@ -83,6 +94,33 @@ export class MatchView {
     this.cam = new FollowCamera(rig.camera);
     this.cam.snapTo(0, 0);
     this.director = new Director(rig.camera);
+    // aim reticle on the goal mouth
+    this.reticle = new THREE.Group();
+    this.reticleRing = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.05, 8, 24), new THREE.MeshBasicMaterial({ color: 0xffd23f, transparent: true, opacity: 0.9, depthTest: false }));
+    this.reticleHigh = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.25, 6), new THREE.MeshBasicMaterial({ color: 0xff7a1a, transparent: true, opacity: 0.9, depthTest: false }));
+    this.reticleHigh.position.y = 0.45;
+    this.reticle.add(this.reticleRing, this.reticleHigh);
+    this.reticle.visible = false;
+    this.reticle.renderOrder = 10;
+    this.group.add(this.reticle);
+    // pass lanes
+    const laneGeo = new THREE.BoxGeometry(1, 0.02, 0.14);
+    laneGeo.translate(0.5, 0, 0);
+    for (let i = 0; i < 3; i++) {
+      const l = new THREE.Mesh(laneGeo, new THREE.MeshBasicMaterial({ color: 0x3fff7a, transparent: true, opacity: 0.6, depthTest: false }));
+      l.visible = false;
+      l.renderOrder = 9;
+      l.frustumCulled = false;
+      this.lanes.push(l);
+      this.group.add(l);
+    }
+    // one-timer timing ring
+    this.otRing = new THREE.Mesh(new THREE.TorusGeometry(1, 0.06, 8, 32), new THREE.MeshBasicMaterial({ color: 0xffd23f, transparent: true, opacity: 0.85, depthTest: false }));
+    this.otRing.rotation.x = -Math.PI / 2;
+    this.otRing.position.y = 0.05;
+    this.otRing.visible = false;
+    this.otRing.renderOrder = 9;
+    this.group.add(this.otRing);
     this.hud = new Hud(uiRoot, humanTeam, perkNames);
     if (humanTeam !== null) sfx.startCrowd();
   }
@@ -208,8 +246,29 @@ export class MatchView {
         break;
       }
       case 'shot':
+        if (e.oneTimer && st.skaters[e.shooter]?.controlled) this.hud.announce('PERFECT!', 'gold', 'ONE-TIMER');
         sfx.slapshot(e.power);
         this.particles.spawn({ x: e.pos.x, y: e.pos.y, z: 0.1, count: 6, color: 0xdff4ff, speed: 2, life: 0.35, size: 0.07, up: 1.5 });
+        break;
+      case 'bigSave':
+        this.hud.announce('BIG SAVE!', 'gold', st.skaters[e.goalie].name);
+        this.particles.spawn({ x: e.pos.x, y: e.pos.y, z: 0.6, count: 30, color: [0xffffff, 0xffd23f], speed: 5, life: 0.7, size: 0.12, up: 4 });
+        sfx.crowdBurst(0.7);
+        this.excite = Math.max(this.excite, 0.7);
+        break;
+      case 'ankleBreaker':
+        this.hud.announce('ANKLE BREAKER!', 'fire', st.skaters[e.skater].name);
+        this.particles.spawn({ x: st.skaters[e.victim].pos.x, y: st.skaters[e.victim].pos.y, z: 0.3, count: 16, color: [0xff7a1a, 0xffd23f], speed: 3, life: 0.5, size: 0.1, up: 2 });
+        sfx.crowdBurst(0.5);
+        break;
+      case 'divePrompt':
+        if (st.teams[e.team].isHuman) this.hud.prompt('DIVE!  J / A  +  UP/DOWN', GOALIE.diveWindow, 'dive');
+        break;
+      case 'goaliePulled':
+        this.hud.announce(e.pulled ? 'GOALIE PULLED' : 'GOALIE BACK', e.pulled ? 'red' : '', e.pulled ? 'EXTRA ATTACKER' : '');
+        break;
+      case 'saucer':
+        sfx.pass();
         break;
       case 'save':
         sfx.save();
@@ -428,6 +487,70 @@ export class MatchView {
       this.cam.update(dt, fx, fy, st.shake, this.time, spread);
     }
     if (directing && this.director.kind === 'replay') this.hud.tag('REPLAY');
+    // aim reticle, pass lanes, one-timer ring for the controlled carrier
+    this.reticle.visible = false;
+    for (const l of this.lanes) l.visible = false;
+    this.otRing.visible = false;
+    if (!this.silent && !this.replay) {
+      for (const t of st.teams) {
+        if (!t.isHuman || !t.controlledId) continue;
+        const c = st.skaters[t.controlledId];
+        if (!c.hasPuck || c.isGoalie) continue;
+        const goal = attackGoal(c.team);
+        const dGoal = Math.abs(goal.lineX - c.pos.x);
+        if (dGoal < 22 && Math.sign(goal.lineX - c.pos.x) === goal.dir) {
+          const aim = this.humanInput?.aim ?? { x: 0, y: 0 };
+          const oppGoalie = st.teams[c.team === 0 ? 1 : 0].goalie;
+          const gk = oppGoalie ? st.skaters[oppGoalie] : null;
+          let post: number;
+          if (Math.hypot(aim.x, aim.y) > 0.25) post = Math.max(-1, Math.min(1, aim.y * 1.3));
+          else post = gk ? -Math.sign(gk.pos.y || 1) * 0.85 : 0;
+          const charge = c.charging ? c.shotCharge : 0;
+          const high = charge > 0.6;
+          this.reticle.position.set(goal.lineX - goal.dir * 0.15, high ? 0.95 : 0.3, post * (RINK.goalWidth / 2) * 0.82);
+          this.reticle.rotation.y = goal.dir > 0 ? -Math.PI / 2 : Math.PI / 2;
+          this.reticleHigh.visible = high;
+          (this.reticleRing.material as THREE.MeshBasicMaterial).color.setHex(high ? 0xff7a1a : 0xffd23f);
+          this.reticleRing.scale.setScalar(1 + charge * 0.6);
+          this.reticle.visible = true;
+        }
+        // lanes
+        const range = c.stats.hands >= 8 ? 30 : 18;
+        let li = 0;
+        for (const id of t.skaters) {
+          if (id === c.id || li >= this.lanes.length) continue;
+          const m = st.skaters[id];
+          const d = Math.hypot(m.pos.x - c.pos.x, m.pos.y - c.pos.y);
+          if (d > range || m.knockdown > 0) continue;
+          const blocked = laneBlocked(st, c, m);
+          const lane = this.lanes[li];
+          lane.position.set(c.pos.x, 0.06, c.pos.y);
+          lane.rotation.y = -Math.atan2(m.pos.y - c.pos.y, m.pos.x - c.pos.x);
+          lane.scale.set(d, 1, 1);
+          (lane.material as THREE.MeshBasicMaterial).color.setHex(blocked ? 0xff3b3b : 0x3fff7a);
+          (lane.material as THREE.MeshBasicMaterial).opacity = blocked ? 0.35 : 0.55;
+          lane.visible = true;
+          li++;
+        }
+        // one-timer ring
+        const since = st.t - c.receivedAt;
+        if (since < PUCK.oneTimerWindow && st.puck.prevTouch && st.skaters[st.puck.prevTouch]?.team === c.team) {
+          const k = 1 - since / PUCK.oneTimerWindow;
+          this.otRing.position.set(c.pos.x, 0.05, c.pos.y);
+          this.otRing.scale.setScalar(0.6 + k * 0.9);
+          this.otRing.visible = true;
+        }
+      }
+      // pull-goalie hint late in regulation
+      const human = st.teams.find((t) => t.isHuman);
+      if (human && st.phase === 'play' && !st.overtime && st.clock <= GOALIE.pullClock && !human.pulled && st.period >= st.mods.periods) {
+        this.pullHint += dt;
+        if (this.pullHint > 8) {
+          this.pullHint = 0;
+          this.hud.prompt('HOLD J / A TO PULL THE GOALIE', 2.5, 'quiet');
+        }
+      }
+    }
     // controlled skater skate audio
     for (const t of st.teams) {
       if (t.isHuman && t.controlledId && !this.silent) {

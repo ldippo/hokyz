@@ -29,6 +29,9 @@ export const SKATER = {
   turboMinToActivate: 0.08,
   iceFriction: 3.2, // exponential velocity damping (1/s)
   turnRate: 9, // rad/s facing slew
+  dekeChainWindow: 1.0,
+  dekeChainMax: 3,
+  dekeTurboCost: 0.12,
   knockdownTime: 1.25,
   getUpInvuln: 0.9,
   stumbleTime: 0.5,
@@ -39,6 +42,13 @@ export const SKATER = {
 };
 
 export const GOALIE = {
+  diveWindow: 0.6,
+  diveTime: 0.45,
+  diveSpeed: 9,
+  diveRightMul: 1.4,
+  diveWrongMul: 0.5,
+  pullHold: 1.0,
+  pullClock: 120,
   radius: 0.75,
   maxSpeed: 5.5,
   accel: 22,
@@ -63,6 +73,9 @@ export const PUCK = {
   shotLiftMax: 1.4,
   dumpSpeed: 9,
   oneTimerWindow: 0.28,
+  saucerHold: 0.22, // hold pass this long → saucer
+  saucerLift: 3.6,
+  saucerSpeedMul: 0.85,
   oneTimerPowerMul: 1.25,
   gravity: 9.8,
   bounce: 0.4,

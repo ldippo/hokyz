@@ -57,6 +57,10 @@ export function applyHit(st: MatchState, h: Skater, vic: Skater, rng: Rng, event
     h.stumble = SKATER.stumbleTime * 0.7;
     h.vel.x *= 0.3;
     h.vel.y *= 0.3;
+    if (vic.deke > 0 && vic.hasPuck) {
+      h.knockdown = Math.max(h.knockdown, 0.5);
+      events.push({ type: 'ankleBreaker', skater: vic.id, victim: h.id });
+    }
     return;
   }
   let power = SKATER.statScale(h.stats.hit) * hm.hitPowerMul * (0.55 + hSpeed / 18);

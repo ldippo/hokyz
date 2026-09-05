@@ -77,7 +77,7 @@ function incomingCheck(st: MatchState, sk: Skater): boolean {
 }
 
 export function thinkSkater(st: MatchState, sk: Skater, brain: Brain, dt: number, rng: Rng): Input {
-  const input: Input = { move: { x: 0, y: 0 }, turbo: false, pass: false, shoot: false, shootRelease: false, check: false, deke: false };
+  const input: Input = { move: { x: 0, y: 0 }, aim: { x: 0, y: 0 }, turbo: false, pass: false, passHeld: false, passHoldTime: 0, shoot: false, shootRelease: false, check: false, deke: false };
   if (sk.knockdown > 0) return input;
   const team = st.teams[sk.team];
   const dir = attackDir(sk.team);

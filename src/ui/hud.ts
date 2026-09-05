@@ -5,6 +5,7 @@ export class Hud {
   root: HTMLElement;
   private els: Record<string, HTMLElement> = {};
   private announceTimer = 0;
+  private promptTimer = 0;
   private lastCountdown = -1;
   constructor(parent: HTMLElement, private humanTeam: 0 | 1 | null, perkNames: string[] = []) {
     this.root = document.createElement('div');
@@ -22,6 +23,7 @@ export class Hud {
       <div class="fire-streak" data-el="streak"><span></span><span></span><span></span></div>
       <div class="announce" data-el="announce"></div>
       <div class="cine-tag" data-el="tag"></div>
+      <div class="prompt" data-el="prompt"></div>
       <div class="countdown" data-el="countdown"></div>
       <div class="flash" data-el="flash"></div>
       <div class="vignette-fire" data-el="vig"></div>
@@ -47,6 +49,13 @@ export class Hud {
     a.innerHTML = `${text}${sub ? `<span class="sub">${sub}</span>` : ''}`;
     a.className = `announce pop ${cls}`;
     this.announceTimer = 1.6;
+  }
+
+  /** Short-lived contextual prompt (dive window, pull goalie). */
+  prompt(text: string, seconds = 0.6, cls = ''): void {
+    this.els.prompt.textContent = text;
+    this.els.prompt.className = `prompt on ${cls}`;
+    this.promptTimer = seconds;
   }
 
   tag(text: string | null): void {
@@ -75,6 +84,10 @@ export class Hud {
     this.els.clock.textContent = `${m}:${s.toString().padStart(2, '0')}`;
     this.els.period.textContent = st.overtime ? 'OT' : st.period === 1 ? '1ST' : st.period === 2 ? '2ND' : st.period === 3 ? '3RD' : `${st.period}TH`;
     this.announceTimer -= dt;
+    if (this.promptTimer > 0) {
+      this.promptTimer -= dt;
+      if (this.promptTimer <= 0) this.els.prompt.classList.remove('on');
+    }
 
     if (st.phase === 'faceoff') {
       const n = Math.ceil(st.phaseTimer);

@@ -164,3 +164,8 @@ p.screen-sub { color: #8fa3d9; letter-spacing: 0.15em; text-transform: uppercase
 .mvp-card .rarity { font-size: 11px; letter-spacing: 0.3em; color: var(--gold); }
 .mvp-card .cname { font-family: var(--font-display); font-size: 30px; letter-spacing: 0.06em; color: #fff; }
 .mvp-card .desc { font-size: 14px; color: #c8d4f0; }
+
+.prompt { position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%); font-family: var(--font-display); font-size: 26px; letter-spacing: 0.2em; color: #fff; background: rgba(0,0,0,0.6); border: 2px solid var(--gold); padding: 6px 18px; opacity: 0; transition: opacity .1s; pointer-events: none; }
+.prompt.on { opacity: 1; }
+.prompt.dive { border-color: var(--red); color: var(--gold); animation: pulse .3s infinite; }
+.prompt.quiet { font-size: 14px; letter-spacing: 0.25em; color: #8fa3d9; border-color: #3a4260; background: rgba(0,0,0,0.4); }
