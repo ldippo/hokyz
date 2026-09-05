@@ -22,6 +22,10 @@ export function stepOnFire(st: MatchState, events: MatchEvent[]): void {
       bump(st, e.hitter, add);
       const v = st.skaters[e.victim];
       if (v) v.streak = 0;
+    } else if (e.type === 'ankleBreaker') {
+      bump(st, e.skater, add);
+    } else if (e.type === 'bigSave') {
+      bump(st, e.goalie, add);
     }
   }
   events.push(...add);
@@ -29,7 +33,7 @@ export function stepOnFire(st: MatchState, events: MatchEvent[]): void {
 
 function bump(st: MatchState, id: string, add: MatchEvent[]): void {
   const s = st.skaters[id];
-  if (!s || s.isGoalie) return;
+  if (!s) return;
   const m = st.mods.teams[s.team];
   s.streak += 1 * m.onFireGainMul;
   if (s.onFire > 0) {
@@ -40,5 +44,13 @@ function bump(st: MatchState, id: string, add: MatchEvent[]): void {
     s.onFire = ONFIRE.duration * m.onFireDurationMul;
     s.streak = 0;
     add.push({ type: 'onFire', skater: id });
+    if (m.fireSpread) {
+      const mates = st.teams[s.team].skaters.filter((x) => x !== id && st.skaters[x].onFire === 0);
+      if (mates.length) {
+        const mate = st.skaters[mates[Math.floor((st.t * 7919) % mates.length)]];
+        mate.onFire = ONFIRE.duration * m.onFireDurationMul * 0.7;
+        add.push({ type: 'onFire', skater: mate.id });
+      }
+    }
   }
 }

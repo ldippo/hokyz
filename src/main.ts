@@ -6,6 +6,10 @@ const canvas = document.getElementById('game') as HTMLCanvasElement;
 const ui = document.getElementById('ui') as HTMLElement;
 const app = new App(canvas, ui);
 void app.init().then(() => {
+  if (new URLSearchParams(location.search).has('rigview')) {
+    void import('./render/rigViewer').then((m) => m.startRigViewer(app));
+    return;
+  }
   app.start();
   titleScreen(app);
 });

@@ -29,6 +29,9 @@ export const SKATER = {
   turboMinToActivate: 0.08,
   iceFriction: 3.2, // exponential velocity damping (1/s)
   turnRate: 9, // rad/s facing slew
+  dekeChainWindow: 1.0,
+  dekeChainMax: 3,
+  dekeTurboCost: 0.12,
   knockdownTime: 1.25,
   getUpInvuln: 0.9,
   stumbleTime: 0.5,
@@ -39,6 +42,13 @@ export const SKATER = {
 };
 
 export const GOALIE = {
+  diveWindow: 0.6,
+  diveTime: 0.45,
+  diveSpeed: 9,
+  diveRightMul: 1.4,
+  diveWrongMul: 0.5,
+  pullHold: 1.0,
+  pullClock: 120,
   radius: 0.75,
   maxSpeed: 5.5,
   accel: 22,
@@ -63,6 +73,9 @@ export const PUCK = {
   shotLiftMax: 1.4,
   dumpSpeed: 9,
   oneTimerWindow: 0.28,
+  saucerHold: 0.22, // hold pass this long → saucer
+  saucerLift: 3.6,
+  saucerSpeedMul: 0.85,
   oneTimerPowerMul: 1.25,
   gravity: 9.8,
   bounce: 0.4,
@@ -114,6 +127,45 @@ export const AI = {
   shootRangeX: 9, // shoot when within this x of goal line
   shootRate: [0.9, 1.1, 1.3, 1.5], // shots attempted per second while in the zone
   supportSpacing: 6,
+};
+
+export const FIGHT = {
+  offerTime: 1.6,
+  duelTime: 8,
+  cueEvery: 1.05,
+  cueWindow: 0.5,
+  punchDmg: 22,
+  counterDmg: 26,
+  wrongDmg: 10,
+  feintDmg: 14,
+  mashNeeded: 6,
+  mashHeal: 24,
+  resultTime: 2.2,
+  /** knockdowns in a period before a big hit provokes a fight */
+  provokeKnockdowns: 3,
+  /** max fights per period (both teams combined) */
+  perPeriod: 1,
+  enforcerProvokeChance: 0.3,
+};
+
+export const SPECIAL = {
+  gainPerSec: 1 / 115,
+  gainBigHit: 0.09,
+  gainGoal: 0.18,
+  gainSave: 0.04,
+  gainAnkle: 0.08,
+  laserTime: 6,
+  afterburnerTime: 3.2,
+  afterburnerSpeed: 1.6,
+  shockwaveRadius: 4.2,
+  blinkWindow: 0.7,
+  brickWallSaves: 3,
+};
+
+export const TEAMFIRE = {
+  duration: 20,
+  cooldown: 45,
+  unansweredGoals: 3,
 };
 
 export const SIM_DT = 1 / 60;

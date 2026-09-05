@@ -14,6 +14,9 @@ import { RIVALS, buildRivalRoster } from './run/teams';
 import { Rng } from './core/rng';
 import { PerfProbe, TIERS, Watchdog, probeTier, type Tier } from './render/quality';
 import { h } from './ui/dom';
+import { loadRigs } from './render/skaterRig';
+import { loadRinkTextures } from './render/textures';
+import { setupEnvironment } from './render/environment';
 
 export class App {
   rig: SceneRig;
@@ -31,6 +34,8 @@ export class App {
   humanPlaying = false;
   watchdog: Watchdog;
   perf: PerfProbe;
+  assetsReady: Promise<void> = Promise.resolve();
+  assetsLoaded = false;
   private toastEl: HTMLElement | null = null;
 
   constructor(canvas: HTMLCanvasElement, ui: HTMLElement) {
@@ -59,11 +64,27 @@ export class App {
   async init(): Promise<void> {
     await this.rig.ready;
     this.applyQualityPref();
+    setupEnvironment(this.rig.renderer, this.rig.scene, 0.35);
+    // assets stream in behind the title; the attract match re-creates itself when they land
+    this.assetsReady = Promise.all([
+      loadRigs().catch((e) => console.warn('skater rigs failed to load, using fallback meshes', e)),
+      loadRinkTextures(),
+    ]).then(() => {
+      this.assetsLoaded = true;
+      if (this.view && !this.humanPlaying) {
+        this.disposeView();
+        this.attract();
+      }
+      document.querySelector('.loading-hint')?.remove();
+    });
   }
 
   applyQualityPref(): void {
     const pref = this.meta.quality ?? 'auto';
     const tier: Tier = pref === 'auto' ? probeTier(this.rig.gpu) : pref;
+    this.rig.overrides = { ...this.rig.overrides, hitFx: this.meta.hitFx !== false };
+    if (this.meta.hitFx === false) this.rig.overrides.hitFx = false;
+    else delete this.rig.overrides.hitFx;
     this.rig.applyTier(tier);
     this.watchdog.reset();
   }
@@ -83,8 +104,17 @@ export class App {
   private simStep(): void {
     this.input.poll();
     if (this.view && !this.paused) {
-      const ev = this.view.sim.step(this.humanPlaying ? { 0: this.input.simInput() } : {});
-      this.view.afterStep(ev);
+      const v = this.view;
+      if (v.director.active && v.director.kind !== 'fight' && this.humanPlaying && (this.input.justPressed('confirm') || this.input.justPressed('pass') || this.input.justPressed('shoot') || this.input.justPressed('back'))) {
+        v.skipCinematic();
+      }
+      this.loop.speed = v.timeScale;
+      if (!v.holdSim) {
+        const hi = this.humanPlaying ? this.input.simInput() : null;
+        v.humanInput = hi;
+        const ev = v.sim.step(hi ? { 0: hi } : {});
+        v.afterStep(ev);
+      }
     }
     this.nav?.update(this.input);
     this.onTick?.();
@@ -115,6 +145,8 @@ export class App {
   // ---------- match view ----------
   startView(sim: MatchSim, human: boolean, perkNames: string[] = []): MatchView {
     this.disposeView();
+    if (human) sfx.stopMusic();
+    this.loop.speed = 1;
     const theme = RINK_THEMES[this.meta.selectedRink] ?? RINK_THEMES.classic;
     this.view = new MatchView(this.rig, sim, this.ui, human ? 0 : null, perkNames, theme);
     this.humanPlaying = human;
@@ -146,6 +178,7 @@ export class App {
     const v = this.startView(sim, false);
     v.hud.root.style.display = 'none';
     v.silent = true;
+    if (this.meta.music !== false) sfx.startMusic();
   }
 
   // ---------- persistence ----------

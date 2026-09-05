@@ -37,6 +37,17 @@ export function makeSkater(
     lunge: 0,
     checkCooldown: 0,
     deke: 0,
+    dekeKind: 'spin',
+    dekeChain: 0,
+    dekeWindow: 0,
+    dive: 0,
+    diveDir: 0,
+    knockdownsThisPeriod: 0,
+    temper: 0.3,
+    ejected: false,
+    specialKind: archetype === 'sniper' ? 'laser' : archetype === 'enforcer' ? 'shockwave' : archetype === 'speedster' ? 'afterburner' : archetype === 'goalie' ? 'brickwall' : 'blink',
+    specialTimer: 0,
+    perfectUntil: -1,
     onFire: 0,
     streak: 0,
     hp,
@@ -58,6 +69,7 @@ export function skaterMaxSpeed(sk: Skater, st: MatchState): number {
   const m = st.mods.teams[sk.team];
   let s = SKATER.baseMaxSpeed * SKATER.statScale(sk.stats.speed) * m.speedMul;
   if (sk.onFire > 0) s *= ONFIRE.speedMul;
+  if (sk.specialTimer > 0 && sk.specialKind === 'afterburner') s *= 1.6;
   if (sk.turboActive) s *= SKATER.turboSpeedMul;
   if (sk.hasPuck) s *= 0.9 + sk.stats.hands / 100;
   if (sk.stumble > 0) s *= 0.6;
@@ -73,7 +85,11 @@ export function stepSkater(sk: Skater, input: Input, st: MatchState, dt: number,
   sk.pickupCooldown = tick(sk.pickupCooldown, dt);
   sk.checkCooldown = tick(sk.checkCooldown, dt);
   sk.deke = tick(sk.deke, dt);
+  sk.dekeWindow = tick(sk.dekeWindow, dt);
+  if (sk.dekeWindow === 0) sk.dekeChain = 0;
   sk.butterfly = tick(sk.butterfly, dt);
+  sk.specialTimer = tick(sk.specialTimer, dt);
+  if (sk.specialTimer > 0 && sk.specialKind === 'afterburner') sk.invuln = Math.max(sk.invuln, 0.1);
   if (sk.onFire > 0) {
     sk.onFire = Math.max(0, sk.onFire - dt);
     if (sk.onFire === 0) events.push({ type: 'onFireEnd', skater: sk.id });
@@ -159,9 +175,16 @@ export function stickPoint(sk: Skater, out?: Vec2): Vec2 {
   let off = SKATER.possessionOffset;
   let side = 0;
   if (sk.deke > 0) {
-    // puck swings side-to-side during deke
-    side = Math.sin(sk.deke * 18) * 0.7;
-    off *= 0.8;
+    if (sk.dekeKind === 'spin') {
+      // puck swings side-to-side during a spin
+      side = Math.sin(sk.deke * 18) * 0.7;
+      off *= 0.8;
+    } else {
+      // toe drag: pull the puck wide to one side then back
+      const k = Math.sin(Math.min(1, sk.deke / 0.45) * Math.PI);
+      side = (sk.dekeKind === 'dragL' ? 1 : -1) * 0.9 * k;
+      off *= 0.7 + 0.3 * (1 - k);
+    }
   }
   const c = Math.cos(sk.facing),
     s = Math.sin(sk.facing);

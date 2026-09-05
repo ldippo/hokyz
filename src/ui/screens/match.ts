@@ -28,6 +28,7 @@ export function matchIntroScreen(app: App, node: MapNode): void {
       h('div', { class: 'team' }, h('div', { class: 'tn', style: `color:${bundle.away.color}` }, esc(rival.name)), h('div', { class: 'gimmick' }, rival.gimmick)),
     ),
     h('div', {}, h('span', { class: 'mod-tag' }, `AI: ${diffName}`), mut ? h('span', { class: 'mod-tag', title: mut.desc }, `MUTATOR: ${mut.name} — ${mut.desc}`) : null, run.flags.easyNext ? h('span', { class: 'mod-tag' }, 'REF BRIBED') : null, run.flags.hardNext ? h('span', { class: 'mod-tag' }, 'REF ANGRY') : null),
+    bundle.mods.bossPhases.length ? h('div', { style: 'max-width:640px;margin-top:10px' }, ...bundle.mods.bossPhases.map((p) => h('div', { class: 'perk-chip epic', style: 'margin-top:6px' }, h('b', {}, `👑 ${p.label}`), h('div', {}, p.desc)))) : null,
     h('div', { class: 'menu' }, btn('Drop the Puck', () => startRunMatch(app, node, bundle), 'primary'), btn('Back to Map', () => runMapScreen(app))),
   );
   const nav = app.showScreen(el);
@@ -59,7 +60,9 @@ function startRunMatch(app: App, node: MapNode, bundle: ReturnType<typeof buildM
 /** Runs a match with the human on team 0. Calls done() with outcome after final whistle + confirm. */
 export function playMatch(app: App, sim: MatchSim, perkNames: string[], done: (o: MatchOutcome) => void): void {
   app.showScreen(null);
-  app.startView(sim, true, perkNames);
+  const view = app.startView(sim, true, perkNames);
+  view.shakeMul = app.meta.screenShake === false ? 0 : 1;
+  if (app.meta.cinematics !== false) view.enablePresentation();
   let finished = false;
   let pauseEl: HTMLElement | null = null;
   const closePause = () => {
@@ -124,6 +127,7 @@ export function playMatch(app: App, sim: MatchSim, perkNames: string[], done: (o
     }
     if (sim.st.phase === 'over') {
       if (overSince < 0) overSince = sim.st.t;
+      if (app.view?.director.active) return;
       if (sim.st.t - overSince > 2.2 && (app.input.justPressed('confirm') || app.input.justPressed('pass') || app.input.justPressed('shoot'))) {
         finished = true;
         finish();
@@ -143,6 +147,7 @@ export function matchResultScreen(app: App, node: MapNode, outcome: MatchOutcome
     ),
   );
   const injured = run.roster.filter((s) => s.hp <= 20);
+  const mvp = [...outcome.boxScore].sort((x, y) => (y.goals * 3 + y.assists * 2 + y.bigHits * 2 + y.hits * 0.3 + y.saves * 0.6) - (x.goals * 3 + x.assists * 2 + x.bigHits * 2 + x.hits * 0.3 + x.saves * 0.6))[0];
   const el = h('div', { class: 'screen' },
     h('div', { class: 'result' },
       h('h2', { class: outcome.won ? 'win' : 'lose' }, outcome.won ? 'VICTORY' : res.usedLife ? 'SECOND WIND' : 'RUN OVER'),
@@ -150,6 +155,7 @@ export function matchResultScreen(app: App, node: MapNode, outcome: MatchOutcome
       res.cash ? h('div', { style: 'font-family:var(--font-display);font-size:24px;color:var(--gold);margin-bottom:12px' }, `+${res.cash} CASH`) : null,
       res.usedLife ? h('p', { class: 'screen-sub' }, 'Second Wind burned. You live to skate again.') : null,
       injured.length ? h('p', { class: 'screen-sub', style: 'color:#f66' }, `INJURED: ${injured.map((s) => s.name).join(', ')} — out until healed`) : null,
+      mvp ? h('div', { class: 'mvp-card' }, h('div', { class: 'rarity' }, 'PLAYER OF THE GAME'), h('div', { class: 'cname' }, `${mvp.team === 0 ? '🔵' : '🔴'} ${mvp.name}`), h('div', { class: 'desc' }, mvp.isGoalie ? `${mvp.saves} saves` : `${mvp.goals} G · ${mvp.assists} A · ${mvp.hits} hits · ${mvp.bigHits} big`)) : null,
       h('table', { class: 'box' }, h('thead', {}, h('tr', {}, h('th', {}, 'PLAYER'), h('th', {}, 'G'), h('th', {}, 'A'), h('th', {}, 'SOG'), h('th', {}, 'HITS'), h('th', {}, 'BIG'), h('th', {}, 'SV'))), h('tbody', {}, ...rows)),
       h('div', { class: 'menu' },
         btn(res.ended ? 'See Run Summary' : outcome.won ? 'Draft a Perk' : 'Back to Map', () => {

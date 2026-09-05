@@ -72,6 +72,17 @@ export function randomArchetype(rng: Rng): Exclude<Archetype, 'goalie'> {
   return rng.pick(['sniper', 'enforcer', 'playmaker', 'speedster'] as const);
 }
 
+export const XP_LEVELS = [0, 100, 250, 450, 700, 1000];
+export const MAX_LEVEL = XP_LEVELS.length - 1;
+export function levelFor(xp: number): number {
+  let l = 0;
+  for (let i = 1; i < XP_LEVELS.length; i++) if (xp >= XP_LEVELS[i]) l = i;
+  return l;
+}
+export function xpForMatch(b: { goals: number; assists: number; hits: number; bigHits: number; saves: number }, captain: boolean): number {
+  return Math.round((b.goals * 30 + b.assists * 15 + b.hits * 3 + b.bigHits * 10 + b.saves * 6 + 20) * (captain ? 1.5 : 1));
+}
+
 export const INJURED_THRESHOLD = 20;
 export const isInjured = (s: SkaterDef): boolean => s.hp <= INJURED_THRESHOLD;
 

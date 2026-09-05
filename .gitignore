@@ -3,3 +3,4 @@ dist
 .vercel
 .playwright-mcp
 /*.png
+assets/tex

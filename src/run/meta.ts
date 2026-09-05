@@ -44,11 +44,13 @@ export interface RinkTheme {
   crowd: number[];
   kick: number;
   hemi: number;
+  spot: number;
+  banners: string[];
 }
 export const RINK_THEMES: Record<string, RinkTheme> = {
-  classic: { id: 'classic', name: 'Classic Barn', bg: 0x07070c, crowd: [0xd8262f, 0x1c4fd6, 0xffffff, 0x222222, 0xe8b021, 0x2fa84f, 0x8844cc], kick: 0xe8b021, hemi: 0xcfe8ff },
-  rink_neon: { id: 'rink_neon', name: 'Neon Dome', bg: 0x0d0418, crowd: [0xff2bd6, 0x8a3cff, 0x00e5ff, 0x111111, 0xffffff], kick: 0xff2bd6, hemi: 0xd8b8ff },
-  rink_frost: { id: 'rink_frost', name: 'Frostbite Arena', bg: 0x061418, crowd: [0x2fd0c8, 0xffffff, 0x1c4fd6, 0x88ccff, 0x223344], kick: 0x2fd0c8, hemi: 0xbfffff },
+  classic: { id: 'classic', name: 'Classic Barn', bg: 0x07070c, crowd: [0xd8262f, 0x1c4fd6, 0xffffff, 0x222222, 0xe8b021, 0x2fa84f, 0x8844cc], kick: 0xe8b021, hemi: 0xcfe8ff, spot: 0xfff2dd, banners: ['HOKYZ CUP 1998', 'RETIRED #88 BRICKER', 'BIG HITZ NIGHT', 'ZAMBONI CO.'] },
+  rink_neon: { id: 'rink_neon', name: 'Neon Dome', bg: 0x0d0418, crowd: [0xff2bd6, 0x8a3cff, 0x00e5ff, 0x111111, 0xffffff], kick: 0xff2bd6, hemi: 0xd8b8ff, spot: 0xc06cff, banners: ['NEON DOME', 'LOUDEST BARN', 'GLOW NIGHT', 'RAGE FUEL'] },
+  rink_frost: { id: 'rink_frost', name: 'Frostbite Arena', bg: 0x061418, crowd: [0x2fd0c8, 0xffffff, 0x1c4fd6, 0x88ccff, 0x223344], kick: 0x2fd0c8, hemi: 0xbfffff, spot: 0xbfffff, banners: ['FROSTBITE ARENA', 'OUTDOOR CLASSIC', 'TUNDRA YETIS', 'ICE BATH'] },
 };
 
 export interface MetaProfile {
@@ -66,10 +68,14 @@ export interface MetaProfile {
   seenIntro: boolean;
   /** 'auto' picks by GPU probe + watchdog */
   quality: 'auto' | 'low' | 'med' | 'high';
+  cinematics: boolean;
+  screenShake: boolean;
+  hitFx: boolean;
+  music: boolean;
 }
 
 export function defaultMeta(): MetaProfile {
-  return { version: 1, cash: 0, unlocked: ['cap_bricker', 'cap_flash'], runs: 0, wins: 0, bestAct: 0, bestRow: 0, totalGoals: 0, totalBigHits: 0, selectedRink: 'classic', volume: 0.7, seenIntro: false, quality: 'auto' };
+  return { version: 1, cash: 0, unlocked: ['cap_bricker', 'cap_flash'], runs: 0, wins: 0, bestAct: 0, bestRow: 0, totalGoals: 0, totalBigHits: 0, selectedRink: 'classic', volume: 0.7, seenIntro: false, quality: 'auto', cinematics: true, screenShake: true, hitFx: true, music: true };
 }
 
 export const isUnlocked = (m: MetaProfile, id: string): boolean => m.unlocked.includes(id);

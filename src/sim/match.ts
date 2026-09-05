@@ -12,6 +12,9 @@ import { makeSkater } from './skater';
 import { stepSkater } from './skater';
 import { EMPTY_INPUT, type Input, type MatchEvent, type MatchMods, type MatchState, type SkaterDef, type TeamId, type TeamState } from './types';
 import { dist } from './vec';
+import { GOALIE } from './constants';
+import { restoreEjected, stepFight } from './fight';
+import { gainSpecial, stepSpecialInputs, stepTeamFire } from './specials';
 
 export interface TeamSetup {
   name: string;
@@ -28,6 +31,8 @@ export class MatchSim {
   rng: Rng;
   brains: [TeamBrains, TeamBrains] = [new TeamBrains(), new TeamBrains()];
   mash: [number, number] = [0, 0];
+  /** goals scored without reply, per team */
+  unanswered: [number, number] = [0, 0];
   private prevInputs: Map<string, Input> = new Map();
 
   constructor(teams: [TeamSetup, TeamSetup], mods: MatchMods = defaultMatchMods(), seed = 1) {
@@ -63,6 +68,14 @@ export class MatchSim {
         isHuman: t.isHuman,
         difficulty: t.difficulty,
         shotsOnGoal: 0,
+        pulled: false,
+        diveWindow: 0,
+        diveReturnId: null,
+        pullLatch: false,
+        special: 0,
+        brickWall: 0,
+        teamFireCooldown: 0,
+        ejected: [],
       };
     }) as [TeamState, TeamState];
 
@@ -83,9 +96,22 @@ export class MatchSim {
       events: [],
       winner: null,
       mods,
+      fight: null,
+      fightsThisPeriod: 0,
       shake: 0,
       stats: { hits: [0, 0], bigHits: [0, 0], shots: [0, 0] },
     };
+    // temper from traits
+    teams.forEach((t) => {
+      for (const def of t.skaters) {
+        const sk = skaters[def.id];
+        if (!sk) continue;
+        if (def.traits.includes('goon')) sk.temper = 0.9;
+        else if (def.traits.includes('brawler')) sk.temper = 0.75;
+        else if (def.traits.includes('ironjaw')) sk.temper = 0.55;
+        else if (def.archetype === 'enforcer') sk.temper = 0.6;
+      }
+    });
     const ev: MatchEvent[] = [];
     setupFaceoff(this.st, ev);
     this.st.phase = 'intro';
@@ -126,12 +152,16 @@ export class MatchSim {
       case 'play':
         this.stepPlay(humanInputs, dt, events);
         break;
+      case 'fight':
+        stepFight(st, dt, humanInputs, this.rng, events);
+        break;
       case 'goal':
         st.phaseTimer -= dt;
         // let puck & fallen skaters settle visually
         this.settle(dt);
         if (st.phaseTimer <= 0) {
           if (this.checkEndConditions(events)) break;
+          for (const t of st.teams) if (t.pulled) this.togglePull(t.id, events);
           st.faceoffSpot = { x: 0, y: 0 };
           setupFaceoff(st, events);
         }
@@ -139,12 +169,15 @@ export class MatchSim {
       case 'periodEnd':
         st.phaseTimer -= dt;
         if (st.phaseTimer <= 0) {
+          restoreEjected(st);
           st.period++;
           if (st.period > st.mods.periods) st.overtime = true;
           st.clock = st.overtime ? RULES.otLength : st.mods.periodLength;
           st.faceoffSpot = { x: 0, y: 0 };
+          this.applyBossPhases(events);
           setupFaceoff(st, events);
           events.push({ type: 'period', period: st.period, overtime: st.overtime });
+          for (const t of st.teams) if (st.mods.teams[t.id].periodBrickWall > 0) t.brickWall += st.mods.teams[t.id].periodBrickWall;
         }
         break;
       case 'over':
@@ -223,18 +256,40 @@ export class MatchSim {
           inputs.set(id, this.brains[team.id].think(st, sk, dt, this.rng));
         }
       }
-      // human switching when not in possession
+      // human: switching, goalie dive, pull goalie
       if (team.isHuman) {
         const inp = humanInputs[team.id];
         const ownerSk = st.puck.owner ? st.skaters[st.puck.owner] : null;
         const weHave = ownerSk?.team === team.id;
-        if (inp?.pass && !weHave && team.switchLock === 0) {
-          const sorted = team.skaters.map((id) => st.skaters[id]).sort((a, b) => dist(a.pos, st.puck.pos) - dist(b.pos, st.puck.pos));
-          let next = sorted[0];
-          if (next.id === team.controlledId && sorted.length > 1) next = sorted[1];
-          if (next.id !== team.controlledId) setControlled(st, team.id, next.id, events);
+        team.diveWindow = Math.max(0, team.diveWindow - dt);
+        const goalie = team.goalie ? st.skaters[team.goalie] : null;
+        // hand control back after a dive
+        if (goalie && team.controlledId === goalie.id && goalie.dive === 0 && team.diveReturnId) {
+          setControlled(st, team.id, team.diveReturnId, events);
+          team.diveReturnId = null;
+        }
+        if (inp?.pass && inp.passHoldTime < 1.0 && !weHave && team.switchLock === 0) {
+          if (team.diveWindow > 0 && goalie && goalie.dive === 0) {
+            // goalie dive: direction from the move input's screen-vertical axis (sim y)
+            goalie.dive = GOALIE.diveTime;
+            goalie.diveDir = Math.abs(inp.move.y) > 0.3 ? Math.sign(inp.move.y) : Math.sign(st.puck.pos.y - goalie.pos.y) || 1;
+            team.diveReturnId = team.controlledId;
+            setControlled(st, team.id, goalie.id, events);
+            team.diveWindow = 0;
+          } else {
+            const sorted = team.skaters.map((id) => st.skaters[id]).sort((a, b) => dist(a.pos, st.puck.pos) - dist(b.pos, st.puck.pos));
+            let next = sorted[0];
+            if (next.id === team.controlledId && sorted.length > 1) next = sorted[1];
+            if (next.id !== team.controlledId) setControlled(st, team.id, next.id, events);
+          }
           team.switchLock = 0.3;
         }
+        // pull goalie: hold pass ≥ 1s in the final minutes (toggle, once per hold)
+        if (inp?.passHeld && inp.passHoldTime >= GOALIE.pullHold && !team.pullLatch && st.clock <= GOALIE.pullClock && !st.overtime) {
+          team.pullLatch = true;
+          this.togglePull(team.id, events);
+        }
+        if (!inp?.passHeld) team.pullLatch = false;
       }
     }
 
@@ -252,6 +307,16 @@ export class MatchSim {
     for (const team of st.teams) {
       if (team.goalie) stepGoalie(st, st.skaters[team.goalie], dt, this.rng, events);
     }
+    for (const e of events) {
+      if (e.type === 'shot') {
+        const shooter = st.skaters[e.shooter];
+        const defending = st.teams[shooter.team === 0 ? 1 : 0];
+        if (defending.isHuman && defending.goalie && defending.diveWindow === 0) {
+          defending.diveWindow = GOALIE.diveWindow;
+          events.push({ type: 'divePrompt', team: defending.id });
+        }
+      }
+    }
     // skater collisions
     for (let i = 0; i < st.order.length; i++) {
       for (let j = i + 1; j < st.order.length; j++) {
@@ -266,13 +331,97 @@ export class MatchSim {
     else stepPuckPhysics(st, dt, events);
     tryPickups(st, events);
     checkGoal(st, prevX, events);
+    for (const e of events) {
+      if (e.type === 'goal') {
+        this.unanswered[e.team]++;
+        this.unanswered[e.team === 0 ? 1 : 0] = 0;
+        if (e.team === 0) {
+          for (const ph of st.mods.bossPhases) {
+            if (ph.kind !== 'goalieFire' || ph.applied) continue;
+            if (st.teams[0].score >= (ph.goalsAgainst ?? 2)) {
+              ph.applied = true;
+              const gid = st.teams[1].goalie;
+              if (gid) st.skaters[gid].onFire = 9999;
+              events.push({ type: 'bossPhase', label: ph.label, desc: ph.desc });
+            }
+          }
+        }
+      }
+    }
     stepOnFire(st, events);
+    stepSpecialInputs(st, inputs, this.rng, events);
+    const extra: MatchEvent[] = [];
+    gainSpecial(st, dt, events, extra);
+    stepTeamFire(st, dt, extra, this.unanswered);
+    events.push(...extra);
 
     if (st.phase === 'play' && st.clock <= 0) {
       st.clock = 0;
       this.endPeriod(events);
     }
     this.prevInputs = inputs;
+  }
+
+  /** Boss rule changes at period starts (and goal-count triggers). */
+  applyBossPhases(events: MatchEvent[]): void {
+    const st = this.st;
+    for (const ph of st.mods.bossPhases) {
+      if (ph.applied) continue;
+      if (ph.kind === 'goalieFire') continue; // goal-triggered
+      if (st.period < ph.period) continue;
+      ph.applied = true;
+      switch (ph.kind) {
+        case 'extraSkater': {
+          const def = st.mods.extraSkater;
+          if (!def || st.skaters[def.id]) break;
+          const s = makeSkater(def.id, def.name, 1, def.stats, def.archetype, false, def.hp);
+          st.skaters[s.id] = s;
+          st.order.push(s.id);
+          st.teams[1].skaters.push(s.id);
+          break;
+        }
+        case 'slickIce':
+          st.mods.slipperyIce = true;
+          break;
+        case 'bouncy':
+          st.mods.boardsBouncy = true;
+          break;
+        case 'turboAll':
+          st.mods.turboInfinite = true;
+          break;
+      }
+      events.push({ type: 'bossPhase', label: ph.label, desc: ph.desc });
+    }
+  }
+
+  /** Pull the goalie out as an extra attacker (or put them back). */
+  togglePull(teamId: TeamId, events: MatchEvent[]): void {
+    const st = this.st;
+    const team = st.teams[teamId];
+    if (!team.pulled) {
+      if (!team.goalie) return;
+      const g = st.skaters[team.goalie];
+      team.pulledGoalieId = team.goalie;
+      team.goalie = null;
+      team.pulled = true;
+      g.isGoalie = false;
+      g.radius = 0.6;
+      team.skaters.push(g.id);
+      events.push({ type: 'goaliePulled', team: teamId, pulled: true });
+    } else {
+      const id = team.pulledGoalieId;
+      if (!id) return;
+      const g = st.skaters[id];
+      team.skaters = team.skaters.filter((s) => s !== id);
+      team.goalie = id;
+      team.pulled = false;
+      g.isGoalie = true;
+      g.radius = GOALIE.radius;
+      g.hasPuck = false;
+      if (st.puck.owner === id) st.puck.owner = null;
+      if (team.controlledId === id && team.skaters.length) setControlled(st, teamId, team.skaters[0], events);
+      events.push({ type: 'goaliePulled', team: teamId, pulled: false });
+    }
   }
 
   get lastInputs(): Map<string, Input> {

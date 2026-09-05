@@ -20,7 +20,8 @@ export function titleScreen(app: App): void {
       btn('Settings', () => settingsScreen(app)),
     ),
     h('div', { class: 'small' }, `Bank: ${app.meta.cash} cash · Runs: ${app.meta.runs} · Wins: ${app.meta.wins}`),
-    h('div', { class: 'small', html: 'Move <kbd>WASD</kbd> · Turbo <kbd>SHIFT</kbd> · Pass/Switch <kbd>J</kbd> · Shoot/Check <kbd>K</kbd> · Deke <kbd>L</kbd> · Gamepad supported' }),
+    app.assetsLoaded ? null : h('div', { class: 'small loading-hint' }, 'loading arena assets…'),
+    h('div', { class: 'small', html: 'Move <kbd>WASD</kbd> · Turbo <kbd>SHIFT</kbd> · Pass/Switch <kbd>J</kbd> · Shoot/Check <kbd>K</kbd> · Deke <kbd>L</kbd> · Special <kbd>SPACE</kbd> · Aim <kbd>↑↓</kbd> · Gamepad supported' }),
   );
   app.showScreen(el);
 }

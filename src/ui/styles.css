@@ -155,3 +155,45 @@ p.screen-sub { color: #8fa3d9; letter-spacing: 0.15em; text-transform: uppercase
 .settings-row { display: flex; align-items: center; justify-content: space-between; width: 360px; padding: 8px 0; border-bottom: 1px solid #2b3352; font-family: var(--font-display); letter-spacing: 0.08em; font-size: 20px; }
 .settings-row input[type=range] { width: 160px; }
 .pause { position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+.cine-tag { position: absolute; left: 24px; top: 96px; font-family: var(--font-display); font-size: 22px; letter-spacing: 0.3em; color: #fff; background: rgba(216,38,47,0.85); padding: 4px 14px; opacity: 0; transition: opacity .2s; }
+.cine-tag.on { opacity: 1; }
+.cine-tag.on::after { content: '  ·  PRESS ANY BUTTON TO SKIP'; font-size: 12px; letter-spacing: 0.2em; color: #ffd0d0; }
+
+.mvp-card { display: inline-block; margin: 6px auto 14px; padding: 10px 26px; border: 3px solid var(--gold); background: linear-gradient(180deg, #2a2036, #0c0f1a); text-align: center; }
+.mvp-card .rarity { font-size: 11px; letter-spacing: 0.3em; color: var(--gold); }
+.mvp-card .cname { font-family: var(--font-display); font-size: 30px; letter-spacing: 0.06em; color: #fff; }
+.mvp-card .desc { font-size: 14px; color: #c8d4f0; }
+
+.prompt { position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%); font-family: var(--font-display); font-size: 26px; letter-spacing: 0.2em; color: #fff; background: rgba(0,0,0,0.6); border: 2px solid var(--gold); padding: 6px 18px; opacity: 0; transition: opacity .1s; pointer-events: none; }
+.prompt.on { opacity: 1; }
+.prompt.dive { border-color: var(--red); color: var(--gold); animation: pulse .3s infinite; }
+.prompt.quiet { font-size: 14px; letter-spacing: 0.25em; color: #8fa3d9; border-color: #3a4260; background: rgba(0,0,0,0.4); }
+
+.special-label { font-size: 12px; letter-spacing: 0.2em; color: #8fa3d9; margin: 8px 0 3px; text-shadow: 0 2px 0 #000; }
+.special { height: 10px; border: 2px solid #8fa3d9; background: #111; transform: skewX(-12deg); overflow: hidden; }
+.special-fill { height: 100%; width: 0; background: linear-gradient(90deg, #2f6bff, #8a3cff); transition: width .15s linear; }
+.special.ready { border-color: var(--gold); box-shadow: 0 0 14px rgba(255,210,63,0.7); animation: pulse .8s infinite; }
+.special.ready .special-fill { background: linear-gradient(90deg, #ffd23f, #ff7a1a); }
+.fight { position: absolute; left: 50%; top: 110px; transform: translateX(-50%); width: 720px; display: none; align-items: center; justify-content: space-between; gap: 20px; font-family: var(--font-display); }
+.fight.on { display: flex; }
+.fighter { width: 260px; }
+.fighter.f1 { text-align: right; }
+.fname { font-size: 24px; letter-spacing: 0.08em; color: #fff; text-shadow: 0 3px 0 #000; }
+.fhp { height: 16px; border: 3px solid #fff; background: #200; transform: skewX(-12deg); overflow: hidden; }
+.fighter.f1 .fhp { transform: skewX(12deg); }
+.fhp-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #ff2d3a, #ffd23f); transition: width .12s; }
+.fcue { min-width: 160px; text-align: center; font-size: 34px; letter-spacing: 0.15em; color: #fff; padding: 6px 14px; border: 3px solid #fff; background: rgba(0,0,0,0.6); opacity: 0; transform: scale(0.8); transition: opacity .08s, transform .08s; }
+.fcue.on { opacity: 1; transform: scale(1); }
+.fcue.high { border-color: var(--red); color: var(--red); }
+.fcue.low { border-color: var(--blue); color: #7fa6ff; }
+.fcue.feint { border-color: var(--gold); color: var(--gold); }
+.fcue.mash { border-color: var(--fire); color: var(--fire); animation: pulse .25s infinite; }
+
+.tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.tag { font-size: 11px; letter-spacing: 0.12em; padding: 2px 6px; border: 1px solid #3a4260; background: #10141f; color: #c8d4f0; }
+.tag.complete { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 8px rgba(255,210,63,0.4); }
+.card.cursed { border-color: #c56bff; background: linear-gradient(180deg, #2a1636, #0c0f1a); }
+.card .curse { font-size: 12px; letter-spacing: 0.1em; color: #ff6b6b; }
+.roster-card .xpbar { grid-column: 1 / -1; height: 3px; background: #1c2033; }
+.roster-card .xpbar i { display: block; height: 100%; background: #7fa6ff; }

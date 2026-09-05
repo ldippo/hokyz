@@ -3,8 +3,8 @@ import type { MatchMods, SkaterDef, TeamMods } from '../sim/types';
 import { defaultMatchMods, defaultTeamMods } from '../sim/modifiers';
 import { findNode, generateRunMap, type ActMap, type MapNode } from './mapGen';
 import { CAPTAINS, type Captain } from './meta';
-import { PERKS, PERK_BY_ID, RARITY_WEIGHT, defaultRunEffects, type Perk, type Rarity, type RunEffects } from './perks';
-import { generateGoalie, generateSkater, isInjured, newId, randomArchetype } from './roster';
+import { PERKS, PERK_BY_ID, RARITY_WEIGHT, activeSets, applySetBonuses, defaultRunEffects, type Perk, type Rarity, type RunEffects } from './perks';
+import { generateGoalie, generateSkater, isInjured, levelFor, newId, randomArchetype, xpForMatch, MAX_LEVEL } from './roster';
 import { RIVAL_BY_ID, buildRivalRoster } from './teams';
 import { MUTATOR_BY_ID } from './mutators';
 
@@ -110,6 +110,7 @@ export function availableNodes(run: RunState): MapNode[] {
 export function runEffects(run: RunState): RunEffects {
   const e = defaultRunEffects();
   for (const id of run.perks) PERK_BY_ID[id]?.run?.(e);
+  applySetBonuses(activeSets(run.perks), defaultTeamMods(), e);
   if (run.ascension >= 1) e.cashMul *= 1.25;
   if (run.ascension >= 2) e.cashMul *= 1.2;
   return e;
@@ -118,6 +119,7 @@ export function runEffects(run: RunState): RunEffects {
 export function teamMods(run: RunState): TeamMods {
   const m = defaultTeamMods();
   for (const id of run.perks) PERK_BY_ID[id]?.team?.(m);
+  applySetBonuses(activeSets(run.perks), m, defaultRunEffects());
   return m;
 }
 
@@ -165,6 +167,8 @@ export function buildMatch(run: RunState, node: MapNode): MatchSetupBundle {
   }
   if (node.type === 'boss') {
     mods.teams[1].speedMul *= 1.05;
+    mods.bossPhases = (rival.phases ?? []).map((p) => ({ ...p, applied: false }));
+    if (mods.bossPhases.some((p) => p.kind === 'extraSkater')) mods.extraSkater = generateSkater(rng, 'enforcer', nodeTier(run, node) + 1, 'opp');
   }
   if (run.flags.easyNext) mods.teams[1].turboRegenMul *= 0.6;
   if (run.flags.hardNext) mods.teams[1].hitPowerMul *= 1.2;
@@ -200,6 +204,19 @@ export function cashForNode(run: RunState, node: MapNode, outcome: MatchOutcome)
 export function applyMatchOutcome(run: RunState, node: MapNode, outcome: MatchOutcome): { cash: number; ended: boolean; usedLife: boolean } {
   const e = runEffects(run);
   run.matchesPlayed++;
+  // skater XP + level-ups (spent at the next node)
+  for (const b of outcome.boxScore) {
+    if (b.team !== 0) continue;
+    const s = run.roster.find((x) => x.id === b.id) ?? (run.goalie.id === b.id ? run.goalie : null);
+    if (!s) continue;
+    const before = s.level ?? 0;
+    s.xp = (s.xp ?? 0) + xpForMatch(b, s === run.roster[0]);
+    const after = Math.min(MAX_LEVEL, levelFor(s.xp));
+    if (after > before) {
+      s.pendingLevels = (s.pendingLevels ?? 0) + (after - before);
+      s.level = after;
+    }
+  }
   run.goalsFor += outcome.scoreFor;
   run.goalsAgainst += outcome.scoreAgainst;
   run.bigHits += outcome.bigHits;
@@ -288,6 +305,11 @@ export function draftPerks(run: RunState, count: number, rarityBonus = 0): Perk[
   }
   commitRng(run, rng);
   return picks;
+}
+
+/** Skaters with unspent level-ups. */
+export function pendingLevelUps(run: RunState): SkaterDef[] {
+  return [...run.roster, run.goalie].filter((s) => (s.pendingLevels ?? 0) > 0);
 }
 
 export function captainOf(run: RunState): Captain {
