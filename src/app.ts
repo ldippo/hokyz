@@ -15,6 +15,8 @@ import { Rng } from './core/rng';
 import { PerfProbe, TIERS, Watchdog, probeTier, type Tier } from './render/quality';
 import { h } from './ui/dom';
 import { loadRigs } from './render/skaterRig';
+import { loadRinkTextures } from './render/textures';
+import { setupEnvironment } from './render/environment';
 
 export class App {
   rig: SceneRig;
@@ -60,11 +62,11 @@ export class App {
   async init(): Promise<void> {
     await this.rig.ready;
     this.applyQualityPref();
-    try {
-      await loadRigs();
-    } catch (e) {
-      console.warn('skater rigs failed to load, using fallback meshes', e);
-    }
+    setupEnvironment(this.rig.renderer, this.rig.scene, 0.35);
+    await Promise.all([
+      loadRigs().catch((e) => console.warn('skater rigs failed to load, using fallback meshes', e)),
+      loadRinkTextures(),
+    ]);
   }
 
   applyQualityPref(): void {

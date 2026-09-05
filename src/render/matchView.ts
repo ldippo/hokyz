@@ -3,6 +3,8 @@ import { MatchSim } from '../sim/match';
 import type { MatchEvent, MatchState } from '../sim/types';
 import { SceneRig } from './scene';
 import { RinkMesh } from './rinkMesh';
+import { SkateMarks } from './skateMarks';
+import { getRinkTextures } from './textures';
 import { SkaterMesh } from './skaterMesh';
 import { SkaterRig, jerseySpecFor, loadRigs, rigsReady } from './skaterRig';
 import { PuckMesh } from './puckMesh';
@@ -27,17 +29,21 @@ export class MatchView {
   skaters = new Map<string, SkaterMesh | SkaterRig>();
   puck = new PuckMesh();
   particles = new Particles();
+  marks: SkateMarks | null = null;
   cam: FollowCamera;
   hud: Hud;
   time = 0;
   excite = 0;
   private group = new THREE.Group();
   private lastPhase: MatchState['phase'] = 'intro';
+  private lastAnnounce = 'WELCOME TO THE BARN';
   /** attract mode: no sfx */
   silent = false;
 
   constructor(public rig: SceneRig, public sim: MatchSim, uiRoot: HTMLElement, humanTeam: 0 | 1 | null, perkNames: string[] = [], theme: RinkTheme = RINK_THEMES.classic) {
-    this.rink = new RinkMesh(theme);
+    const s = rig.settings;
+    if (s.skateMarks) this.marks = new SkateMarks(1024);
+    this.rink = new RinkMesh(theme, { reflect: s.reflections, marks: this.marks?.texture ?? null, metal: getRinkTextures(), crowdAnim: s.crowdAnim });
     rig.setTheme(theme);
     this.group.add(this.rink.group);
     const st = sim.st;
@@ -69,6 +75,7 @@ export class MatchView {
   }
 
   dispose(): void {
+    this.marks?.dispose();
     this.rig.scene.remove(this.group);
     this.rig.scene.remove(this.puck.mesh, this.puck.shadow, this.puck.glow);
     this.hud.destroy();
@@ -102,6 +109,7 @@ export class MatchView {
           if (r instanceof SkaterRig) r.celebrate();
         }
         this.hud.announce('GOAL!', 'gold', `${scorer?.name ?? team.name}${e.value > 1 ? ` · ${e.value} PTS` : ''}`);
+        this.lastAnnounce = `GOAL ${team.short}`;
         this.hud.flash();
         this.rink.flashGoal(defendGoal(e.team === 0 ? 1 : 0).team);
         this.particles.spawn({ x: e.pos.x, y: e.pos.y, count: 90, color: [0xffd23f, 0xffffff, parseInt(team.color.slice(1), 16)], speed: 9, life: 1.6, size: 0.16, up: 7 });
@@ -119,6 +127,7 @@ export class MatchView {
         sfx.hit(e.big);
         if (e.big) {
           this.hud.announce('BIG HIT!', 'red', st.skaters[e.hitter].name);
+          this.lastAnnounce = `BIG HIT ${st.skaters[e.hitter].name.split(' ').pop()?.toUpperCase()}`;
           if (!this.silent) {
             this.rig.punch(1);
             this.rig.hitStopHandler?.(4);
@@ -160,6 +169,7 @@ export class MatchView {
         sfx.faceoffDrop();
         break;
       case 'period':
+        this.marks?.clear();
         this.hud.announce(e.overtime ? 'OVERTIME' : `PERIOD ${e.period}`, e.overtime ? 'red' : '', e.overtime ? 'SUDDEN DEATH' : '');
         break;
       case 'periodEnd':
@@ -208,6 +218,26 @@ export class MatchView {
     }
     this.particles.update(dt);
     this.rink.update(this.time, dt, this.excite);
+    {
+      const [a, b] = st.teams;
+      const c = Math.max(0, st.clock);
+      const clock = `${Math.floor(c / 60)}:${Math.floor(c % 60).toString().padStart(2, '0')}`;
+      this.rink.arena.drawScreen([{ text: `${a.short}  ${a.score} - ${b.score}  ${b.short}`, size: 54, color: '#ffd23f' }, { text: `${clock}  ·  ${st.overtime ? 'OT' : 'P' + st.period}`, size: 44 }, { text: this.lastAnnounce, size: 36, color: '#ff4b57' }], this.time);
+    }
+    if (this.marks) {
+      for (const id of st.order) {
+        const sk = st.skaters[id];
+        const sp = Math.hypot(sk.vel.x, sk.vel.y);
+        if (sp < 1.2 || sk.knockdown > 0) continue;
+        const ang = Math.atan2(sk.vel.y, sk.vel.x);
+        const side = { x: -Math.sin(sk.facing) * 0.16, y: Math.cos(sk.facing) * 0.16 };
+        const len = Math.min(0.9, sp * dt * 1.4 + 0.15);
+        const w = sk.turboActive ? 0.09 : 0.06;
+        this.marks.stamp(sk.pos.x + side.x, sk.pos.y + side.y, ang, len, w);
+        this.marks.stamp(sk.pos.x - side.x, sk.pos.y - side.y, ang, len, w);
+      }
+      this.marks.render(this.rig.renderer);
+    }
     // camera: follow puck, biased toward controlled skater
     const p = st.puck;
     let fx = p.pos.x,

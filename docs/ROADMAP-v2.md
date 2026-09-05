@@ -48,8 +48,8 @@ Status 2026-09-05: `assets/src/build_skater.py` builds skater + goalie (chunky p
 - Jersey material: TSL node combining base fabric PBR (Poly Haven fabric normal/roughness) + generated team texture (canvas: colors, stripes, mascot SVG, number). Team logo on goalie mask.
 - Gate: all archetypes + goalie visible in Quick Match, knockdown/get-up reads correctly, no bone popping at faceoff snaps, Low tier still ≥30 fps integrated.
 
-### C — Ice, arena, crowd (L)
-Branch `phase/arena`.
+### C — Ice, arena, crowd (L) — IN REVIEW (branch `phase/arena`, stacked on B)
+Status 2026-09-05: `render/iceMaterial.ts` TSL ice: procedural baked scratch normal + roughness (ambientCG ice sets were cracked lake ice, not rink ice, so the base is procedural), planar `reflector()` pass on High with fresnel + scratch distortion, skate-mark accumulation RT (`render/skateMarks.ts`, Med+, cleared each period). Boards rebuilt as UV-correct ribbons: painted-metal kick plate (ambientCG PaintedMetal006, downscaled to 512 via Blender), generated ad strip, cap rail, glass with stanchions. `render/crowd.ts`: 3 procedural fan variants, ~870 instances, TSL vertex bounce/jump/wave (Med+). `render/arena.ts`: jumbotron (live score/clock/last event), 4 spotlights + volumetric cones, rafters, banners. RoomEnvironment PMREM for PBR reflections. Themes carry spot color + banner text. Deferred: KTX2, replay frame on jumbotron (Phase D), crowd jersey colors per matchup, reflection blur by roughness.
 - Ice: PBR ice albedo/normal/roughness (Poly Haven, KTX2) under the painted-lines canvas; TSL material with planar reflection texture (mirror camera pass, roughness blur) + fresnel; skate-mark RT: blades stamp into a 2048² accumulation target, reset on period end.
 - Boards/glass/nets: painted-metal kick plate, ad-board texture strip (generated), glass with reflection + smudge normal, net mesh with alpha.
 - Crowd: 3-4 fan GLTF variants, `InstancedMesh` with per-instance color/phase attributes, TSL vertex sway / jump on goal / wave.

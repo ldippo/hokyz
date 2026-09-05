@@ -12,12 +12,13 @@ export interface TierSettings {
   /** future: planar reflection, skate marks */
   reflections: boolean;
   crowdAnim: boolean;
+  skateMarks: boolean;
 }
 
 export const TIER_SETTINGS: Record<Tier, TierSettings> = {
-  low: { pixelRatioCap: 1, shadowMapSize: 1024, bloom: false, gtao: false, traa: false, hitFx: false, reflections: false, crowdAnim: false },
-  med: { pixelRatioCap: 1.5, shadowMapSize: 2048, bloom: true, gtao: false, traa: false, hitFx: true, reflections: false, crowdAnim: true },
-  high: { pixelRatioCap: 2, shadowMapSize: 2048, bloom: true, gtao: true, traa: true, hitFx: true, reflections: true, crowdAnim: true },
+  low: { pixelRatioCap: 1, shadowMapSize: 1024, bloom: false, gtao: false, traa: false, hitFx: false, reflections: false, crowdAnim: false, skateMarks: false },
+  med: { pixelRatioCap: 1.5, shadowMapSize: 2048, bloom: true, gtao: false, traa: false, hitFx: true, reflections: false, crowdAnim: true, skateMarks: true },
+  high: { pixelRatioCap: 2, shadowMapSize: 2048, bloom: true, gtao: true, traa: true, hitFx: true, reflections: true, crowdAnim: true, skateMarks: true },
 };
 
 const WEAK_GPU = /intel|iris|uhd|hd graphics|adreno|mali|powervr|apple gpu|apple m1|swiftshader|llvmpipe|software|mesa|virtio|basic render/i;

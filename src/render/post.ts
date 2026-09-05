@@ -57,7 +57,7 @@ export class PostStack {
       color = color.mul(vec4(vec3(aoPass.getTextureNode().r), 1));
     }
     let img: N = s.traa ? traa(color, depth, scenePass.getTextureNode('velocity'), camera) : fxaa(color);
-    if (s.bloom) img = img.add(bloom(img, 0.45, 0.35, 0.9));
+    if (s.bloom) img = img.add(bloom(img, 0.32, 0.4, 1.0));
     if (s.hitFx) {
       const zoomAmt = this.hit.mul(0.6).add(this.turbo.mul(0.12));
       img = radialZoom(img, zoomAmt);

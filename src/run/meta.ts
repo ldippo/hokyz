@@ -44,11 +44,13 @@ export interface RinkTheme {
   crowd: number[];
   kick: number;
   hemi: number;
+  spot: number;
+  banners: string[];
 }
 export const RINK_THEMES: Record<string, RinkTheme> = {
-  classic: { id: 'classic', name: 'Classic Barn', bg: 0x07070c, crowd: [0xd8262f, 0x1c4fd6, 0xffffff, 0x222222, 0xe8b021, 0x2fa84f, 0x8844cc], kick: 0xe8b021, hemi: 0xcfe8ff },
-  rink_neon: { id: 'rink_neon', name: 'Neon Dome', bg: 0x0d0418, crowd: [0xff2bd6, 0x8a3cff, 0x00e5ff, 0x111111, 0xffffff], kick: 0xff2bd6, hemi: 0xd8b8ff },
-  rink_frost: { id: 'rink_frost', name: 'Frostbite Arena', bg: 0x061418, crowd: [0x2fd0c8, 0xffffff, 0x1c4fd6, 0x88ccff, 0x223344], kick: 0x2fd0c8, hemi: 0xbfffff },
+  classic: { id: 'classic', name: 'Classic Barn', bg: 0x07070c, crowd: [0xd8262f, 0x1c4fd6, 0xffffff, 0x222222, 0xe8b021, 0x2fa84f, 0x8844cc], kick: 0xe8b021, hemi: 0xcfe8ff, spot: 0xfff2dd, banners: ['HOKYZ CUP 1998', 'RETIRED #88 BRICKER', 'BIG HITZ NIGHT', 'ZAMBONI CO.'] },
+  rink_neon: { id: 'rink_neon', name: 'Neon Dome', bg: 0x0d0418, crowd: [0xff2bd6, 0x8a3cff, 0x00e5ff, 0x111111, 0xffffff], kick: 0xff2bd6, hemi: 0xd8b8ff, spot: 0xc06cff, banners: ['NEON DOME', 'LOUDEST BARN', 'GLOW NIGHT', 'RAGE FUEL'] },
+  rink_frost: { id: 'rink_frost', name: 'Frostbite Arena', bg: 0x061418, crowd: [0x2fd0c8, 0xffffff, 0x1c4fd6, 0x88ccff, 0x223344], kick: 0x2fd0c8, hemi: 0xbfffff, spot: 0xbfffff, banners: ['FROSTBITE ARENA', 'OUTDOOR CLASSIC', 'TUNDRA YETIS', 'ICE BATH'] },
 };
 
 export interface MetaProfile {
