@@ -22,6 +22,7 @@ import { laneBlocked } from '../sim/puck';
 import { PUCK, RINK, GOALIE } from '../sim/constants';
 import type { Input } from '../sim/types';
 import { RINK_THEMES, type RinkTheme } from '../run/meta';
+import { awayColorFor, lanePalette, type CbMode } from '../ui/colors';
 
 let rigTpl: Awaited<ReturnType<typeof loadRigs>> | null = null;
 void loadRigs().then((t) => (rigTpl = t)).catch(() => (rigTpl = null));
@@ -42,6 +43,8 @@ export class MatchView {
   presentation = false;
   /** camera shake multiplier (settings) */
   shakeMul = 1;
+  /** accessibility prefs, set by App before play */
+  access: { colorblind: CbMode; nameTags: 'off' | 'controlled' | 'all'; reducedMotion: boolean; rumble: (s: number, w: number, ms: number) => void; fill: (t: string) => string } = { colorblind: 'off', nameTags: 'all', reducedMotion: false, rumble: () => undefined, fill: (t) => t };
   private replay: { frames: Frame[]; pos: number; skaters: Record<string, Skater>; puck: Puck } | null = null;
   private pendingReplay: { team: 0 | 1; pos: Vec2; at: number } | null = null;
   private pendingMvp: { at: number; id: string } | null = null;
@@ -72,7 +75,10 @@ export class MatchView {
   /** attract mode: no sfx */
   silent = false;
 
-  constructor(public rig: SceneRig, public sim: MatchSim, uiRoot: HTMLElement, humanTeam: 0 | 1 | null, perkNames: string[] = [], theme: RinkTheme = RINK_THEMES.classic) {
+  constructor(public rig: SceneRig, public sim: MatchSim, uiRoot: HTMLElement, humanTeam: 0 | 1 | null, perkNames: string[] = [], theme: RinkTheme = RINK_THEMES.classic, access?: Partial<MatchView['access']>) {
+    if (access) Object.assign(this.access, access);
+    // colorblind-safe away jersey when the two team colors collide
+    sim.st.teams[1].color = awayColorFor(sim.st.teams[0].color, sim.st.teams[1].color, this.access.colorblind);
     const s = rig.settings;
     if (s.skateMarks) this.marks = new SkateMarks(1024);
     this.rink = new RinkMesh(theme, { reflect: s.reflections, marks: this.marks?.texture ?? null, metal: getRinkTextures(), crowdAnim: s.crowdAnim });
@@ -95,6 +101,7 @@ export class MatchView {
       mesh.snap(sk);
       this.skaters.set(id, mesh);
       this.group.add(mesh.group);
+      if (mesh instanceof SkaterRig && this.access.nameTags !== 'off') mesh.makeTag(sk.name, sk.team === 0 ? '#ffffff' : team.color);
     }
     this.puck.snap(st.puck);
     this.puck.addTo(rig.scene);
@@ -245,12 +252,13 @@ export class MatchView {
         }
         this.hud.announce('GOAL!', 'gold', `${scorer?.name ?? team.name}${e.value > 1 ? ` · ${e.value} PTS` : ''}`);
         this.lastAnnounce = `GOAL ${team.short}`;
-        this.hud.flash();
+        if (!this.access.reducedMotion) this.hud.flash();
+        if (!this.silent) this.access.rumble(0.6, 0.9, 400);
         this.rink.flashGoal(defendGoal(e.team === 0 ? 1 : 0).team);
         this.particles.spawn({ x: e.pos.x, y: e.pos.y, count: 90, color: [0xffd23f, 0xffffff, parseInt(team.color.slice(1), 16)], speed: 9, life: 1.6, size: 0.16, up: 7 });
         sfx.goal();
         this.excite = 1;
-        this.rink.arena.flash(team.color, 2.6);
+        this.rink.arena.flash(team.color, this.access.reducedMotion ? 0.6 : 2.6);
         if (!this.silent) {
           this.rig.punch(0.8);
           this.rig.hitStopHandler?.(5);
@@ -269,7 +277,8 @@ export class MatchView {
           if (!this.silent) {
             this.rig.punch(1);
             this.rig.hitStopHandler?.(4);
-            this.cam.roll = (Math.random() < 0.5 ? -1 : 1) * 0.05;
+            this.cam.roll = this.access.reducedMotion ? 0 : (Math.random() < 0.5 ? -1 : 1) * 0.05;
+            this.access.rumble(0.9, 0.5, 220);
           }
           if (this.presentation && st.skaters[e.hitter].onFire > 0 && !this.director.active) {
             const h = st.skaters[e.hitter];
@@ -297,7 +306,7 @@ export class MatchView {
         sfx.crowdBurst(0.5);
         break;
       case 'divePrompt':
-        if (st.teams[e.team].isHuman) this.hud.prompt('DIVE!  J / A  +  UP/DOWN', GOALIE.diveWindow, 'dive');
+        if (st.teams[e.team].isHuman) this.hud.prompt(this.access.fill('DIVE!  {pass} / A  +  {up}/{down}'), GOALIE.diveWindow, 'dive');
         break;
       case 'goaliePulled':
         this.hud.announce(e.pulled ? 'GOALIE PULLED' : 'GOALIE BACK', e.pulled ? 'red' : '', e.pulled ? 'EXTRA ATTACKER' : '');
@@ -306,7 +315,7 @@ export class MatchView {
         sfx.pass();
         break;
       case 'fightOffer': {
-        this.hud.announce('DROP THE GLOVES?', 'red', 'K = FIGHT  ·  J = WALK AWAY');
+        this.hud.announce('DROP THE GLOVES?', 'red', this.access.fill('{shoot} = FIGHT  ·  {pass} = WALK AWAY'));
         sfx.crowdBurst(0.6);
         this.excite = 1;
         const a = st.skaters[e.a],
@@ -377,7 +386,7 @@ export class MatchView {
       }
       case 'specialReady':
         if (st.teams[e.team].isHuman) {
-          this.hud.prompt('SPECIAL READY · SPACE / Y', 2.2);
+          this.hud.prompt(this.access.fill('SPECIAL READY · {special} / Y'), 2.2);
           sfx.cash();
         }
         break;
@@ -552,7 +561,10 @@ export class MatchView {
       for (const id of st.order) {
         const r = this.skaters.get(id);
         if (!r) continue;
-        if (r instanceof SkaterRig) r.lookAt(st.skaters[id], st.puck.pos.x, st.puck.pos.y);
+        if (r instanceof SkaterRig) {
+          r.lookAt(st.skaters[id], st.puck.pos.x, st.puck.pos.y);
+          r.tagVisible(this.access.nameTags === 'all' || (this.access.nameTags === 'controlled' && st.skaters[id].controlled));
+        }
         r.update(st.skaters[id], alpha, dt, this.time);
       }
       this.puck.update(st.puck, alpha, this.time);
@@ -658,7 +670,8 @@ export class MatchView {
       } else if (f.stage === 'duel' && f.cue && !f.cue.done) {
         const mine = st.teams[(f.cue.target === 0 ? A : B).team].isHuman;
         cls = f.cue.kind;
-        cue = f.cue.kind === 'high' ? (mine ? 'HIGH!  K' : 'HIGH') : f.cue.kind === 'low' ? (mine ? 'LOW!  L' : 'LOW') : f.cue.kind === 'feint' ? (mine ? 'FEINT — BLOCK  J' : 'FEINT') : mine ? 'MASH  K!' : 'RECOVER';
+        const F = this.access.fill;
+        cue = f.cue.kind === 'high' ? (mine ? F('HIGH ▲  {shoot}') : 'HIGH ▲') : f.cue.kind === 'low' ? (mine ? F('LOW ▼  {deke}') : 'LOW ▼') : f.cue.kind === 'feint' ? (mine ? F('FEINT ◆ BLOCK  {pass}') : 'FEINT ◆') : mine ? F('MASH ●  {shoot}!') : 'RECOVER ●';
       } else if (f.stage === 'result') {
         cue = f.winner === null ? 'DRAW' : 'K.O.';
         cls = 'feint';
@@ -745,7 +758,9 @@ export class MatchView {
           lane.position.set(c.pos.x, 0.06, c.pos.y);
           lane.rotation.y = -Math.atan2(m.pos.y - c.pos.y, m.pos.x - c.pos.x);
           lane.scale.set(d, 1, 1);
-          (lane.material as THREE.MeshBasicMaterial).color.setHex(blocked ? 0xff3b3b : 0x3fff7a);
+          const [openC, blockedC] = lanePalette(this.access.colorblind);
+          (lane.material as THREE.MeshBasicMaterial).color.setHex(blocked ? blockedC : openC);
+          lane.scale.y = blocked ? 0.6 : 1;
           (lane.material as THREE.MeshBasicMaterial).opacity = blocked ? 0.35 : 0.55;
           lane.visible = true;
           li++;
@@ -765,7 +780,7 @@ export class MatchView {
         this.pullHint += dt;
         if (this.pullHint > 8) {
           this.pullHint = 0;
-          this.hud.prompt('HOLD J / A TO PULL THE GOALIE', 2.5, 'quiet');
+          this.hud.prompt(this.access.fill('HOLD {pass} / A TO PULL THE GOALIE'), 2.5, 'quiet');
         }
       }
     }

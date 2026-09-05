@@ -2,7 +2,29 @@ import type { Input } from '../sim/types';
 
 export type Action = 'up' | 'down' | 'left' | 'right' | 'aimUp' | 'aimDown' | 'aimLeft' | 'aimRight' | 'turbo' | 'pass' | 'shoot' | 'deke' | 'special' | 'pause' | 'confirm' | 'back';
 
-const DEFAULT_KEYS: Record<string, Action> = {
+export const REMAPPABLE: { action: Action; label: string }[] = [
+  { action: 'up', label: 'Move up' },
+  { action: 'down', label: 'Move down' },
+  { action: 'left', label: 'Move left' },
+  { action: 'right', label: 'Move right' },
+  { action: 'turbo', label: 'Turbo' },
+  { action: 'pass', label: 'Pass / switch / block' },
+  { action: 'shoot', label: 'Shoot / check / high' },
+  { action: 'deke', label: 'Deke / low' },
+  { action: 'special', label: 'Special move' },
+  { action: 'aimUp', label: 'Aim far post' },
+  { action: 'aimDown', label: 'Aim near post' },
+  { action: 'pause', label: 'Pause' },
+];
+
+/** Pretty name for a KeyboardEvent.code. */
+export function labelForCode(code: string): string {
+  const map: Record<string, string> = { ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→', ShiftLeft: 'SHIFT', ShiftRight: 'R-SHIFT', Space: 'SPACE', Escape: 'ESC', Enter: 'ENTER', ControlLeft: 'CTRL', ControlRight: 'R-CTRL', AltLeft: 'ALT', Tab: 'TAB', Backspace: 'BKSP' };
+  if (map[code]) return map[code];
+  return code.replace(/^Key/, '').replace(/^Digit/, '').replace(/^Numpad/, 'NUM ');
+}
+
+export const DEFAULT_KEYS: Record<string, Action> = {
   KeyW: 'up',
   KeyS: 'down',
   KeyA: 'left',
@@ -52,9 +74,19 @@ export class InputManager {
   gamepadIndex: number | null = null;
   /** Called on any key/button press (for "press any key" screens). */
   onAnyPress: (() => void) | null = null;
+  /** when set, the next keydown is captured for rebinding instead of played */
+  capture: ((code: string) => void) | null = null;
+  rumbleEnabled = true;
 
   constructor() {
     window.addEventListener('keydown', (e) => {
+      if (this.capture) {
+        e.preventDefault();
+        const cb = this.capture;
+        this.capture = null;
+        cb(e.code);
+        return;
+      }
       const a = this.keymap[e.code];
       if (a) {
         if (!this.keyHeld.has(a)) this.pressedThisFrame.add(a);
@@ -124,6 +156,33 @@ export class InputManager {
   get passHoldTime(): number {
     if (this.held.has('pass') && this.passHoldStart >= 0) return (performance.now() - this.passHoldStart) / 1000;
     return this.passHoldAtRelease;
+  }
+
+  /** Human-readable key for an action (first bound key). */
+  label(a: Action): string {
+    const code = Object.keys(this.keymap).find((k) => this.keymap[k] === a);
+    return code ? labelForCode(code) : '?';
+  }
+  /** Replace {action} tokens with the bound key. */
+  fill(text: string): string {
+    return text.replace(/\{(\w+)\}/g, (_, a: string) => this.label(a as Action));
+  }
+  /** Rebind: remove other keys for the action, keep one binding per action. */
+  bind(code: string, a: Action): void {
+    for (const k of Object.keys(this.keymap)) if (this.keymap[k] === a) delete this.keymap[k];
+    this.keymap[code] = a;
+  }
+  resetKeys(): void {
+    this.keymap = { ...DEFAULT_KEYS };
+  }
+  /** Gamepad rumble (no-op without a pad or when disabled). */
+  rumble(strong: number, weak: number, ms: number): void {
+    if (!this.rumbleEnabled) return;
+    const pads = navigator.getGamepads?.() ?? [];
+    for (const p of pads) {
+      const act = (p as Gamepad & { vibrationActuator?: { playEffect?: (t: string, o: object) => Promise<unknown> } })?.vibrationActuator;
+      if (act?.playEffect) void act.playEffect('dual-rumble', { startDelay: 0, duration: ms, strongMagnitude: strong, weakMagnitude: weak }).catch(() => undefined);
+    }
   }
 
   isHeld(a: Action): boolean {

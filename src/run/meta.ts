@@ -86,10 +86,16 @@ export interface MetaProfile {
   rivalRecord: Record<string, { w: number; l: number }>;
   weekly: { week: string; bestAct: number; bestRow: number; won: boolean; runs: number } | null;
   telemetry: { perkOffered: Record<string, number>; perkPicked: Record<string, number>; nodePicked: Record<string, number>; runEndAct: Record<string, number> };
+  keymap: Record<string, string> | null;
+  colorblind: 'off' | 'deuteranopia' | 'protanopia' | 'tritanopia';
+  nameTags: 'off' | 'controlled' | 'all';
+  textScale: number;
+  reducedMotion: boolean;
+  rumble: boolean;
 }
 
 export function defaultMeta(): MetaProfile {
-  return { version: 1, cash: 0, unlocked: ['cap_bricker', 'cap_flash'], runs: 0, wins: 0, bestAct: 0, bestRow: 0, totalGoals: 0, totalBigHits: 0, selectedRink: 'classic', volume: 0.7, seenIntro: false, quality: 'auto', cinematics: true, screenShake: true, hitFx: true, music: true, trainingDone: false, feats: [], totalFightsWon: 0, totalTopCorner: 0, totalAnkle: 0, totalSpecials: 0, totalShootoutWins: 0, bestGoalsMatch: 0, bestBigHitsMatch: 0, rivalRecord: {}, weekly: null, telemetry: { perkOffered: {}, perkPicked: {}, nodePicked: {}, runEndAct: {} } };
+  return { version: 1, cash: 0, unlocked: ['cap_bricker', 'cap_flash'], runs: 0, wins: 0, bestAct: 0, bestRow: 0, totalGoals: 0, totalBigHits: 0, selectedRink: 'classic', volume: 0.7, seenIntro: false, quality: 'auto', cinematics: true, screenShake: true, hitFx: true, music: true, trainingDone: false, feats: [], totalFightsWon: 0, totalTopCorner: 0, totalAnkle: 0, totalSpecials: 0, totalShootoutWins: 0, bestGoalsMatch: 0, bestBigHitsMatch: 0, rivalRecord: {}, weekly: null, telemetry: { perkOffered: {}, perkPicked: {}, nodePicked: {}, runEndAct: {} }, keymap: null, colorblind: 'off', nameTags: 'all', textScale: 1, reducedMotion: false, rumble: true };
 }
 
 export const isUnlocked = (m: MetaProfile, id: string): boolean => m.unlocked.includes(id);
