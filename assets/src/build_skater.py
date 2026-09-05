@@ -201,8 +201,23 @@ def build_skater(goalie=False):
     bm.to_mesh(helm.data); bm.free()
     assign_mat(helm, helmet); vgroup_all(helm, 'head'); parts.append(helm)
     if goalie:
-        cage = box('cage', (0.17, 0, HEAD_Z - 0.02), (0.025, 0.24, 0.22), bevel=0.01, seg=1)
-        assign_mat(cage, blade); vgroup_all(cage, 'head'); parts.append(cage)
+        # mask shell (team-colored helmet material) wrapping the face, plus a bar cage and chin guard
+        shell = sphere('maskshell', (0.03, 0, HEAD_Z - 0.01), 0.19, scale=(1.0, 1.02, 1.08))
+        bm2 = bmesh.new(); bm2.from_mesh(shell.data)
+        # cut the front opening for the cage
+        geom2 = [f for f in bm2.faces if (shell.matrix_world @ f.calc_center_median()).x > 0.12 and abs((shell.matrix_world @ f.calc_center_median()).z - (HEAD_Z - 0.02)) < 0.12]
+        bmesh.ops.delete(bm2, geom=geom2, context='FACES')
+        bm2.to_mesh(shell.data); bm2.free()
+        assign_mat(shell, helmet); vgroup_all(shell, 'head'); parts.append(shell)
+        for i in range(3):
+            bar = limb('cageh%d' % i, (0.19, -0.13, HEAD_Z - 0.1 + i * 0.08), (0.19, 0.13, HEAD_Z - 0.1 + i * 0.08), 0.008, 0.008, verts=6)
+            assign_mat(bar, blade); vgroup_all(bar, 'head'); parts.append(bar)
+        for i in range(4):
+            y = -0.12 + i * 0.08
+            bar = limb('cagev%d' % i, (0.19, y, HEAD_Z - 0.14), (0.19, y, HEAD_Z + 0.08), 0.008, 0.008, verts=6)
+            assign_mat(bar, blade); vgroup_all(bar, 'head'); parts.append(bar)
+        chin = box('chin', (0.16, 0, HEAD_Z - 0.17), (0.08, 0.2, 0.06), bevel=0.02, seg=2)
+        assign_mat(chin, pad_m); vgroup_all(chin, 'head'); parts.append(chin)
     else:
         vz = box('visor', (0.15, 0, HEAD_Z + 0.02), (0.06, 0.3, 0.1), bevel=0.02, seg=2)
         assign_mat(vz, visor); vgroup_all(vz, 'head'); parts.append(vz)

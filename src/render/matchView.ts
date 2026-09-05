@@ -48,6 +48,11 @@ export class MatchView {
   private replay: { frames: Frame[]; pos: number; skaters: Record<string, Skater>; puck: Puck } | null = null;
   private pendingReplay: { team: 0 | 1; pos: Vec2; at: number } | null = null;
   private pendingMvp: { at: number; id: string } | null = null;
+  /** highlight clips captured during the match */
+  private clips: { kind: 'goal' | 'hit' | 'save' | 'ankle' | 'fight'; pos: Vec2; scoredOn: 0 | 1 | null; frames: Frame[]; label: string }[] = [];
+  private pendingClips: { kind: 'goal' | 'hit' | 'save' | 'ankle' | 'fight'; pos: Vec2; scoredOn: 0 | 1 | null; label: string; after: number }[] = [];
+  private reel: { idx: number } | null = null;
+  reelDone = false;
   private introBeats = 0;
   private lastCam: 'follow' | 'director' = 'follow';
   /** latest human input, for the aim reticle */
@@ -178,7 +183,7 @@ export class MatchView {
   /** True while the sim should not advance (intro / replay / mvp shots). */
   get holdSim(): boolean {
     const k = this.director.kind;
-    return k === 'intro' || k === 'replay' || k === 'mvp';
+    return k === 'intro' || k === 'replay' || k === 'mvp' || k === 'reel';
   }
   get timeScale(): number {
     return this.director.kind === 'hit' ? this.director.timeScale : 1;
@@ -187,10 +192,45 @@ export class MatchView {
   skipCinematic(): void {
     const k = this.director.kind;
     if (!k) return;
+    if (this.reel) {
+      this.reel = null;
+      this.reelDone = true;
+    }
     this.endReplay();
     this.director.stop();
     if (k === 'intro') this.sim.st.phaseTimer = 0.2;
     this.hud.tag(null);
+  }
+
+  private markClip(kind: 'goal' | 'hit' | 'save' | 'ankle' | 'fight', pos: Vec2, scoredOn: 0 | 1 | null, label: string): void {
+    if (this.access.reducedMotion) return;
+    this.pendingClips.push({ kind, pos: { x: pos.x, y: pos.y }, scoredOn, label, after: 28 });
+  }
+
+  /** Pick up to 6 clips: goals first, then the rest in order. */
+  private reelClips(): typeof this.clips {
+    const goals = this.clips.filter((c) => c.kind === 'goal').slice(-4);
+    const rest = this.clips.filter((c) => c.kind !== 'goal');
+    return [...goals, ...rest].slice(0, 6);
+  }
+
+  private startReelClip(): void {
+    const list = this.reelClips();
+    if (!this.reel || this.reel.idx >= list.length) {
+      this.reel = null;
+      this.reelDone = true;
+      this.endReplay();
+      this.director.stop();
+      this.hud.tag(null);
+      return;
+    }
+    const c = list[this.reel.idx];
+    const st = this.sim.st;
+    this.replay = { frames: c.frames, pos: 0, skaters: structuredClone(st.skaters), puck: structuredClone(st.puck) };
+    const dur = c.frames.length / 60 / 0.6 + 0.2;
+    this.director.reelShot(c.kind, c.pos, c.scoredOn, dur);
+    this.hud.tag(`HIGHLIGHTS ${this.reel.idx + 1}/${list.length} · ${c.label}`);
+    for (const id of st.order) this.skaters.get(id)?.snap(this.replay.skaters[id]);
   }
 
   private startReplay(team: 0 | 1, pos: Vec2): void {
@@ -226,7 +266,15 @@ export class MatchView {
   afterStep(events: MatchEvent[]): void {
     const st = this.sim.st;
     this.lastEvents = events;
-    if (st.phase === 'play') this.replayBuf.push(captureFrame(st));
+    if (st.phase === 'play' || st.phase === 'shootout' || st.phase === 'fight' || st.phase === 'goal') this.replayBuf.push(captureFrame(st));
+    for (let i = this.pendingClips.length - 1; i >= 0; i--) {
+      const pc = this.pendingClips[i];
+      if (--pc.after > 0) continue;
+      this.pendingClips.splice(i, 1);
+      const frames = this.replayBuf.snapshot().slice(-130);
+      if (frames.length < 60) continue;
+      this.clips.push({ kind: pc.kind, pos: pc.pos, scoredOn: pc.scoredOn, frames, label: pc.label });
+    }
     for (const id of st.order) this.skaters.get(id)?.snapshot(st.skaters[id]);
     this.puck.snapshot(st.puck);
     if (st.phase !== this.lastPhase) {
@@ -264,7 +312,10 @@ export class MatchView {
           this.rig.hitStopHandler?.(5);
           if (team.isHuman) sfx.chant(9, 0.45);
         }
-        if (this.presentation) this.pendingReplay = { team: e.team === 0 ? 1 : 0, pos: { ...e.pos }, at: this.time + 0.9 };
+        if (this.presentation) {
+          this.pendingReplay = { team: e.team === 0 ? 1 : 0, pos: { ...e.pos }, at: this.time + 0.9 };
+          this.markClip('goal', e.pos, e.team === 0 ? 1 : 0, `GOAL · ${scorer?.name ?? team.name}`);
+        }
         break;
       }
       case 'hit': {
@@ -280,6 +331,7 @@ export class MatchView {
             this.cam.roll = this.access.reducedMotion ? 0 : (Math.random() < 0.5 ? -1 : 1) * 0.05;
             this.access.rumble(0.9, 0.5, 220);
           }
+          if (this.presentation) this.markClip('hit', e.pos, null, `BIG HIT · ${st.skaters[e.hitter].name}`);
           if (this.presentation && st.skaters[e.hitter].onFire > 0 && !this.director.active) {
             const h = st.skaters[e.hitter];
             this.director.hit(e.pos, { x: e.pos.x - h.pos.x, y: e.pos.y - h.pos.y });
@@ -296,12 +348,14 @@ export class MatchView {
         break;
       case 'bigSave':
         this.hud.announce('BIG SAVE!', 'gold', st.skaters[e.goalie].name);
+        if (this.presentation) this.markClip('save', e.pos, null, `BIG SAVE · ${st.skaters[e.goalie].name}`);
         this.particles.spawn({ x: e.pos.x, y: e.pos.y, z: 0.6, count: 30, color: [0xffffff, 0xffd23f], speed: 5, life: 0.7, size: 0.12, up: 4 });
         sfx.crowdBurst(0.7);
         this.excite = Math.max(this.excite, 0.7);
         break;
       case 'ankleBreaker':
         this.hud.announce('ANKLE BREAKER!', 'fire', st.skaters[e.skater].name);
+        if (this.presentation) this.markClip('ankle', st.skaters[e.victim].pos, null, `ANKLE BREAKER · ${st.skaters[e.skater].name}`);
         this.particles.spawn({ x: st.skaters[e.victim].pos.x, y: st.skaters[e.victim].pos.y, z: 0.3, count: 16, color: [0xff7a1a, 0xffd23f], speed: 3, life: 0.5, size: 0.1, up: 2 });
         sfx.crowdBurst(0.5);
         break;
@@ -351,6 +405,7 @@ export class MatchView {
         this.hud.fight(false);
         if (e.winner) {
           this.hud.announce(st.skaters[e.winner].name.toUpperCase(), 'gold', 'WINS THE FIGHT · LOSER SITS');
+          if (this.presentation) this.markClip('fight', st.skaters[e.winner].pos, null, `K.O. · ${st.skaters[e.winner].name}`);
           const r = this.skaters.get(e.winner);
           if (r instanceof SkaterRig) r.celebrate();
           sfx.crowdBurst(1);
@@ -505,6 +560,10 @@ export class MatchView {
       this.pendingReplay = null;
       if (!this.director.active) this.startReplay(p.team, p.pos);
     }
+    if (this.presentation && st.phase === 'over' && !this.reel && !this.reelDone && !this.pendingMvp && !this.director.active && this.reelClips().length > 0) {
+      this.reel = { idx: 0 };
+      this.startReelClip();
+    }
     if (this.pendingMvp && this.time >= this.pendingMvp.at) {
       const m = this.pendingMvp;
       this.pendingMvp = null;
@@ -554,8 +613,14 @@ export class MatchView {
       this.puck.snap(rp.puck);
       this.puck.update(rp.puck, 1, this.time);
       if (rp.pos >= rp.frames.length - 1 || !this.director.active) {
-        this.endReplay();
-        this.director.stop();
+        if (this.reel) {
+          this.reel.idx++;
+          this.director.stop();
+          this.startReelClip();
+        } else {
+          this.endReplay();
+          this.director.stop();
+        }
       }
     } else {
       for (const id of st.order) {
@@ -652,6 +717,7 @@ export class MatchView {
       this.cam.update(dt, fx, fy, st.shake * this.shakeMul, this.time, spread);
     }
     if (directing && this.director.kind === 'replay') this.hud.tag('REPLAY');
+    if (directing && this.director.kind === 'reel' && !this.reel) this.hud.tag(null);
     // shootout tracker
     if (st.shootout) {
       const so = st.shootout;

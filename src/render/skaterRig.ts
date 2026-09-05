@@ -49,6 +49,16 @@ interface BoneRef {
 
 const tmpQ = new THREE.Quaternion();
 const tmpV = new THREE.Vector3();
+const ikS = new THREE.Vector3(),
+  ikT = new THREE.Vector3(),
+  ikE = new THREE.Vector3(),
+  ikD = new THREE.Vector3(),
+  ikP = new THREE.Vector3(),
+  ikPerp = new THREE.Vector3(),
+  ikRest = new THREE.Vector3(),
+  ikQ = new THREE.Quaternion(),
+  ikParent = new THREE.Quaternion(),
+  ikCur = new THREE.Vector3();
 
 /** Skinned skater driven procedurally from sim state. Same interface as SkaterMesh. */
 export class SkaterRig {
@@ -78,6 +88,9 @@ export class SkaterRig {
   /** fight animation: stance while >0, punch/stagger timers */
   fightStance = false;
   private tag: THREE.Sprite | null = null;
+  /** IK: hand grip offsets in the stick bone's rest local frame + arm segment lengths */
+  private grips: { side: 'L' | 'R'; offset: THREE.Vector3; upper: number; fore: number }[] = [];
+  ikEnabled = true;
   private punchT = 0;
   private punchHigh = true;
   private staggerT = 0;
@@ -124,6 +137,20 @@ export class SkaterRig {
     for (const ref of this.bones.values()) {
       ref.bone.getWorldQuaternion(ref.invRestWorld);
       ref.invRestWorld.invert();
+    }
+    const stick = this.bones.get('stick')?.bone;
+    if (stick) {
+      for (const side of ['L'] as const) {
+        const ua = this.bones.get(`upperArm${side}`)?.bone;
+        const fa = this.bones.get(`foreArm${side}`)?.bone;
+        const hand = this.bones.get(`hand${side}`)?.bone;
+        if (!ua || !fa || !hand) continue;
+        const S = ua.getWorldPosition(new THREE.Vector3());
+        const E = fa.getWorldPosition(new THREE.Vector3());
+        const H = hand.getWorldPosition(new THREE.Vector3());
+        const offset = stick.worldToLocal(H.clone());
+        this.grips.push({ side, offset, upper: S.distanceTo(E), fore: E.distanceTo(H) });
+      }
     }
     this.pivot.add(this.model);
     this.group.add(this.pivot);
@@ -365,16 +392,23 @@ export class SkaterRig {
       this.rot('shin.L', AX_Z, -0.6 * f);
       this.rot('head', AX_Z, -0.5 * f);
     }
-    // stick wobble while charging; toe-drag swings the stick wide
-    if (sk.charging) this.rot('stick', AX_Y, -0.35 * sk.shotCharge);
+    // wind-up while charging and toe-drag sweeps move the bottom hand (the stick follows it)
+    if (sk.charging) {
+      this.rot('upperArm.R', AX_Y, -0.22 * sk.shotCharge);
+      this.rot('upperArm.R', AX_Z, 0.12 * sk.shotCharge);
+    }
     if (sk.deke > 0 && sk.dekeKind !== 'spin') {
       const k = Math.sin(Math.min(1, sk.deke / 0.45) * Math.PI);
       const side = sk.dekeKind === 'dragL' ? 1 : -1;
-      this.rot('stick', AX_Y, side * 0.9 * k);
+      this.rot('upperArm.R', AX_Y, side * 0.8 * k);
+      this.rot('foreArm.R', AX_Y, side * 0.3 * k);
       this.rot('chest', AX_Y, side * 0.35 * k);
       this.rot('chest', AX_X, -side * 0.25 * k);
     }
 
+    // stick-hand IK: keep both hands on the stick unless the arms are busy
+    const armsFree = this.ikEnabled && !this.fightStance && this.celebrateT <= 0 && this.fall < 0.3 && sk.lunge <= 0 && !(sk.specialTimer > 0 && sk.specialKind === 'shockwave');
+    if (armsFree && this.grips.length) this.solveArms();
     // indicators
     this.ring.visible = sk.controlled;
     this.arrow.visible = sk.controlled;
@@ -391,6 +425,61 @@ export class SkaterRig {
     });
     this.shadow.scale.setScalar(1 + this.fall * 0.9);
     if (this.jerseyMat) this.jerseyMat.emissive.setHex(sk.hp < 30 ? 0x330000 : onFire ? 0x552200 : 0x000000);
+  }
+
+  /** Two-bone IK: rotate upper/fore arm so the hand lands on its grip point of the stick. */
+  private solveArms(): void {
+    const stick = this.bones.get('stick')?.bone;
+    if (!stick) return;
+    this.model.updateMatrixWorld(true);
+    for (const g of this.grips) {
+      const ua = this.bones.get(`upperArm${g.side}`);
+      const fa = this.bones.get(`foreArm${g.side}`);
+      const hand = this.bones.get(`hand${g.side}`)?.bone;
+      if (!ua || !fa || !hand) continue;
+      ua.bone.getWorldPosition(ikS);
+      ikT.copy(g.offset);
+      stick.localToWorld(ikT);
+      ikD.subVectors(ikT, ikS);
+      const maxReach = g.upper + g.fore - 0.01;
+      let d = ikD.length();
+      if (d < 1e-4) continue;
+      if (d > maxReach) {
+        ikD.multiplyScalar(maxReach / d);
+        d = maxReach;
+        ikT.addVectors(ikS, ikD);
+      }
+      ikD.divideScalar(d);
+      // pole: out to the side and back, slightly down (in world, from the model's yaw)
+      const yaw = this.group.rotation.y;
+      const sideSign = g.side === 'L' ? -1 : 1; // Blender +Y (left) → glTF -Z
+      ikP.set(-Math.sin(yaw) * sideSign * 0.7 - Math.cos(yaw) * 0.5, -0.35, -Math.cos(yaw) * sideSign * 0.7 + Math.sin(yaw) * 0.5).normalize();
+      ikPerp.copy(ikP).addScaledVector(ikD, -ikP.dot(ikD));
+      if (ikPerp.lengthSq() < 1e-6) ikPerp.set(0, -1, 0).addScaledVector(ikD, -ikD.y);
+      ikPerp.normalize();
+      const cosA = THREE.MathUtils.clamp((g.upper * g.upper + d * d - g.fore * g.fore) / (2 * g.upper * d), -1, 1);
+      const a = Math.acos(cosA);
+      ikE.copy(ikS).addScaledVector(ikD, g.upper * Math.cos(a)).addScaledVector(ikPerp, g.upper * Math.sin(a));
+      // two passes: the first places the elbow, the second corrects drift from the parent chain
+      for (let pass = 0; pass < 2; pass++) {
+        this.aimBone(ua.bone, fa.bone, ikE);
+        this.aimBone(fa.bone, hand, ikT);
+      }
+    }
+  }
+  /** Rotate `bone` (in place, minimal twist) so that `child`'s world position points at `target`. */
+  private aimBone(bone: THREE.Bone, child: THREE.Bone, target: THREE.Vector3): void {
+    bone.getWorldPosition(ikS);
+    child.getWorldPosition(ikCur);
+    ikRest.subVectors(ikCur, ikS).normalize();
+    ikD.subVectors(target, ikS).normalize();
+    ikQ.setFromUnitVectors(ikRest, ikD);
+    // world delta → local: q_local' = inv(parentWorld) * delta * parentWorld * q_local
+    const parent = bone.parent as THREE.Object3D;
+    parent.getWorldQuaternion(ikParent);
+    tmpQ.copy(ikParent).invert().multiply(ikQ).multiply(ikParent);
+    bone.quaternion.premultiply(tmpQ);
+    bone.updateMatrixWorld(true);
   }
 
   /** Aim the head toward a world point (sim coords). */

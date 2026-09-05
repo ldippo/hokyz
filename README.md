@@ -33,6 +33,7 @@ Controls (keyboard / gamepad):
 
 - NHL Hitz-style 3v3: turbo, big hits, on-fire streaks, team fire, fights, archetype specials (laser shot, shockwave, afterburner, blink pass, brick wall).
 - Rogue-like run: branching 3-act map, perk drafts with 7 synergy sets, cursed perks, shops, events, rest stops, skater XP + level-ups, injuries, bosses with phase mechanics, meta unlocks.
+- Training Camp, shootouts, skills nodes, rival grudges, feats, weekly seeded runs, records + local telemetry, key remapping, colorblind palettes, reduced motion, match-end highlight reel.
 - Rendering: WebGPU (WebGL2 fallback) with TSL post-processing, rigged procedurally-animated skaters, reflective scratched ice with skate marks, instanced animated crowd, arena dressing, cinematic intro/replay/MVP shots. Low/Med/High auto quality tiers.
 
 ## Structure
