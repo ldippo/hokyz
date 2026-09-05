@@ -82,6 +82,30 @@ export function stepFight(st: MatchState, dt: number, inputs: Partial<Record<0 |
       f.nextCue = 0.7;
       st.fightsThisPeriod++;
       events.push({ type: 'fightStart', a: f.a, b: f.b });
+      // bystanders back off to a ring around the scrap
+      const mx = (A.pos.x + B.pos.x) / 2,
+        my = (A.pos.y + B.pos.y) / 2;
+      let k = 0;
+      for (const id of st.order) {
+        if (id === f.a || id === f.b) continue;
+        const s = st.skaters[id];
+        if (s.isGoalie) continue;
+        const ang = (k++ / 6) * Math.PI * 2 + 0.4;
+        s.pos.x = mx + Math.cos(ang) * 5.5;
+        s.pos.y = my + Math.sin(ang) * 4.5;
+        s.vel.x = s.vel.y = 0;
+        s.knockdown = 0;
+        s.facing = Math.atan2(my - s.pos.y, mx - s.pos.x);
+      }
+      // square up
+      const gap = 1.7;
+      const dx = B.pos.x - A.pos.x,
+        dy = B.pos.y - A.pos.y;
+      const dl = Math.hypot(dx, dy) || 1;
+      A.pos.x = mx - (dx / dl) * (gap / 2);
+      A.pos.y = my - (dy / dl) * (gap / 2);
+      B.pos.x = mx + (dx / dl) * (gap / 2);
+      B.pos.y = my + (dy / dl) * (gap / 2);
       // human takes control of their fighter
       for (const i of [0, 1] as const) {
         const sk = i === 0 ? A : B;
