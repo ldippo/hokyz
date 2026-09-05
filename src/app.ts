@@ -34,6 +34,8 @@ export class App {
   humanPlaying = false;
   watchdog: Watchdog;
   perf: PerfProbe;
+  assetsReady: Promise<void> = Promise.resolve();
+  assetsLoaded = false;
   private toastEl: HTMLElement | null = null;
 
   constructor(canvas: HTMLCanvasElement, ui: HTMLElement) {
@@ -63,15 +65,26 @@ export class App {
     await this.rig.ready;
     this.applyQualityPref();
     setupEnvironment(this.rig.renderer, this.rig.scene, 0.35);
-    await Promise.all([
+    // assets stream in behind the title; the attract match re-creates itself when they land
+    this.assetsReady = Promise.all([
       loadRigs().catch((e) => console.warn('skater rigs failed to load, using fallback meshes', e)),
       loadRinkTextures(),
-    ]);
+    ]).then(() => {
+      this.assetsLoaded = true;
+      if (this.view && !this.humanPlaying) {
+        this.disposeView();
+        this.attract();
+      }
+      document.querySelector('.loading-hint')?.remove();
+    });
   }
 
   applyQualityPref(): void {
     const pref = this.meta.quality ?? 'auto';
     const tier: Tier = pref === 'auto' ? probeTier(this.rig.gpu) : pref;
+    this.rig.overrides = { ...this.rig.overrides, hitFx: this.meta.hitFx !== false };
+    if (this.meta.hitFx === false) this.rig.overrides.hitFx = false;
+    else delete this.rig.overrides.hitFx;
     this.rig.applyTier(tier);
     this.watchdog.reset();
   }
@@ -165,7 +178,7 @@ export class App {
     const v = this.startView(sim, false);
     v.hud.root.style.display = 'none';
     v.silent = true;
-    sfx.startMusic();
+    if (this.meta.music !== false) sfx.startMusic();
   }
 
   // ---------- persistence ----------

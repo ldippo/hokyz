@@ -85,8 +85,17 @@ Status 2026-09-05: every perk carries tags (FIRE, IRON, JET, SNIPE, WALL, SCRAP,
 - UI: tag counts on draft, level-up screen, boss mechanic reveal on intro.
 - Tests: set bonus application, XP thresholds, boss phase triggers.
 
-### H — Polish + budget (S)
-Branch `phase/polish`. Asset budget audit (≤40 MB, lazy loading, attract mode on light scene), settings completeness, README/docs, final balance batch, production merge.
+### H — Polish + budget (S) — IN REVIEW (branch `phase/polish`, stacked on G)
+Status 2026-09-05: budget audit: models 464 KB, textures 160 KB, audio 264 KB, JS 189 KB app + 978 KB three vendor chunk (65 + 270 KB gzip), no production source maps; total shipped ≈ 2.1 MB against the 40 MB cap, so KTX2/Draco stay deferred. Assets stream behind the title (attract match re-creates itself when rigs land, loading hint until then); rig viewer lazy-imported. Settings gained menu music, cinematics, screen shake, hit-fx toggles. Final batch (10 matches/difficulty): goals 7.9 / 6.8 / 9.5 / 9.7, fights 0.5-2.4, specials 7.8-9.5, team fire 0.8-1.5.
+
+## What's next (not in the v2 plan)
+- Merge the stack #1 → #8 in order after playtests; production only moves on `main`.
+- KTX2 textures + Draco meshes if assets ever approach the cap.
+- Stick-hand IK for the wind-up (hands currently slip slightly off the stick).
+- CC0 recordings to replace the pre-rendered SFX (same file names in `public/audio/`).
+- Reflection blur by roughness; per-matchup crowd jersey colors; replay frame on the jumbotron.
+- Run economy tuning from real runs: set reachability by act 2, cursed perk pick rates, boss phase difficulty.
+- Mobile/touch, co-op, daily seed remain out of scope.
 
 ## Risks and mitigations
 - **TSL / WebGPU maturity in r185**: fallback path is tested every phase; if a node effect misbehaves on WebGL2, tier it High-only.

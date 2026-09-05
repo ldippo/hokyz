@@ -10,10 +10,20 @@ export function settingsScreen(app: App): void {
   const cycleQ = (d: number) => { const i = levels.indexOf(app.meta.quality); app.meta.quality = levels[(i + d + levels.length) % levels.length]; app.saveMeta(); app.applyQualityPref(); refreshQ(); };
   refreshQ();
   const vol = h('input', { type: 'range', min: 0, max: 1, step: 0.05, value: app.meta.volume, onInput: (e) => { const v = Number((e.target as HTMLInputElement).value); app.meta.volume = v; sfx.setVolume(v); app.saveMeta(); }, 'data-nav': '1' });
+  const toggle = (label: string, key: 'cinematics' | 'screenShake' | 'hitFx' | 'music', onChange?: () => void) => {
+    const lbl = h('span', {}, '');
+    const refresh = () => { lbl.textContent = app.meta[key] === false ? 'OFF' : 'ON'; };
+    refresh();
+    return h('div', { class: 'settings-row' }, h('span', {}, label), h('div', { style: 'display:flex;gap:8px;align-items:center' }, btn('‹', () => { app.meta[key] = app.meta[key] === false; app.saveMeta(); refresh(); onChange?.(); }), lbl, btn('›', () => { app.meta[key] = app.meta[key] === false; app.saveMeta(); refresh(); onChange?.(); })));
+  };
   const el = h('div', { class: 'screen transparent' },
     h('h2', { class: 'screen-title' }, 'SETTINGS'),
     h('div', { style: 'margin:20px 0' },
       h('div', { class: 'settings-row' }, h('span', {}, 'Volume'), vol),
+      toggle('Menu music', 'music', () => { if (app.meta.music === false) sfx.stopMusic(); else sfx.startMusic(); }),
+      toggle('Cinematics (intro, replays)', 'cinematics'),
+      toggle('Screen shake', 'screenShake'),
+      toggle('Hit flash / zoom fx', 'hitFx', () => app.applyQualityPref()),
       h('div', { class: 'settings-row' }, h('span', {}, 'Quality'), h('div', { style: 'display:flex;gap:8px;align-items:center' }, btn('‹', () => cycleQ(-1)), qLbl, btn('›', () => cycleQ(1)))),
       h('div', { class: 'settings-row' }, h('span', {}, 'Move'), h('span', { html: '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / Left stick' })),
       h('div', { class: 'settings-row' }, h('span', {}, 'Turbo'), h('span', { html: '<kbd>SHIFT</kbd> / RT' })),

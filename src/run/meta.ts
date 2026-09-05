@@ -68,10 +68,14 @@ export interface MetaProfile {
   seenIntro: boolean;
   /** 'auto' picks by GPU probe + watchdog */
   quality: 'auto' | 'low' | 'med' | 'high';
+  cinematics: boolean;
+  screenShake: boolean;
+  hitFx: boolean;
+  music: boolean;
 }
 
 export function defaultMeta(): MetaProfile {
-  return { version: 1, cash: 0, unlocked: ['cap_bricker', 'cap_flash'], runs: 0, wins: 0, bestAct: 0, bestRow: 0, totalGoals: 0, totalBigHits: 0, selectedRink: 'classic', volume: 0.7, seenIntro: false, quality: 'auto' };
+  return { version: 1, cash: 0, unlocked: ['cap_bricker', 'cap_flash'], runs: 0, wins: 0, bestAct: 0, bestRow: 0, totalGoals: 0, totalBigHits: 0, selectedRink: 'classic', volume: 0.7, seenIntro: false, quality: 'auto', cinematics: true, screenShake: true, hitFx: true, music: true };
 }
 
 export const isUnlocked = (m: MetaProfile, id: string): boolean => m.unlocked.includes(id);

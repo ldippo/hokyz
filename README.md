@@ -16,12 +16,24 @@ Controls (keyboard / gamepad):
 
 | Action | Keyboard | Pad |
 | --- | --- | --- |
-| Move | WASD / arrows | Left stick / d-pad |
+| Move | WASD | Left stick / d-pad |
+| Aim shot (post) | Arrow keys / mouse | Right stick |
 | Turbo | Shift | RT / RB |
-| Pass / switch skater | J | A |
-| Shoot (hold to charge) / body check | K or Space | B |
-| Deke / spin dodge | L | X |
+| Pass / switch skater (release) | J | A |
+| Saucer pass | Hold J briefly | Hold A |
+| Pull goalie (last 2:00) | Hold J 1 s | Hold A 1 s |
+| Goalie dive (after an opponent's shot) | J + up/down | A + stick |
+| Shoot (hold to charge) / body check | K | B |
+| Deke (with direction = toe drag) | L | X |
+| Special move (meter full) | Space | Y |
+| Fight: high / low / block / mash | K / L / J / K | B / X / A / B |
 | Pause | P / Esc | Start |
+
+## Features
+
+- NHL Hitz-style 3v3: turbo, big hits, on-fire streaks, team fire, fights, archetype specials (laser shot, shockwave, afterburner, blink pass, brick wall).
+- Rogue-like run: branching 3-act map, perk drafts with 7 synergy sets, cursed perks, shops, events, rest stops, skater XP + level-ups, injuries, bosses with phase mechanics, meta unlocks.
+- Rendering: WebGPU (WebGL2 fallback) with TSL post-processing, rigged procedurally-animated skaters, reflective scratched ice with skate marks, instanced animated crowd, arena dressing, cinematic intro/replay/MVP shots. Low/Med/High auto quality tiers.
 
 ## Structure
 

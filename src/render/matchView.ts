@@ -40,6 +40,8 @@ export class MatchView {
   replayBuf = new ReplayBuffer(300);
   /** presentation beats on (off in attract mode) */
   presentation = false;
+  /** camera shake multiplier (settings) */
+  shakeMul = 1;
   private replay: { frames: Frame[]; pos: number; skaters: Record<string, Skater>; puck: Puck } | null = null;
   private pendingReplay: { team: 0 | 1; pos: Vec2; at: number } | null = null;
   private pendingMvp: { at: number; id: string } | null = null;
@@ -585,7 +587,7 @@ export class MatchView {
         if (this.director.kind === null && st.phase === 'intro' && st.phaseTimer > 100) st.phaseTimer = 0.2;
         this.hud.tag(null);
       }
-      this.cam.update(dt, fx, fy, st.shake, this.time, spread);
+      this.cam.update(dt, fx, fy, st.shake * this.shakeMul, this.time, spread);
     }
     if (directing && this.director.kind === 'replay') this.hud.tag('REPLAY');
     // fight overlay
