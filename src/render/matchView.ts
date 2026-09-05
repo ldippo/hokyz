@@ -49,6 +49,9 @@ export class MatchView {
   private lastCam: 'follow' | 'director' = 'follow';
   /** latest human input, for the aim reticle */
   humanInput: Input | null = null;
+  /** events from the most recent sim step (training drills read these) */
+  lastEvents: MatchEvent[] = [];
+  private markerMesh: THREE.Group | null = null;
   private reticle: THREE.Group;
   private reticleRing: THREE.Mesh;
   private reticleHigh: THREE.Mesh;
@@ -136,6 +139,23 @@ export class MatchView {
     if (humanTeam !== null) sfx.startCrowd();
   }
 
+  /** Training marker: glowing ring + beacon on the ice, or null to hide. */
+  setMarker(pos: Vec2 | null): void {
+    if (!this.markerMesh) {
+      const g = new THREE.Group();
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(1.0, 0.08, 8, 32), new THREE.MeshBasicMaterial({ color: 0xffd23f, transparent: true, opacity: 0.9, depthTest: false }));
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.y = 0.05;
+      const beacon = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.25, 4, 8, 1, true), new THREE.MeshBasicMaterial({ color: 0xffd23f, transparent: true, opacity: 0.25, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }));
+      beacon.position.y = 2;
+      g.add(ring, beacon);
+      this.group.add(g);
+      this.markerMesh = g;
+    }
+    this.markerMesh.visible = pos !== null;
+    if (pos) this.markerMesh.position.set(pos.x, 0, pos.y);
+  }
+
   /** Enable intro/replay/mvp beats. Call right after construction for human matches. */
   enablePresentation(): void {
     this.presentation = true;
@@ -197,6 +217,7 @@ export class MatchView {
   /** Call after each sim step with produced events. */
   afterStep(events: MatchEvent[]): void {
     const st = this.sim.st;
+    this.lastEvents = events;
     if (st.phase === 'play') this.replayBuf.push(captureFrame(st));
     for (const id of st.order) this.skaters.get(id)?.snapshot(st.skaters[id]);
     this.puck.snapshot(st.puck);
@@ -523,6 +544,10 @@ export class MatchView {
     }
     this.particles.update(dt);
     this.rink.update(this.time, dt, this.excite);
+    if (this.markerMesh?.visible) {
+      this.markerMesh.children[0].scale.setScalar(1 + Math.sin(this.time * 5) * 0.12);
+      this.markerMesh.rotation.y += dt;
+    }
     {
       const [a, b] = st.teams;
       const c = Math.max(0, st.clock);

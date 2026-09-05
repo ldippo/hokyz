@@ -24,6 +24,8 @@ export interface TeamSetup {
   goalie: SkaterDef | null;
   isHuman: boolean;
   difficulty: number; // 0..3
+  /** scripted dummies: no AI, no clock; the drill controller drives them */
+  scripted?: boolean;
 }
 
 export class MatchSim {
@@ -33,6 +35,10 @@ export class MatchSim {
   mash: [number, number] = [0, 0];
   /** goals scored without reply, per team */
   unanswered: [number, number] = [0, 0];
+  /** inputs for scripted (dummy) skaters, set by a drill controller */
+  scriptInputs = new Map<string, Input>();
+  /** freeze the clock (training) */
+  freezeClock = false;
   private prevInputs: Map<string, Input> = new Map();
 
   constructor(teams: [TeamSetup, TeamSetup], mods: MatchMods = defaultMatchMods(), seed = 1) {
@@ -72,6 +78,7 @@ export class MatchSim {
         diveWindow: 0,
         diveReturnId: null,
         pullLatch: false,
+        scripted: !!t.scripted,
         special: 0,
         brickWall: 0,
         teamFireCooldown: 0,
@@ -242,7 +249,7 @@ export class MatchSim {
 
   private stepPlay(humanInputs: Partial<Record<TeamId, Input>>, dt: number, events: MatchEvent[]): void {
     const st = this.st;
-    st.clock -= dt;
+    if (!this.freezeClock) st.clock -= dt;
     // gather inputs
     const inputs = new Map<string, Input>();
     for (const team of st.teams) {
@@ -252,6 +259,8 @@ export class MatchSim {
         const sk = st.skaters[id];
         if (team.isHuman && team.controlledId === id) {
           inputs.set(id, humanInputs[team.id] ?? EMPTY_INPUT);
+        } else if (team.scripted) {
+          inputs.set(id, this.scriptInputs.get(id) ?? EMPTY_INPUT);
         } else {
           inputs.set(id, this.brains[team.id].think(st, sk, dt, this.rng));
         }

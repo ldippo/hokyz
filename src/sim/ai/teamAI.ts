@@ -18,6 +18,7 @@ export class TeamBrains {
   /** Assign roles for a team based on situation. */
   assignRoles(st: MatchState, teamId: TeamId): void {
     const team = st.teams[teamId];
+    if (team.scripted) return;
     const p = st.puck;
     const ownerSk = p.owner ? st.skaters[p.owner] : null;
     const skaters = team.skaters.map((id) => st.skaters[id]);

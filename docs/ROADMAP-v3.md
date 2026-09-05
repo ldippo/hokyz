@@ -64,4 +64,5 @@ Branch `v3/access`. Key remapping UI, colorblind palettes for lanes/cues/jerseys
 Branch `v3/reel`. Match-end reel from the replay buffer (goals, big hits, big saves), skippable; stick-hand IK; goalie mask detail. Gate: reel never desyncs from the box score.
 
 ## Status log
-- 2026-09-05: plan written; V3-1 in progress.
+- 2026-09-05: plan written.
+- 2026-09-05: V3-1 Training Camp merged: 10 drills (skate, turbo, pass, one-timer, aimed corner, toe-drag, big hit, saucer, goalie dive, special) on a frozen-clock rink with scripted dummies (`TeamSetup.scripted`, `MatchSim.scriptInputs`, `freezeClock`), marker beacon, glyph prompts, hints after 12 s, skip/leave, +50 bank cash on first completion, title nudge until done. Headless: skate/turbo/pass drills completed through real input paths; skip path reaches the completion screen.
