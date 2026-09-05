@@ -143,6 +143,12 @@ export class Sfx {
     if (on) this.tone(300, 0.2, 0.15, 'sawtooth', 700, 0.01);
     else this.tone(500, 0.12, 0.08, 'sawtooth', 250, 0.01);
   }
+  /** puck off a body: dull thud (clean) or a sharper clack (deflection) */
+  block(clean: boolean): void {
+    if (clean && this.s('hit', { gain: 0.45, detune: 500 })) return;
+    this.noise(clean ? 0.14 : 0.08, clean ? 0.5 : 0.35, clean ? 600 : 2500, 0.6, clean ? 'lowpass' : 'bandpass');
+    this.tone(clean ? 140 : 320, 0.1, 0.25, 'sine', 40);
+  }
   knockdown(): void {
     this.noise(0.25, 0.4, 250, 0.7, 'lowpass');
   }

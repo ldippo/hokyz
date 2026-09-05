@@ -1,5 +1,5 @@
 import type { Rng } from '../core/rng';
-import type { Archetype, SkaterDef, Stats } from '../sim/types';
+import type { Archetype, GoalieStyle, SkaterDef, Stats } from '../sim/types';
 
 export const ARCHETYPES: Record<Exclude<Archetype, 'goalie'>, { label: string; icon: string; base: Stats; blurb: string }> = {
   sniper: { label: 'Sniper', icon: '🎯', base: { speed: 6, shot: 8, hands: 7, hit: 3, balance: 4, stamina: 6 }, blurb: 'Lethal release. Charge it up, pick a corner.' },
@@ -62,12 +62,19 @@ export function generateSkater(rng: Rng, archetype: Exclude<Archetype, 'goalie'>
   return { id: newId(idPrefix), name: randomName(rng), archetype, stats: clampStats(stats), traits, hp: 100, maxHp: 100 };
 }
 
+export const GOALIE_STYLES: Record<GoalieStyle, { label: string; icon: string; desc: string }> = {
+  butterfly: { label: 'Butterfly', icon: '🦋', desc: 'Drops early. Eats low shots, beatable upstairs.' },
+  standup: { label: 'Stand-up', icon: '🧍', desc: 'Stays tall. Owns the top corners, five-hole is soft.' },
+  handler: { label: 'Puck-handler', icon: '🏒', desc: 'Quick, hard outlet passes even under pressure. Brick Wall covers one fewer shot.' },
+};
+
 export function generateGoalie(rng: Rng, tier = 0, idPrefix = 'g'): SkaterDef {
   const stats: Stats = { ...GOALIE_BASE };
   stats.hands += rng.int(-1, 1) + tier;
   stats.speed += rng.int(-1, 1) + tier * 0.5;
   stats.balance += rng.int(0, 1);
-  return { id: newId(idPrefix), name: randomName(rng), archetype: 'goalie', stats: clampStats(stats), traits: [], hp: 100, maxHp: 100 };
+  const goalieStyle = rng.pick(['butterfly', 'standup', 'handler'] as const);
+  return { id: newId(idPrefix), name: randomName(rng), archetype: 'goalie', stats: clampStats(stats), traits: [], hp: 100, maxHp: 100, goalieStyle };
 }
 
 export function randomArchetype(rng: Rng): Exclude<Archetype, 'goalie'> {

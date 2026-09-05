@@ -4,7 +4,7 @@ import { titleScreen } from './title';
 import { availableNodes, currentAct, enterNode, lineup, runEffects, type RunState } from '../../run/runState';
 import { COLS, nodeIcon, nodeLabel, type MapNode } from '../../run/mapGen';
 import { PERK_BY_ID, TAG_INFO, SET_SIZE, tagCounts, activeSets } from '../../run/perks';
-import { XP_LEVELS, MAX_LEVEL } from '../../run/roster';
+import { XP_LEVELS, MAX_LEVEL, GOALIE_STYLES } from '../../run/roster';
 import { ARCHETYPES, isInjured, TRAITS } from '../../run/roster';
 import { matchIntroScreen } from './match';
 import { shopScreen } from './shop';
@@ -43,7 +43,7 @@ export function rosterPanel(run: RunState): HTMLElement {
     );
   });
   const g = run.goalie;
-  cards.push(h('div', { class: 'roster-card' }, h('div', { class: 'nm' }, `🥅 ${g.name}`), h('div', { class: 'arch' }, 'GOALIE'), h('div', { class: 'stats', html: `SAVES <b>${g.stats.hands}</b> SPD <b>${g.stats.speed}</b> BAL <b>${g.stats.balance}</b>` })));
+  cards.push(h('div', { class: 'roster-card', title: GOALIE_STYLES[g.goalieStyle ?? 'butterfly'].desc }, h('div', { class: 'nm' }, `🥅 ${g.name}`), h('div', { class: 'arch' }, `GOALIE · ${GOALIE_STYLES[g.goalieStyle ?? 'butterfly'].icon} ${GOALIE_STYLES[g.goalieStyle ?? 'butterfly'].label.toUpperCase()}`), h('div', { class: 'stats', html: `SAVES <b>${g.stats.hands}</b> SPD <b>${g.stats.speed}</b> BAL <b>${g.stats.balance}</b>` })));
   const perks = run.perks.map((id) => PERK_BY_ID[id]).filter(Boolean);
   const counts = tagCounts(run.perks);
   const sets = activeSets(run.perks);

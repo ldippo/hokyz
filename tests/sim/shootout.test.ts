@@ -49,13 +49,19 @@ describe('shootout', () => {
   it('a tied overtime goes to a shootout instead of another OT', () => {
     const mods = defaultMatchMods();
     mods.periodLength = 4;
-    // make scoring impossible: goalies save everything via brick wall refill
+    // make scoring impossible: park the puck at centre ice every frame
     const s = sim(mods, 3);
-    s.st.teams[0].brickWall = 9999;
-    s.st.teams[1].brickWall = 9999;
     let sawShootout = false;
     for (let i = 0; i < 60 * 200 && !sawShootout; i++) {
       for (const e of s.step()) if (e.type === 'shootoutStart') sawShootout = true;
+      const p = s.st.puck;
+      if (s.st.phase === 'play') {
+        if (p.owner) s.st.skaters[p.owner].hasPuck = false;
+        p.owner = null;
+        p.pos = { x: 0, y: 0 };
+        p.vel = { x: 0, y: 0 };
+        p.isShot = false;
+      }
     }
     expect(sawShootout).toBe(true);
     expect(s.st.overtime).toBe(true);

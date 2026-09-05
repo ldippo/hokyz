@@ -20,6 +20,7 @@ export const FEATS: Feat[] = [
   { id: 'big_hitter', name: 'Wrecking Ball', icon: '🔨', desc: 'Five big hits in one match.', reward: { cash: 50 }, check: ({ outcome }) => (outcome?.bigHits ?? 0) >= 5 },
   { id: 'brawler', name: 'Gloves Off', icon: '🥊', desc: 'Win a fight.', reward: { cash: 40 }, check: ({ outcome }) => (outcome?.fightsWon ?? 0) >= 1 },
   { id: 'ankle_breaker', name: 'Ankle Collector', icon: '🦶', desc: 'Three ankle breakers in one match.', reward: { cash: 50 }, check: ({ outcome }) => (outcome?.ankleBreakers ?? 0) >= 3 },
+  { id: 'meat_shield', name: 'Meat Shield', icon: '🛡️', desc: 'Block five shots in one match.', reward: { cash: 50 }, check: ({ outcome }) => (outcome?.blocks ?? 0) >= 5 },
   { id: 'wall', name: 'The Wall', icon: '🧤', desc: 'Make a BIG SAVE with a goalie dive.', reward: { cash: 40 }, check: ({ outcome }) => (outcome?.bigSaves ?? 0) >= 1 },
   { id: 'showtime', name: 'Showtime', icon: '🎇', desc: 'Fire three specials in one match.', reward: { cash: 40 }, check: ({ outcome }) => (outcome?.specialsUsed ?? 0) >= 3 },
   { id: 'top_shelf', name: 'Top Shelf', icon: '🥫', desc: 'Score three top-corner goals in one match.', reward: { cash: 50 }, check: ({ outcome }) => (outcome?.topCornerGoals ?? 0) >= 3 },

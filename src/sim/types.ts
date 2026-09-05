@@ -29,7 +29,11 @@ export interface SkaterDef {
   level?: number;
   /** level-ups earned but not yet spent */
   pendingLevels?: number;
+  /** goalies only */
+  goalieStyle?: GoalieStyle;
 }
+
+export type GoalieStyle = 'butterfly' | 'standup' | 'handler';
 
 export interface Skater {
   id: string;
@@ -70,6 +74,9 @@ export interface Skater {
   temper: number;
   /** out for the rest of the period (lost a fight) */
   ejected: boolean;
+  goalieStyle: GoalieStyle | null;
+  /** per-match tally */
+  blocks: number;
   specialKind: SpecialKind;
   specialTimer: number;
   /** extended one-timer window (blink pass) until match time */
@@ -230,6 +237,9 @@ export type MatchEvent =
   | { type: 'shootoutAttempt'; team: TeamId; shooter: string; round: number; suddenDeath: boolean }
   | { type: 'shootoutResult'; team: TeamId; shooter: string; scored: boolean }
   | { type: 'shootoutEnd'; winner: TeamId; goals: [number, number] }
+  | { type: 'shotBlock'; blocker: string; shooter: string | null; pos: Vec2; clean: boolean }
+  | { type: 'freeze'; goalie: string }
+  | { type: 'sting'; skater: string }
   | { type: 'save'; goalie: string; pos: Vec2 }
   | { type: 'post'; pos: Vec2 }
   | { type: 'pass'; from: string; to: string | null }

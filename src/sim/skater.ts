@@ -11,6 +11,7 @@ export function makeSkater(
   archetype: Archetype,
   isGoalie: boolean,
   hp = 100,
+  goalieStyle: Skater['goalieStyle'] = null,
 ): Skater {
   return {
     id,
@@ -45,6 +46,8 @@ export function makeSkater(
     knockdownsThisPeriod: 0,
     temper: 0.3,
     ejected: false,
+    goalieStyle: isGoalie ? goalieStyle ?? 'butterfly' : null,
+    blocks: 0,
     specialKind: archetype === 'sniper' ? 'laser' : archetype === 'enforcer' ? 'shockwave' : archetype === 'speedster' ? 'afterburner' : archetype === 'goalie' ? 'brickwall' : archetype === 'grinder' ? 'bulldoze' : archetype === 'dangler' ? 'phantom' : 'blink',
     specialTimer: 0,
     perfectUntil: -1,
