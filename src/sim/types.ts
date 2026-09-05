@@ -134,6 +134,7 @@ export interface TeamState {
   pullLatch: boolean;
   pulledGoalieId?: string | null;
   scripted?: boolean;
+  logo?: string;
   /** special meter 0..1 */
   special: number;
   brickWall: number; // auto-saves remaining

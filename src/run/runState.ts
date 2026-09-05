@@ -19,6 +19,9 @@ export interface RunState {
   teamName: string;
   teamShort: string;
   teamColor: string;
+  teamLogo: string;
+  /** chosen starters (ids); healthy ones start, bench fills in */
+  lineupIds: string[];
   maps: ActMap[];
   act: number;
   row: number; // next row to play (0 = start)
@@ -44,7 +47,23 @@ export interface RunState {
   won: boolean;
 }
 
-export function newRun(seedText: string, captain: Captain, ascension: number, unlockedPerks: string[]): RunState {
+export interface TeamIdentity {
+  name: string;
+  short: string;
+  color: string;
+  logo: string;
+}
+
+export const TEAM_NAMES = ['Iron Elks', 'Rust Belt Rhinos', 'Midnight Owls', 'Junkyard Dogs', 'Thunder Moose', 'Backalley Bandits', 'Frostbite Foxes', 'Harbor Hammers', 'Coal Town Crows', 'Delta Devils'];
+export const TEAM_COLORS = ['#2f6bff', '#d8262f', '#2fa84f', '#ffd23f', '#8a3cff', '#ff7a1a', '#00b8d4', '#ffffff', '#111111', '#ff3cac'];
+export const TEAM_LOGOS = ['circle', 'shield', 'diamond', 'star', 'hex'];
+export function shortFor(name: string): string {
+  const words = name.trim().split(/\s+/);
+  const w = (words[words.length - 1] || 'TEAM').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  return w.slice(0, 8) || 'TEAM';
+}
+
+export function newRun(seedText: string, captain: Captain, ascension: number, unlockedPerks: string[], identity?: Partial<TeamIdentity>): RunState {
   const seed = hashSeed(seedText || String(Date.now()));
   const rng = new Rng(seed);
   const maps = generateRunMap(rng.fork(), 3);
@@ -56,9 +75,8 @@ export function newRun(seedText: string, captain: Captain, ascension: number, un
   roster.push(generateSkater(rng, a1, 0), generateSkater(rng, a2, 0));
   roster.push(generateSkater(rng, randomArchetype(rng), 0)); // bench
   const goalie = generateGoalie(rng, 0);
-  const names = ['Iron Elks', 'Rust Belt Rhinos', 'Midnight Owls', 'Junkyard Dogs', 'Thunder Moose', 'Backalley Bandits'];
-  const shorts = ['ELKS', 'RHINOS', 'OWLS', 'DOGS', 'MOOSE', 'BANDITS'];
-  const ni = rng.int(0, names.length - 1);
+  const ni = rng.int(0, TEAM_NAMES.length - 1);
+  const name = identity?.name?.trim() || TEAM_NAMES[ni];
   return {
     version: 1,
     seed,
@@ -66,9 +84,11 @@ export function newRun(seedText: string, captain: Captain, ascension: number, un
     rngState: rng.state,
     ascension,
     captainId: captain.id,
-    teamName: names[ni],
-    teamShort: shorts[ni],
-    teamColor: '#2f6bff',
+    teamName: name,
+    teamShort: identity?.short || shortFor(name),
+    teamColor: identity?.color || '#2f6bff',
+    teamLogo: identity?.logo || TEAM_LOGOS[ni % TEAM_LOGOS.length],
+    lineupIds: roster.slice(0, 3).map((s) => s.id),
     maps,
     act: 1,
     row: 0,
@@ -130,10 +150,42 @@ export function teamMods(run: RunState): TeamMods {
 }
 
 export function lineup(run: RunState): SkaterDef[] {
-  const healthy = run.roster.filter((s) => !isInjured(s));
-  const injured = run.roster.filter((s) => isInjured(s));
-  // captain first if healthy
-  return [...healthy, ...injured].slice(0, 3);
+  const ids = run.lineupIds ?? [];
+  const chosen = ids.map((id) => run.roster.find((s) => s.id === id)).filter((s): s is SkaterDef => !!s && !isInjured(s));
+  const rest = run.roster.filter((s) => !chosen.includes(s));
+  const healthyRest = rest.filter((s) => !isInjured(s));
+  const injured = rest.filter((s) => isInjured(s));
+  return [...chosen, ...healthyRest, ...injured].slice(0, 3);
+}
+
+/** Toggle a skater into/out of the starting three. Returns false if the change is not allowed. */
+export function toggleStarter(run: RunState, id: string): boolean {
+  run.lineupIds ??= [];
+  const s = run.roster.find((x) => x.id === id);
+  if (!s) return false;
+  if (run.lineupIds.includes(id)) {
+    run.lineupIds = run.lineupIds.filter((x) => x !== id);
+    return true;
+  }
+  if (isInjured(s)) return false;
+  if (run.lineupIds.length >= 3) run.lineupIds.shift();
+  run.lineupIds.push(id);
+  return true;
+}
+
+export function cutValue(s: SkaterDef): number {
+  return 15 + (s.level ?? 0) * 10;
+}
+
+/** Release a non-captain skater for cash. Needs at least 3 skaters left. */
+export function cutSkater(run: RunState, id: string): number {
+  const idx = run.roster.findIndex((s) => s.id === id);
+  if (idx <= 0 || run.roster.length <= 3) return 0;
+  const [s] = run.roster.splice(idx, 1);
+  run.lineupIds = (run.lineupIds ?? []).filter((x) => x !== id);
+  const cash = cutValue(s);
+  run.cash += cash;
+  return cash;
 }
 
 export function nodeTier(run: RunState, node: MapNode): number {
@@ -150,7 +202,7 @@ export function nodeDifficulty(run: RunState, node: MapNode): number {
 }
 
 export interface MatchSetupBundle {
-  home: { name: string; short: string; color: string; skaters: SkaterDef[]; goalie: SkaterDef };
+  home: { name: string; short: string; color: string; skaters: SkaterDef[]; goalie: SkaterDef; logo?: string };
   away: { name: string; short: string; color: string; skaters: SkaterDef[]; goalie: SkaterDef; gimmick: string; difficulty: number; rivalId: string; grudge: number; taunt: string | null };
   mods: MatchMods;
   mutatorName: string | null;
@@ -188,7 +240,7 @@ export function buildMatch(run: RunState, node: MapNode): MatchSetupBundle {
   const seed = rng.int(1, 1e9);
   commitRng(run, rng);
   return {
-    home: { name: run.teamName, short: run.teamShort, color: run.teamColor, skaters: lineup(run), goalie: run.goalie },
+    home: { name: run.teamName, short: run.teamShort, color: run.teamColor, skaters: lineup(run), goalie: run.goalie, logo: run.teamLogo },
     away: { name: rival.name, short: rival.short, color: rival.color, skaters: opp.skaters, goalie: opp.goalie, gimmick: rival.gimmick, difficulty: nodeDifficulty(run, node), rivalId: rival.id, grudge, taunt },
     mods,
     mutatorName,

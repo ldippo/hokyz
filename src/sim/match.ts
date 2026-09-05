@@ -25,6 +25,8 @@ export interface TeamSetup {
   goalie: SkaterDef | null;
   isHuman: boolean;
   difficulty: number; // 0..3
+  /** jersey emblem shape override (run team identity) */
+  logo?: string;
   /** scripted dummies: no AI, no clock; the drill controller drives them */
   scripted?: boolean;
 }
@@ -80,6 +82,7 @@ export class MatchSim {
         diveReturnId: null,
         pullLatch: false,
         scripted: !!t.scripted,
+        logo: t.logo,
         special: 0,
         brickWall: 0,
         teamFireCooldown: 0,

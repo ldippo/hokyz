@@ -43,7 +43,7 @@ function startShootout(app: App, node: MapNode, reward: number): void {
   rival.mods?.(mods.teams[1]);
   const sim = new MatchSim(
     [
-      { name: run.teamName, short: run.teamShort, color: run.teamColor, skaters: lineup(run), goalie: run.goalie, isHuman: true, difficulty: 2 },
+      { name: run.teamName, short: run.teamShort, color: run.teamColor, skaters: lineup(run), goalie: run.goalie, isHuman: true, difficulty: 2, logo: run.teamLogo },
       { name: rival.name, short: rival.short, color: rival.color, skaters: opp.skaters, goalie: opp.goalie, isHuman: false, difficulty: Math.min(3, run.act) },
     ],
     mods,
@@ -67,7 +67,7 @@ function startHitParade(app: App, node: MapNode, reward: number): void {
   mods.periodLength = 9999;
   const sim = new MatchSim(
     [
-      { name: run.teamName, short: run.teamShort, color: run.teamColor, skaters: lineup(run), goalie: null, isHuman: true, difficulty: 2, scripted: true },
+      { name: run.teamName, short: run.teamShort, color: run.teamColor, skaters: lineup(run), goalie: null, isHuman: true, difficulty: 2, scripted: true, logo: run.teamLogo },
       { name: 'Dummies', short: 'DUMMY', color: '#8a8f99', skaters: dummies, goalie: null, isHuman: false, difficulty: 0, scripted: true },
     ],
     mods,

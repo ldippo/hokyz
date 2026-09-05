@@ -51,6 +51,8 @@ export function migrateRun(raw: unknown): RunState | null {
   run.weekly ??= null;
   run.perks ??= [];
   run.path ??= [];
+  run.teamLogo ??= 'circle';
+  run.lineupIds ??= run.roster.slice(0, 3).map((s) => s.id);
   for (const s of [...run.roster, run.goalie]) {
     s.xp ??= 0;
     s.level ??= 0;

@@ -216,3 +216,15 @@ p.screen-sub { color: #8fa3d9; letter-spacing: 0.15em; text-transform: uppercase
 .taunt span { display: block; font-size: 12px; letter-spacing: 0.25em; color: var(--gold); margin-top: 4px; }
 
 .rebind-wait { color: var(--gold); animation: pulse .5s infinite; }
+
+.identity { margin-top: 18px; padding: 12px 18px; border: 2px solid #2b3352; background: rgba(8,10,18,0.7); display: flex; flex-direction: column; gap: 8px; }
+.identity-row { display: flex; align-items: center; gap: 12px; }
+.identity .lbl { font-family: var(--font-display); letter-spacing: 0.25em; font-size: 12px; color: #8fa3d9; width: 60px; }
+.swatch { width: 28px; height: 28px; border: 2px solid #3a4260; cursor: pointer; padding: 0; font-size: 16px; color: #fff; background: #10141f; }
+.swatch.sel { border-color: var(--gold); box-shadow: 0 0 8px rgba(255,210,63,0.6); transform: scale(1.1); }
+.team-preview { font-family: var(--font-display); font-size: 22px; letter-spacing: 0.06em; color: #fff; display: flex; align-items: center; gap: 10px; }
+.team-preview .badge { display: inline-flex; width: 34px; height: 34px; align-items: center; justify-content: center; border: 2px solid #fff; border-radius: 6px; font-size: 18px; }
+.team-preview small { color: #8fa3d9; font-size: 12px; letter-spacing: 0.2em; }
+.team-preview em { font-family: var(--font-body); font-size: 12px; color: var(--gold); }
+.roster-card .starter-btn { font-size: 12px; padding: 2px 8px; }
+.roster-card.starting { border-color: var(--gold); }

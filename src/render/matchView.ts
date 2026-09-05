@@ -98,7 +98,7 @@ export class MatchView {
       if (rigsReady()) {
         const idx = st.order.indexOf(id);
         const tpl = rigTemplate(sk.isGoalie);
-        const spec = jerseySpecFor(team.color, sk.team, team.name, team.short, sk.isGoalie ? 1 : numbers[idx % numbers.length], sk.name.split(' ').pop());
+        const spec = jerseySpecFor(team.color, sk.team, team.name, team.short, sk.isGoalie ? 1 : numbers[idx % numbers.length], sk.name.split(' ').pop(), team.logo);
         mesh = new SkaterRig(id, tpl, sk.isGoalie, spec);
       } else {
         mesh = new SkaterMesh(id, team.color, sk.isGoalie, sk.team === 0 ? '#151520' : '#f2f2f2');
