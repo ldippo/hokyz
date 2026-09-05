@@ -121,7 +121,8 @@ export function applyHit(st: MatchState, h: Skater, vic: Skater, rng: Rng, event
   events.push({ type: 'hit', hitter: h.id, victim: vic.id, big, pos: { x: vic.pos.x, y: vic.pos.y } });
   // provoke a fight: repeat victim of big hits, or an enforcer flattening the carrier
   if (!st.mods.noFights && !st.fight && !vic.isGoalie && !h.isGoalie && st.phase === 'play' && st.fightsThisPeriod < FIGHT.perPeriod) {
-    const provoked = (big && vic.knockdownsThisPeriod > FIGHT.provokeKnockdowns) || (big && hadPuck && h.archetype === 'enforcer' && rng.next() < FIGHT.enforcerProvokeChance);
+    const temper = Math.max(hm.temperMul, vm.temperMul);
+    const provoked = (big && vic.knockdownsThisPeriod > Math.max(1, FIGHT.provokeKnockdowns / temper)) || (big && hadPuck && h.archetype === 'enforcer' && rng.next() < FIGHT.enforcerProvokeChance * temper);
     if (provoked) offerFight(st, h.id, vic.id, events);
   }
 }

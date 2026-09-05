@@ -32,7 +32,7 @@ export function shopScreen(app: App, node: MapNode): void {
       h('div', { class: 'cards' },
         ...perks.map((p) => {
           const c = price(PERK_PRICE[p.rarity]);
-          return perkCard(p, () => { run.cash -= c; run.perks.push(p.id); bought.add(p.id); perks = perks.filter((x) => x !== p); sfx.cash(); app.saveRun(); render(); }, c, run.cash < c);
+          return perkCard(p, () => { run.cash -= c; run.perks.push(p.id); bought.add(p.id); perks = perks.filter((x) => x !== p); sfx.cash(); app.saveRun(); render(); }, c, run.cash < c, run.perks);
         }),
         h('div', { class: `card ${anyHurt && run.cash >= healCost ? '' : 'disabled'}`, 'data-nav': anyHurt && run.cash >= healCost ? '1' : '', onClick: () => { if (!anyHurt || run.cash < healCost) return; run.cash -= healCost; run.roster.forEach((s) => (s.hp = s.maxHp)); run.goalie.hp = 100; sfx.cash(); app.saveRun(); render(); } },
           h('div', { class: 'rarity' }, 'service'), h('div', { class: 'ico' }, '🩺'), h('div', { class: 'cname' }, 'Team Doctor'), h('div', { class: 'desc' }, 'Fully heal every skater and the goalie.'), h('div', { class: 'price' }, `${healCost} CASH`)),

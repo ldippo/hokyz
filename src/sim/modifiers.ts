@@ -25,6 +25,9 @@ export function defaultTeamMods(): TeamMods {
     staminaMul: 1,
     specialGainMul: 1,
     fightPowerMul: 1,
+    fireSpread: false,
+    periodBrickWall: 0,
+    temperMul: 1,
   };
 }
 
@@ -40,6 +43,8 @@ export function defaultMatchMods(): MatchMods {
     suddenDeath: false,
     mercyRule: 0,
     noFights: false,
+    bossPhases: [],
+    extraSkater: null,
     teams: [defaultTeamMods(), defaultTeamMods()],
   };
 }

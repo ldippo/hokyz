@@ -1,6 +1,7 @@
 import type { Rng } from '../core/rng';
 import type { RunState } from './runState';
 import { generateSkater, randomArchetype, TRAITS } from './roster';
+import { PERKS } from './perks';
 import type { Stats } from '../sim/types';
 
 export interface EventChoice {
@@ -25,6 +26,26 @@ const bump = (run: RunState, key: keyof Stats, n: number, who?: number) => {
 };
 
 export const EVENTS: RunEvent[] = [
+  {
+    id: 'underground',
+    title: 'Underground Game',
+    icon: '🎲',
+    text: 'A guy in a trench coat runs a card game behind the Zamboni bay. "Sixty cash. Win, and I know a guy with a rare perk. Lose, and my cousin takes it out on one of yours."',
+    choices: [
+      { label: 'Ante up (60)', detail: '50%: gain a random rare perk. 50%: lose the cash and a skater takes 30 damage.', effect: (r, rng) => { r.cash -= 60; if (rng.chance(0.5)) { const pool = PERKS.filter((p) => p.rarity === 'rare' && !r.perks.includes(p.id) && !p.unlock); const p = rng.pick(pool); if (p) { r.perks.push(p.id); return `Royal flush. You walk out with ${p.name}.`; } return 'You won, but the guy had nothing left to give.'; } const v = rng.pick(r.roster); v.hp = Math.max(1, v.hp - 30); return `Busted. ${v.name} learns what a cousin is (-30 HP).`; }, disabled: (r) => r.cash < 60 },
+      { label: 'Walk past', detail: 'Nothing happens.', effect: () => 'You keep walking. The Zamboni hums.' },
+    ],
+  },
+  {
+    id: 'blackmarket_doc',
+    title: 'Black Market Doc',
+    icon: '💉',
+    text: 'A "doctor" with a cooler offers an experimental treatment. "Guaranteed results. Side effects include... results."',
+    choices: [
+      { label: 'Take the shot', detail: 'Guaranteed random EPIC perk. A random skater loses 40 HP.', effect: (r, rng) => { const pool = PERKS.filter((p) => p.rarity === 'epic' && !r.perks.includes(p.id) && !p.unlock); const p = rng.pick(pool); const v = rng.pick(r.roster); v.hp = Math.max(1, v.hp - 40); if (p) { r.perks.push(p.id); return `${v.name} goes pale (-40 HP). You gain ${p.name}.`; } return `${v.name} goes pale for nothing.`; } },
+      { label: 'Report him', detail: '+20 cash reward.', effect: (r) => { r.cash += 20; return 'The league sends a thank-you note and 20 cash.'; } },
+    ],
+  },
   {
     id: 'bribe_ref',
     title: 'The Ref Wants a Word',

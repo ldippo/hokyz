@@ -28,6 +28,7 @@ export function matchIntroScreen(app: App, node: MapNode): void {
       h('div', { class: 'team' }, h('div', { class: 'tn', style: `color:${bundle.away.color}` }, esc(rival.name)), h('div', { class: 'gimmick' }, rival.gimmick)),
     ),
     h('div', {}, h('span', { class: 'mod-tag' }, `AI: ${diffName}`), mut ? h('span', { class: 'mod-tag', title: mut.desc }, `MUTATOR: ${mut.name} — ${mut.desc}`) : null, run.flags.easyNext ? h('span', { class: 'mod-tag' }, 'REF BRIBED') : null, run.flags.hardNext ? h('span', { class: 'mod-tag' }, 'REF ANGRY') : null),
+    bundle.mods.bossPhases.length ? h('div', { style: 'max-width:640px;margin-top:10px' }, ...bundle.mods.bossPhases.map((p) => h('div', { class: 'perk-chip epic', style: 'margin-top:6px' }, h('b', {}, `👑 ${p.label}`), h('div', {}, p.desc)))) : null,
     h('div', { class: 'menu' }, btn('Drop the Puck', () => startRunMatch(app, node, bundle), 'primary'), btn('Back to Map', () => runMapScreen(app))),
   );
   const nav = app.showScreen(el);

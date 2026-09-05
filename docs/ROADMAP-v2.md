@@ -79,8 +79,8 @@ Status 2026-09-05: `sim/fight.ts` fight state machine: a big hit on a repeat vic
 - Render: fight cam + UI prompts, special VFX (laser trail, shockwave ring, afterburner, blink), meter HUD.
 - Tests: fight trigger conditions, special effects on state, meter fill rates.
 
-### G — Run depth (M)
-Branch `phase/run-depth`.
+### G — Run depth (M) — IN REVIEW (branch `phase/run-depth`, stacked on F)
+Status 2026-09-05: every perk carries tags (FIRE, IRON, JET, SNIPE, WALL, SCRAP, CASH); 3 of a tag completes a set: Wildfire (fire spreads to a teammate), Iron Curtain (injuries zeroed, +15% resist), Afterburners (2× turbo regen, +6% speed), Dead Aim (+40% accuracy, +30% meter), Fortress (goalie gets a free auto-save each period), Goon Squad (fights +50%, more offers), Franchise (25% shop discount, +25% cash). Draft/shop cards show tag progress, the roster panel lists tags and completed sets. Four cursed epics (Glass Jaw, Blood Money, Loose Cannon, Overclock) plus two risk events (Underground Game, Black Market Doc). Skater XP from box scores (captain 1.5×), levels at 100/250/450/700/1000; level-ups are spent on a screen before the next map view (+1 to one of two stats, or a trait). Boss phases: Wreckers add a 4th skater in P3; Blur turns the ice slick in P2 and gives infinite turbo in P3; Legends' goalie catches fire after 2 goals against and the boards go bouncy in P3; revealed on the match intro and announced in-match. New sim hooks: `fireSpread`, `periodBrickWall`, `temperMul`, `MatchMods.bossPhases` / `extraSkater`.
 - Perk tags + set bonuses (data + `modifiers.ts` hooks), cursed perks, risk events, skater XP/levels with node-time level-up choice, boss phase rules (period-triggered mutations in `MatchSim`).
 - UI: tag counts on draft, level-up screen, boss mechanic reveal on intro.
 - Tests: set bonus application, XP thresholds, boss phase triggers.

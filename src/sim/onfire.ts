@@ -44,5 +44,13 @@ function bump(st: MatchState, id: string, add: MatchEvent[]): void {
     s.onFire = ONFIRE.duration * m.onFireDurationMul;
     s.streak = 0;
     add.push({ type: 'onFire', skater: id });
+    if (m.fireSpread) {
+      const mates = st.teams[s.team].skaters.filter((x) => x !== id && st.skaters[x].onFire === 0);
+      if (mates.length) {
+        const mate = st.skaters[mates[Math.floor((st.t * 7919) % mates.length)]];
+        mate.onFire = ONFIRE.duration * m.onFireDurationMul * 0.7;
+        add.push({ type: 'onFire', skater: mate.id });
+      }
+    }
   }
 }

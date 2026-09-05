@@ -3,7 +3,8 @@ import { btn, esc, h } from '../dom';
 import { titleScreen } from './title';
 import { availableNodes, currentAct, enterNode, lineup, runEffects, type RunState } from '../../run/runState';
 import { COLS, nodeIcon, nodeLabel, type MapNode } from '../../run/mapGen';
-import { PERK_BY_ID } from '../../run/perks';
+import { PERK_BY_ID, TAG_INFO, SET_SIZE, tagCounts, activeSets } from '../../run/perks';
+import { XP_LEVELS, MAX_LEVEL } from '../../run/roster';
 import { ARCHETYPES, isInjured, TRAITS } from '../../run/roster';
 import { matchIntroScreen } from './match';
 import { shopScreen } from './shop';
@@ -11,7 +12,16 @@ import { eventScreen } from './event';
 import { restScreen } from './rest';
 import { runOverScreen } from './runOver';
 import { RIVAL_BY_ID } from '../../run/teams';
+import { levelUpScreen } from './levelUp';
+import { pendingLevelUps } from '../../run/runState';
 import { MUTATOR_BY_ID } from '../../run/mutators';
+
+function xpPct(xp: number, level: number): number {
+  if (level >= MAX_LEVEL) return 100;
+  const lo = XP_LEVELS[level],
+    hi = XP_LEVELS[level + 1];
+  return ((xp - lo) / (hi - lo)) * 100;
+}
 
 export function rosterPanel(run: RunState): HTMLElement {
   const line = lineup(run);
@@ -21,19 +31,25 @@ export function rosterPanel(run: RunState): HTMLElement {
     const arch = s.archetype === 'goalie' ? { label: 'Goalie', icon: '🥅' } : ARCHETYPES[s.archetype];
     return h('div', { class: `roster-card ${inj ? 'injured' : ''}` },
       h('div', { class: 'nm' }, `${arch.icon} ${s.name}${s === run.roster[0] ? ' (C)' : ''}`),
-      h('div', { class: 'arch' }, inj ? 'INJURED' : starting ? 'STARTING' : 'BENCH'),
+      h('div', { class: 'arch' }, `${inj ? 'INJURED' : starting ? 'STARTING' : 'BENCH'} · L${s.level ?? 0}${(s.pendingLevels ?? 0) > 0 ? ' ▲' : ''}`),
       h('div', { class: 'stats', html: `SPD <b>${s.stats.speed}</b> SHT <b>${s.stats.shot}</b> HND <b>${s.stats.hands}</b> HIT <b>${s.stats.hit}</b> BAL <b>${s.stats.balance}</b> STA <b>${s.stats.stamina}</b>` }),
       s.traits.length ? h('div', { class: 'stats' }, ...s.traits.map((t) => h('span', { title: TRAITS.find((x) => x.id === t)?.desc ?? '' }, `★ ${TRAITS.find((x) => x.id === t)?.name ?? t}`))) : null,
       h('div', { class: 'hpbar' }, h('i', { style: `width:${Math.round((s.hp / s.maxHp) * 100)}%;background:${s.hp > 50 ? '#3f3' : s.hp > 20 ? '#fc3' : '#f33'}` })),
+      h('div', { class: 'xpbar' }, h('i', { style: `width:${Math.round(xpPct(s.xp ?? 0, s.level ?? 0))}%` })),
     );
   });
   const g = run.goalie;
   cards.push(h('div', { class: 'roster-card' }, h('div', { class: 'nm' }, `🥅 ${g.name}`), h('div', { class: 'arch' }, 'GOALIE'), h('div', { class: 'stats', html: `SAVES <b>${g.stats.hands}</b> SPD <b>${g.stats.speed}</b> BAL <b>${g.stats.balance}</b>` })));
   const perks = run.perks.map((id) => PERK_BY_ID[id]).filter(Boolean);
+  const counts = tagCounts(run.perks);
+  const sets = activeSets(run.perks);
+  const tagRow = (Object.keys(TAG_INFO) as (keyof typeof TAG_INFO)[]).filter((t) => (counts[t] ?? 0) > 0).map((t) => h('span', { class: `tag ${sets.includes(t) ? 'complete' : ''}`, title: `${TAG_INFO[t].set}: ${TAG_INFO[t].desc}` }, `${TAG_INFO[t].icon} ${t} ${Math.min(SET_SIZE, counts[t] ?? 0)}/${SET_SIZE}`));
   return h('div', { class: 'side' },
     h('h3', {}, `Roster · ${run.teamName}`),
     ...cards,
     h('h3', {}, `Perks (${perks.length})`),
+    tagRow.length ? h('div', { class: 'tags', style: 'margin-bottom:8px' }, ...tagRow) : null,
+    ...sets.map((t) => h('div', { class: 'perk-chip epic' }, h('b', {}, `${TAG_INFO[t].icon} SET: ${TAG_INFO[t].set}`), h('div', {}, TAG_INFO[t].desc))),
     h('div', { class: 'perk-list' }, ...(perks.length ? perks.map((p) => h('div', { class: `perk-chip ${p.rarity}` }, h('b', {}, `${p.icon} ${p.name}`), h('div', {}, p.desc))) : [h('div', { class: 'perk-chip' }, 'None yet. Win a match to draft.')])),
   );
 }
@@ -58,6 +74,10 @@ export function runMapScreen(app: App): void {
   const run = app.run!;
   if (run.over) {
     runOverScreen(app);
+    return;
+  }
+  if (pendingLevelUps(run).length) {
+    levelUpScreen(app);
     return;
   }
   app.saveRun();

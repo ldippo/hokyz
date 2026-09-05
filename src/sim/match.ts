@@ -174,8 +174,10 @@ export class MatchSim {
           if (st.period > st.mods.periods) st.overtime = true;
           st.clock = st.overtime ? RULES.otLength : st.mods.periodLength;
           st.faceoffSpot = { x: 0, y: 0 };
+          this.applyBossPhases(events);
           setupFaceoff(st, events);
           events.push({ type: 'period', period: st.period, overtime: st.overtime });
+          for (const t of st.teams) if (st.mods.teams[t.id].periodBrickWall > 0) t.brickWall += st.mods.teams[t.id].periodBrickWall;
         }
         break;
       case 'over':
@@ -333,6 +335,17 @@ export class MatchSim {
       if (e.type === 'goal') {
         this.unanswered[e.team]++;
         this.unanswered[e.team === 0 ? 1 : 0] = 0;
+        if (e.team === 0) {
+          for (const ph of st.mods.bossPhases) {
+            if (ph.kind !== 'goalieFire' || ph.applied) continue;
+            if (st.teams[0].score >= (ph.goalsAgainst ?? 2)) {
+              ph.applied = true;
+              const gid = st.teams[1].goalie;
+              if (gid) st.skaters[gid].onFire = 9999;
+              events.push({ type: 'bossPhase', label: ph.label, desc: ph.desc });
+            }
+          }
+        }
       }
     }
     stepOnFire(st, events);
@@ -347,6 +360,38 @@ export class MatchSim {
       this.endPeriod(events);
     }
     this.prevInputs = inputs;
+  }
+
+  /** Boss rule changes at period starts (and goal-count triggers). */
+  applyBossPhases(events: MatchEvent[]): void {
+    const st = this.st;
+    for (const ph of st.mods.bossPhases) {
+      if (ph.applied) continue;
+      if (ph.kind === 'goalieFire') continue; // goal-triggered
+      if (st.period < ph.period) continue;
+      ph.applied = true;
+      switch (ph.kind) {
+        case 'extraSkater': {
+          const def = st.mods.extraSkater;
+          if (!def || st.skaters[def.id]) break;
+          const s = makeSkater(def.id, def.name, 1, def.stats, def.archetype, false, def.hp);
+          st.skaters[s.id] = s;
+          st.order.push(s.id);
+          st.teams[1].skaters.push(s.id);
+          break;
+        }
+        case 'slickIce':
+          st.mods.slipperyIce = true;
+          break;
+        case 'bouncy':
+          st.mods.boardsBouncy = true;
+          break;
+        case 'turboAll':
+          st.mods.turboInfinite = true;
+          break;
+      }
+      events.push({ type: 'bossPhase', label: ph.label, desc: ph.desc });
+    }
   }
 
   /** Pull the goalie out as an extra attacker (or put them back). */

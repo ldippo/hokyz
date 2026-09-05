@@ -25,6 +25,10 @@ export interface SkaterDef {
   traits: string[];
   hp: number;
   maxHp: number;
+  xp?: number;
+  level?: number;
+  /** level-ups earned but not yet spent */
+  pendingLevels?: number;
 }
 
 export interface Skater {
@@ -204,6 +208,7 @@ export type MatchEvent =
   | { type: 'special'; skater: string; kind: SpecialKind; pos: Vec2 }
   | { type: 'specialReady'; team: TeamId }
   | { type: 'teamFire'; team: TeamId }
+  | { type: 'bossPhase'; label: string; desc: string }
   | { type: 'save'; goalie: string; pos: Vec2 }
   | { type: 'post'; pos: Vec2 }
   | { type: 'pass'; from: string; to: string | null }
@@ -247,6 +252,12 @@ export interface TeamMods {
   staminaMul: number;
   specialGainMul: number;
   fightPowerMul: number;
+  /** set bonus: when a skater ignites, a teammate ignites too */
+  fireSpread: boolean;
+  /** auto-saves granted at every period start */
+  periodBrickWall: number;
+  /** multiplies fight provoke/accept odds */
+  temperMul: number;
 }
 
 export interface MatchMods {
@@ -261,7 +272,21 @@ export interface MatchMods {
   suddenDeath: boolean; // first goal wins
   mercyRule: number; // 0 = off, else lead needed to end
   noFights: boolean;
+  /** boss rule changes keyed by period */
+  bossPhases: BossPhase[];
+  /** pre-built 4th skater for an 'extraSkater' phase (team 1) */
+  extraSkater: SkaterDef | null;
   teams: [TeamMods, TeamMods];
+}
+
+export interface BossPhase {
+  period: number;
+  kind: 'extraSkater' | 'slickIce' | 'goalieFire' | 'bouncy' | 'turboAll';
+  label: string;
+  desc: string;
+  /** goalieFire: goals against that trigger it (checked each goal) */
+  goalsAgainst?: number;
+  applied?: boolean;
 }
 
 export interface MatchState {

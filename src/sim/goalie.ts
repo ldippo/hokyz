@@ -144,6 +144,7 @@ export function stepGoalie(st: MatchState, g: Skater, dt: number, rng: Rng, even
         }
         let chance = GOALIE.baseSaveChance * SKATER.statScale(g.stats.hands) * m.goalieSaveMul * angleF * powerF * highF * screen * readF * diveF * (gm.beaten > 0 ? 0.3 : 1);
         const team = st.teams[g.team];
+        if (g.onFire > 0) chance *= 1.35;
         if (team.brickWall > 0) {
           chance = 2;
           team.brickWall--;

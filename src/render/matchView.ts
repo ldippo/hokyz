@@ -355,6 +355,12 @@ export class MatchView {
           sfx.cash();
         }
         break;
+      case 'bossPhase':
+        this.hud.announce(e.label, 'red', e.desc);
+        this.lastAnnounce = e.label;
+        sfx.crowdBurst(0.8);
+        if (!this.silent) this.rig.punch(0.5);
+        break;
       case 'teamFire':
         this.hud.announce('TEAM ON FIRE!', 'fire', st.teams[e.team].name.toUpperCase());
         for (const id of st.teams[e.team].skaters) {

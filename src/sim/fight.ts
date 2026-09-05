@@ -31,7 +31,7 @@ function fighter(st: MatchState, i: 0 | 1): Skater {
 /** AI accept probability from hit stat, temper trait and difficulty. */
 function aiAccepts(st: MatchState, sk: Skater, rng: Rng): boolean {
   const team = st.teams[sk.team];
-  const p = 0.08 + sk.stats.hit / 30 + sk.temper * 0.35 + team.difficulty * 0.04;
+  const p = (0.08 + sk.stats.hit / 30 + sk.temper * 0.35 + team.difficulty * 0.04) * st.mods.teams[sk.team].temperMul;
   return rng.next() < Math.min(0.9, p);
 }
 
