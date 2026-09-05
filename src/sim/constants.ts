@@ -125,6 +125,8 @@ export const AI = {
   checkRetry: [2.4, 2.0, 1.8, 1.6], // seconds between AI check attempts
   passSmarts: [0.4, 0.6, 0.85, 1.0],
   shootRangeX: 9, // shoot when within this x of goal line
+  pullClock: 90, // AI pulls the goalie when trailing by ≤2 inside this
+  pullDeficitMax: 2,
   shootRate: [0.9, 1.1, 1.3, 1.5], // shots attempted per second while in the zone
   supportSpacing: 6,
 };

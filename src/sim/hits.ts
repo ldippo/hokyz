@@ -3,6 +3,7 @@ import { offerFight } from './fight';
 import { releasePuck } from './puck';
 import type { Input, MatchEvent, MatchState, Skater } from './types';
 import { angleDiff, angleOf, fromAngle, len, norm, sub } from './vec';
+import { defendGoal } from './rink';
 import type { Rng } from '../core/rng';
 
 /** Start a body-check lunge if requested and able. */
@@ -100,7 +101,13 @@ export function applyHit(st: MatchState, h: Skater, vic: Skater, rng: Rng, event
 
   if (vic.hasPuck) {
     // puck pops loose in hit direction + randomness
-    const pop = fromAngle(angleOf(dirV) + (rng.next() - 0.5) * 1.2, HIT.puckPopSpeed * (knock ? 1.3 : 0.8));
+    let popAng = angleOf(dirV) + (rng.next() - 0.5) * 1.2;
+    // never pop the puck toward the victim's own net from close range
+    const own = defendGoal(vic.team);
+    const toGoal = angleOf({ x: own.lineX - vic.pos.x, y: -vic.pos.y });
+    const nearOwnNet = Math.hypot(own.lineX - vic.pos.x, vic.pos.y) < 9;
+    if (nearOwnNet && Math.abs(angleDiff(popAng, toGoal)) < 0.7) popAng = toGoal + (vic.pos.y >= 0 ? 1 : -1) * 1.6;
+    const pop = fromAngle(popAng, HIT.puckPopSpeed * (knock ? 1.3 : 0.8));
     releasePuck(st, vic, pop);
     st.puck.lastTouch = h.id;
     st.puck.lastTouchTeam = h.team;

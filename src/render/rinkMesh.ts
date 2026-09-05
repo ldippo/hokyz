@@ -302,6 +302,7 @@ export class RinkMesh {
 
   update(time: number, dt: number, excite: number): void {
     this.crowd.update(dt, excite);
+    this.arena.update(dt);
     for (const l of this.goalLights) l.intensity = Math.max(0, l.intensity - dt * 25);
     void time;
   }

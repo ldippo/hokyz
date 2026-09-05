@@ -14,7 +14,8 @@ for (const d of diffs) {
     saves = 0,
     fights = 0,
     specials = 0,
-    teamFire = 0;
+    teamFire = 0,
+    ownGoals = 0;
   let maxTicks = 0;
   for (let i = 0; i < N; i++) {
     const a = quickTeam('A');
@@ -31,7 +32,10 @@ for (const d of diffs) {
     while (sim.st.phase !== 'over' && t < 60 * 60 * 20) {
       const ev = sim.step();
       for (const e of ev) {
-        if (e.type === 'goal') goals++;
+        if (e.type === 'goal') {
+          goals++;
+          if (e.ownGoal) ownGoals++;
+        }
         if (e.type === 'hit') {
           hits++;
           if (e.big) big++;
@@ -54,6 +58,6 @@ for (const d of diffs) {
     maxTicks = Math.max(maxTicks, t);
   }
   console.log(
-    `diff ${d}: goals/match ${(goals / N).toFixed(2)} shots ${(shots / N).toFixed(1)} saves ${(saves / N).toFixed(1)} hits ${(hits / N).toFixed(1)} big ${(big / N).toFixed(1)} onFire ${(fire / N).toFixed(2)} fights ${(fights / N).toFixed(2)} specials ${(specials / N).toFixed(2)} teamFire ${(teamFire / N).toFixed(2)} avgMin ${(ticks / N / 3600).toFixed(1)} maxMin ${(maxTicks / 3600).toFixed(1)}`,
+    `diff ${d}: goals/match ${(goals / N).toFixed(2)} own ${(ownGoals / N).toFixed(2)} shots ${(shots / N).toFixed(1)} saves ${(saves / N).toFixed(1)} hits ${(hits / N).toFixed(1)} big ${(big / N).toFixed(1)} onFire ${(fire / N).toFixed(2)} fights ${(fights / N).toFixed(2)} specials ${(specials / N).toFixed(2)} teamFire ${(teamFire / N).toFixed(2)} avgMin ${(ticks / N / 3600).toFixed(1)} maxMin ${(maxTicks / 3600).toFixed(1)}`,
   );
 }

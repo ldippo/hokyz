@@ -138,6 +138,25 @@ n = int(SR * 0.35); tt = t(0.35)
 s = hp(rng.standard_normal(n), 1200) * np.exp(-tt * 45) * 1.2 + bp(rng.standard_normal(n), 300, 900) * np.exp(-tt * 12) * 0.6
 write('shot', norm(reverb(s, 0.7, 0.25), -4))
 
+# crowd chant: stomp-stomp-clap at 120 bpm, 4 bars, with a roomy crowd 'hey' on the clap
+bpm = 120; beat = 60 / bpm; bars = 4; n = int(SR * beat * 4 * bars); ch = np.zeros(n)
+for bar in range(bars):
+    for b in range(4):
+        s0 = int((bar * 4 + b) * beat * SR)
+        if b in (0, 1):
+            d = int(SR * 0.25); tt = np.arange(d) / SR
+            addat(ch, s0, np.sin(2 * np.pi * (70 - 30 * tt / 0.25) * tt) * np.exp(-tt * 18) * 1.6 + lp(rng.standard_normal(d), 300) * np.exp(-tt * 30) * 0.8)
+        elif b == 2:
+            d = int(SR * 0.18); tt = np.arange(d) / SR
+            clap = np.zeros(d)
+            for k in range(12):
+                o = int(rng.uniform(0, 0.02) * SR); dd = int(SR * 0.06)
+                addat(clap, o, hp(rng.standard_normal(dd), 1400) * np.exp(-np.arange(dd) / (SR * 0.012)))
+            addat(ch, s0, clap * 0.9)
+            hey = bp(rng.standard_normal(int(SR * 0.3)), 500, 1400) * env(int(SR * 0.3), 0.02, 0.1, 0.5, 0.15) * 0.6
+            addat(ch, s0, hey)
+write('chant', norm(reverb(ch, 1.3, 0.35)[:n], -7), loop=True)
+
 # arena organ loop (menu): "charge" riff, 6 s at 120 bpm
 notes = [392, 523, 659, 784, 659, 784, 0, 0, 392, 523, 659, 784, 659, 784, 0, 0, 349, 440, 523, 698, 523, 698, 0, 0, 392, 494, 587, 784, 587, 784, 0, 0]
 beat = 0.1875; n = int(SR * len(notes) * beat); org = np.zeros(n); tt = t(len(notes) * beat)

@@ -1,5 +1,5 @@
 import { ONFIRE, PUCK, RINK, SKATER } from './constants';
-import { attackGoal } from './rink';
+import { attackGoal, defendGoal } from './rink';
 import { stickPoint } from './skater';
 import type { Input, MatchEvent, MatchState, Puck, Skater, Vec2 } from './types';
 import { add, clamp, dist, fromAngle, len, norm, scale, sub } from './vec';
@@ -175,6 +175,15 @@ export function pickPassTarget(st: MatchState, sk: Skater, aim: Vec2 | null): Sk
     // prefer teammates in aim direction, closer to attack goal, not too far
     const forward = -Math.abs(t.pos.x - attackX) / RINK.length;
     let score = align * 2 + forward * 1.5 - d / 30;
+    // never thread a pass across our own crease
+    const own = defendGoal(sk.team);
+    const ox = own.lineX - sk.pos.x,
+      oy = -sk.pos.y;
+    const proj = ox * n.x + oy * n.y;
+    if (proj > 0 && proj < d) {
+      const perp = Math.abs(-ox * n.y + oy * n.x);
+      if (perp < 3.2) score -= 4;
+    }
     // lane blocked?
     for (const oid of st.teams[sk.team === 0 ? 1 : 0].skaters) {
       const o = st.skaters[oid];

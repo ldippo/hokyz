@@ -59,6 +59,7 @@ export class MatchView {
   private otRing: THREE.Mesh;
   private pullHint = 0;
   private shockRing: THREE.Mesh;
+  private prevVel = new Map<string, { x: number; y: number }>();
   private shockT = 0;
   private laserTrail = 0;
   cam: FollowCamera;
@@ -249,9 +250,11 @@ export class MatchView {
         this.particles.spawn({ x: e.pos.x, y: e.pos.y, count: 90, color: [0xffd23f, 0xffffff, parseInt(team.color.slice(1), 16)], speed: 9, life: 1.6, size: 0.16, up: 7 });
         sfx.goal();
         this.excite = 1;
+        this.rink.arena.flash(team.color, 2.6);
         if (!this.silent) {
           this.rig.punch(0.8);
           this.rig.hitStopHandler?.(5);
+          if (team.isHuman) sfx.chant(9, 0.45);
         }
         if (this.presentation) this.pendingReplay = { team: e.team === 0 ? 1 : 0, pos: { ...e.pos }, at: this.time + 0.9 };
         break;
@@ -670,6 +673,26 @@ export class MatchView {
       this.shockRing.scale.setScalar(0.3 + k * 4.5);
       (this.shockRing.material as THREE.MeshBasicMaterial).opacity = 0.9 * (1 - k);
     } else this.shockRing.visible = false;
+    // snow spray on hard stops / cuts, fast-puck trail
+    for (const id of st.order) {
+      const k = st.skaters[id];
+      const pv = this.prevVel.get(id);
+      const sp = Math.hypot(k.vel.x, k.vel.y);
+      if (pv && k.knockdown === 0) {
+        const psp = Math.hypot(pv.x, pv.y);
+        const decel = psp - sp;
+        const dot = psp > 0.1 && sp > 0.1 ? (pv.x * k.vel.x + pv.y * k.vel.y) / (psp * sp) : 1;
+        if ((decel > 2.2 && psp > 4) || (dot < 0.5 && psp > 4)) {
+          const n = Math.min(14, Math.round(4 + psp));
+          this.particles.spawn({ x: k.pos.x, y: k.pos.y, z: 0.05, count: n, color: [0xffffff, 0xdff4ff], speed: 1.2 + psp * 0.15, life: 0.45, size: 0.07, up: 1.4, gravity: 6, dir: { x: pv.x, y: pv.y }, spread: 1.6 });
+        }
+      }
+      this.prevVel.set(id, { x: k.vel.x, y: k.vel.y });
+    }
+    if (!st.puck.owner && !st.puck.laser) {
+      const ps = Math.hypot(st.puck.vel.x, st.puck.vel.y);
+      if (ps > 13) this.particles.spawn({ x: st.puck.pos.x, y: st.puck.pos.y, z: st.puck.z + 0.08, count: 1, color: [0x9fd3ff, 0xffffff], speed: 0.3, life: 0.22, size: 0.07, up: 0.2, gravity: 0 });
+    }
     // laser puck trail + afterburner flames
     if (st.puck.laser && !st.puck.owner) {
       this.laserTrail += dt;

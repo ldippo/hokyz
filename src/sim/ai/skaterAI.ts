@@ -138,8 +138,8 @@ export function thinkSkater(st: MatchState, sk: Skater, brain: Brain, dt: number
         return input;
       } else if (pressured && incomingCheck(st, sk) && rng.next() < 0.6) {
         input.deke = true;
-      } else if (!pressured && rng.next() < rateP(0.35 * diff(st, sk, 'passSmarts')) && dGoal > 12) {
-        // occasional up-ice pass to open teammate ahead
+      } else if (!pressured && rng.next() < rateP((sk.pos.x * dir < -RINK.blueLineX ? 1.3 : 0.35) * diff(st, sk, 'passSmarts')) && dGoal > 12) {
+        // outlet / up-ice pass to an open teammate ahead (much likelier on the breakout)
         for (const id of team.skaters) {
           const t = st.skaters[id];
           if (t.id === sk.id) continue;
@@ -173,7 +173,13 @@ export function thinkSkater(st: MatchState, sk: Skater, brain: Brain, dt: number
       // support positions relative to carrier
       const ahead = ownerSk.pos.x * dir < goal.lineX * dir - 8;
       const mySide = Math.sign(sk.pos.y - ownerSk.pos.y) || (brain.role === 'supportHigh' ? 1 : -1);
-      if (brain.role === 'supportHigh') {
+      const breakout = ownerSk.pos.x * dir < -RINK.blueLineX;
+      if (breakout) {
+        // breakout lanes: wingers fan to the boards ahead of the carrier, trailer offers a drop pass
+        if (brain.role === 'supportHigh') brain.target = keepInRink({ x: ownerSk.pos.x + dir * 9, y: mySide * 8.5 });
+        else brain.target = keepInRink({ x: ownerSk.pos.x + dir * 3.5, y: -mySide * 7 });
+        brain.turbo = rng.next() < diff(st, sk, 'turboUse') * 0.5;
+      } else if (brain.role === 'supportHigh') {
         // go to far post / slot for one-timer
         const slotX = goal.lineX - dir * (ahead ? 7 : 5);
         brain.target = keepInRink({ x: slotX, y: clamp(-Math.sign(ownerSk.pos.y || mySide) * 4.5, -6, 6) });
