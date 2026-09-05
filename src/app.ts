@@ -79,12 +79,26 @@ export class App {
     });
   }
 
+  /** Accessibility prefs that live outside the renderer. */
+  applyAccessPrefs(): void {
+    const m = this.meta;
+    if (m.keymap) this.input.keymap = { ...m.keymap } as typeof this.input.keymap;
+    else this.input.resetKeys();
+    this.input.rumbleEnabled = m.rumble !== false;
+    document.documentElement.style.setProperty('--ui-scale', String(m.textScale || 1));
+    (this.ui.style as CSSStyleDeclaration & { zoom?: string }).zoom = String(m.textScale || 1);
+  }
+
   applyQualityPref(): void {
     const pref = this.meta.quality ?? 'auto';
     const tier: Tier = pref === 'auto' ? probeTier(this.rig.gpu) : pref;
-    this.rig.overrides = { ...this.rig.overrides, hitFx: this.meta.hitFx !== false };
-    if (this.meta.hitFx === false) this.rig.overrides.hitFx = false;
+    const reduced = this.meta.reducedMotion === true;
+    this.rig.overrides = { ...this.rig.overrides };
+    if (this.meta.hitFx === false || reduced) this.rig.overrides.hitFx = false;
     else delete this.rig.overrides.hitFx;
+    if (reduced) this.rig.overrides.crowdAnim = false;
+    else delete this.rig.overrides.crowdAnim;
+    this.applyAccessPrefs();
     this.rig.applyTier(tier);
     this.watchdog.reset();
   }
@@ -148,7 +162,15 @@ export class App {
     if (human) sfx.stopMusic();
     this.loop.speed = 1;
     const theme = RINK_THEMES[this.meta.selectedRink] ?? RINK_THEMES.classic;
-    this.view = new MatchView(this.rig, sim, this.ui, human ? 0 : null, perkNames, theme);
+    const m = this.meta;
+    this.view = new MatchView(this.rig, sim, this.ui, human ? 0 : null, perkNames, theme, {
+      colorblind: m.colorblind ?? 'off',
+      nameTags: human ? (m.nameTags ?? 'all') : 'off',
+      reducedMotion: m.reducedMotion === true,
+      rumble: (st, w, ms) => this.input.rumble(st, w, ms),
+      fill: (t) => this.input.fill(t),
+    });
+    if (m.reducedMotion) this.view.shakeMul = 0;
     this.humanPlaying = human;
     this.paused = false;
     return this.view;

@@ -48,7 +48,7 @@ export const DRILLS: Drill[] = [
   {
     id: 'skate',
     title: 'SKATE',
-    text: 'Skate to the marker. Move with [WASD] or the left stick.',
+    text: 'Skate to the marker. Move with [{up}{left}{down}{right}] or the left stick.',
     setup: (c) => {
       park(c);
       place(c.me, -6, 0, 0);
@@ -60,7 +60,7 @@ export const DRILLS: Drill[] = [
   {
     id: 'turbo',
     title: 'TURBO',
-    text: 'Hold [SHIFT] / [RT] for turbo and cross the far blue line. Watch the meter drain.',
+    text: 'Hold [{turbo}] / [RT] for turbo and cross the far blue line. Watch the meter drain.',
     setup: (c) => {
       place(c.me, -12, 0, 0);
       c.me.turbo = 1;
@@ -72,7 +72,7 @@ export const DRILLS: Drill[] = [
   {
     id: 'pass',
     title: 'PASS',
-    text: 'Tap [J] / [A] to pass to your teammate. Aim with the stick toward them.',
+    text: 'Tap [{pass}] / [A] to pass to your teammate. Aim with the stick toward them.',
     setup: (c) => {
       place(c.me, 0, 0, 0);
       place(c.mate, 8, -5, Math.PI);
@@ -84,7 +84,7 @@ export const DRILLS: Drill[] = [
   {
     id: 'onetimer',
     title: 'ONE-TIMER',
-    text: 'Your teammate passes back. Shoot [K] / [B] while the gold ring is closing for a PERFECT one-timer.',
+    text: 'Your teammate passes back. Shoot [{shoot}] / [B] while the gold ring is closing for a PERFECT one-timer.',
     setup: (c) => {
       place(c.me, 12, 3, 0);
       place(c.mate, 12, -5, 0.5);
@@ -104,7 +104,7 @@ export const DRILLS: Drill[] = [
   {
     id: 'aim',
     title: 'PICK A CORNER',
-    text: 'Hold [K] to charge past 60%, aim [↑] or [↓] (right stick) to pick the far or near post, release. Score top corner.',
+    text: 'Hold [{shoot}] to charge past 60%, aim [{aimUp}] or [{aimDown}] (right stick) to pick the far or near post, release. Score top corner.',
     setup: (c) => {
       place(c.me, 11, 0, 0);
       givePuck(c.st, c.me, []);
@@ -122,7 +122,7 @@ export const DRILLS: Drill[] = [
   {
     id: 'deke',
     title: 'TOE DRAG',
-    text: 'A defender lunges as you close in. Press [L] / [X] with a direction to drag past him. Break his ankles.',
+    text: 'A defender lunges as you close in. Press [{deke}] / [X] with a direction to drag past him. Break his ankles.',
     setup: (c) => {
       place(c.me, -4, 0, 0);
       givePuck(c.st, c.me, []);
@@ -146,7 +146,7 @@ export const DRILLS: Drill[] = [
   {
     id: 'check',
     title: 'BIG HIT',
-    text: 'Without the puck, press [K] / [B] to body check. Turbo first for a BIG HIT.',
+    text: 'Without the puck, press [{shoot}] / [B] to body check. Turbo first for a BIG HIT.',
     setup: (c) => {
       place(c.me, -6, 0, 0);
       c.me.turbo = 1;
@@ -166,7 +166,7 @@ export const DRILLS: Drill[] = [
   {
     id: 'saucer',
     title: 'SAUCER PASS',
-    text: 'A body is in the lane. Hold [J] / [A] a moment and release to saucer the puck over him to your teammate.',
+    text: 'A body is in the lane. Hold [{pass}] / [A] a moment and release to saucer the puck over him to your teammate.',
     setup: (c) => {
       place(c.me, 0, 0, 0);
       place(c.mate, 8, 0, Math.PI);
@@ -189,7 +189,7 @@ export const DRILLS: Drill[] = [
   {
     id: 'dive',
     title: 'GOALIE DIVE',
-    text: 'The shooter fires. When DIVE! appears, press [J] / [A] plus [W]/[S] toward the puck side for a BIG SAVE.',
+    text: 'The shooter fires. When DIVE! appears, press [{pass}] / [A] plus [{up}]/[{down}] toward the puck side for a BIG SAVE.',
     setup: (c) => {
       place(c.me, -14, 6, Math.PI);
       place(c.dummies[0], -10, 0, Math.PI);
@@ -217,7 +217,7 @@ export const DRILLS: Drill[] = [
   {
     id: 'special',
     title: 'SPECIAL',
-    text: 'Your meter is full. Press [SPACE] / [Y] to fire your archetype special.',
+    text: 'Your meter is full. Press [{special}] / [Y] to fire your archetype special.',
     setup: (c) => {
       park(c);
       place(c.me, 4, 0, 0);

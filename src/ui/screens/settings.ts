@@ -2,6 +2,7 @@ import type { App } from '../../app';
 import { btn, h } from '../dom';
 import { titleScreen } from './title';
 import { sfx } from '../../audio/sfx';
+import { controlsScreen } from './controls';
 
 export function settingsScreen(app: App): void {
   const levels = ['auto', 'low', 'med', 'high'] as const;
@@ -10,6 +11,20 @@ export function settingsScreen(app: App): void {
   const cycleQ = (d: number) => { const i = levels.indexOf(app.meta.quality); app.meta.quality = levels[(i + d + levels.length) % levels.length]; app.saveMeta(); app.applyQualityPref(); refreshQ(); };
   refreshQ();
   const vol = h('input', { type: 'range', min: 0, max: 1, step: 0.05, value: app.meta.volume, onInput: (e) => { const v = Number((e.target as HTMLInputElement).value); app.meta.volume = v; sfx.setVolume(v); app.saveMeta(); }, 'data-nav': '1' });
+  const cycle = <T extends string | number>(label: string, values: readonly T[], get: () => T, set: (v: T) => void, fmt: (v: T) => string = (v) => String(v).toUpperCase()) => {
+    const lbl = h('span', {}, '');
+    const refresh = () => { lbl.textContent = fmt(get()); };
+    refresh();
+    const step = (d: number) => { const i = values.indexOf(get()); set(values[(i + d + values.length) % values.length]); app.saveMeta(); refresh(); };
+    return h('div', { class: 'settings-row' }, h('span', {}, label), h('div', { style: 'display:flex;gap:8px;align-items:center' }, btn('‹', () => step(-1)), lbl, btn('›', () => step(1))));
+  };
+  const toggleBool = (label: string, get: () => boolean, set: (v: boolean) => void) => {
+    const lbl = h('span', {}, '');
+    const refresh = () => { lbl.textContent = get() ? 'ON' : 'OFF'; };
+    refresh();
+    const flip = () => { set(!get()); app.saveMeta(); refresh(); };
+    return h('div', { class: 'settings-row' }, h('span', {}, label), h('div', { style: 'display:flex;gap:8px;align-items:center' }, btn('‹', flip), lbl, btn('›', flip)));
+  };
   const toggle = (label: string, key: 'cinematics' | 'screenShake' | 'hitFx' | 'music', onChange?: () => void) => {
     const lbl = h('span', {}, '');
     const refresh = () => { lbl.textContent = app.meta[key] === false ? 'OFF' : 'ON'; };
@@ -24,6 +39,12 @@ export function settingsScreen(app: App): void {
       toggle('Cinematics (intro, replays)', 'cinematics'),
       toggle('Screen shake', 'screenShake'),
       toggle('Hit flash / zoom fx', 'hitFx', () => app.applyQualityPref()),
+      cycle('Colorblind palette', ['off', 'deuteranopia', 'protanopia', 'tritanopia'] as const, () => app.meta.colorblind ?? 'off', (v) => { app.meta.colorblind = v; }),
+      cycle('Name tags', ['all', 'controlled', 'off'] as const, () => app.meta.nameTags ?? 'all', (v) => { app.meta.nameTags = v; }),
+      cycle('HUD text size', [1, 1.25, 1.5] as const, () => (app.meta.textScale ?? 1) as 1 | 1.25 | 1.5, (v) => { app.meta.textScale = v; app.applyAccessPrefs(); }, (v) => `${Math.round(v * 100)}%`),
+      toggleBool('Reduced motion (no shake, flashes, hit fx, crowd)', () => app.meta.reducedMotion === true, (v) => { app.meta.reducedMotion = v; app.applyQualityPref(); }),
+      toggleBool('Gamepad rumble', () => app.meta.rumble !== false, (v) => { app.meta.rumble = v; app.applyAccessPrefs(); }),
+      h('div', { class: 'settings-row' }, h('span', {}, 'Key bindings'), btn('Controls…', () => controlsScreen(app))),
       h('div', { class: 'settings-row' }, h('span', {}, 'Quality'), h('div', { style: 'display:flex;gap:8px;align-items:center' }, btn('‹', () => cycleQ(-1)), qLbl, btn('›', () => cycleQ(1)))),
       h('div', { class: 'settings-row' }, h('span', {}, 'Move'), h('span', { html: '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / Left stick' })),
       h('div', { class: 'settings-row' }, h('span', {}, 'Turbo'), h('span', { html: '<kbd>SHIFT</kbd> / RT' })),

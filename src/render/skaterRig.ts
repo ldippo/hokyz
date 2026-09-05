@@ -77,6 +77,7 @@ export class SkaterRig {
   private roll = 0;
   /** fight animation: stance while >0, punch/stagger timers */
   fightStance = false;
+  private tag: THREE.Sprite | null = null;
   private punchT = 0;
   private punchHigh = true;
   private staggerT = 0;
@@ -179,6 +180,31 @@ export class SkaterRig {
   }
   celebrate(): void {
     this.celebrateT = 1.6;
+  }
+  /** Name tag sprite above the head. */
+  makeTag(name: string, color = '#ffffff'): void {
+    const c = document.createElement('canvas');
+    c.width = 256;
+    c.height = 64;
+    const g = c.getContext('2d')!;
+    g.fillStyle = 'rgba(0,0,0,0.55)';
+    g.fillRect(0, 8, 256, 48);
+    g.font = 'bold 30px Impact, "Arial Black", sans-serif';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillStyle = color;
+    g.fillText(name.toUpperCase().slice(0, 16), 128, 33);
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    const m = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+    this.tag = new THREE.Sprite(m);
+    this.tag.scale.set(1.9, 0.48, 1);
+    this.tag.position.y = 2.35;
+    this.tag.renderOrder = 11;
+    this.group.add(this.tag);
+  }
+  tagVisible(on: boolean): void {
+    if (this.tag) this.tag.visible = on;
   }
   punch(high: boolean): void {
     this.punchT = 0.32;

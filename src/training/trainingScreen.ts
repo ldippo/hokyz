@@ -87,7 +87,7 @@ export function trainingScreen(app: App): void {
     d.setup(ctx);
     prog.textContent = `DRILL ${idx + 1} / ${DRILLS.length}`;
     title.textContent = d.title;
-    text.innerHTML = glyphs(d.text);
+    text.innerHTML = glyphs(app.input.fill(d.text));
     view.hud.announce(d.title, 'gold', `DRILL ${idx + 1}`);
     sfx.whistle();
   };
