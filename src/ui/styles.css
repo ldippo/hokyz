@@ -228,3 +228,6 @@ p.screen-sub { color: #8fa3d9; letter-spacing: 0.15em; text-transform: uppercase
 .team-preview em { font-family: var(--font-body); font-size: 12px; color: var(--gold); }
 .roster-card .starter-btn { font-size: 12px; padding: 2px 8px; }
 .roster-card.starting { border-color: var(--gold); }
+
+.linkbtn { background: none; border: 1px solid #3a4260; color: #8fa3d9; border-radius: 4px; padding: 0 6px; margin-left: 6px; cursor: pointer; font-size: 12px; }
+.linkbtn:hover { border-color: var(--gold); color: #fff; }

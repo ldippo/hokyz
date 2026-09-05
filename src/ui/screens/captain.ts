@@ -6,13 +6,19 @@ import { CAPTAINS, ascensionLevel, isUnlocked, weeklySeed } from '../../run/meta
 import { newRun, TEAM_NAMES, TEAM_COLORS, TEAM_LOGOS, shortFor } from '../../run/runState';
 import { Rng } from '../../core/rng';
 import { awayColorFor } from '../colors';
-import { ARCHETYPES, statLine } from '../../run/roster';
+import { ARCHETYPES, GOALIE_STYLES, statLine } from '../../run/roster';
+import type { GoalieStyle } from '../../sim/types';
 
-export function captainScreen(app: App, weekly: string | null = null): void {
+export function captainScreen(app: App, weekly: string | null = null, presetSeed = ''): void {
   const maxAsc = ascensionLevel(app.meta);
   let asc = maxAsc;
   const seedInput = h('input', { type: 'text', placeholder: 'seed (optional)', style: 'font-family:var(--font-display);font-size:18px;padding:6px 10px;background:#10141f;border:2px solid #3a4260;color:#fff;letter-spacing:0.1em;width:220px' }) as HTMLInputElement;
+  if (presetSeed) seedInput.value = presetSeed;
   const ascLbl = h('span', {}, `ASCENSION ${asc}`);
+  let goalieStyle: GoalieStyle | null = null;
+  const styleBtns = h('div', { style: 'display:flex;gap:6px;flex-wrap:wrap' },
+    ...([null, 'butterfly', 'standup', 'handler'] as (GoalieStyle | null)[]).map((st) => h('button', { class: 'swatch logo', style: 'width:auto;padding:0 10px', title: st ? GOALIE_STYLES[st].desc : 'Random style', onClick: () => { goalieStyle = st; preview(); } }, st ? `${GOALIE_STYLES[st].icon} ${GOALIE_STYLES[st].label}` : '🎲 Random')),
+  );
   // team identity
   const rnd = new Rng(Date.now() & 0xffff);
   const identity = { name: rnd.pick(TEAM_NAMES), color: TEAM_COLORS[0], logo: TEAM_LOGOS[rnd.int(0, TEAM_LOGOS.length - 1)] };
@@ -24,6 +30,7 @@ export function captainScreen(app: App, weekly: string | null = null): void {
   const preview = () => {
     swatches.querySelectorAll('.swatch').forEach((b) => b.classList.toggle('sel', (b as HTMLElement).title === identity.color));
     logos.querySelectorAll('.swatch').forEach((b) => b.classList.toggle('sel', b.textContent === logoIcons[identity.logo]));
+    styleBtns.querySelectorAll('.swatch').forEach((b) => b.classList.toggle('sel', (goalieStyle ? b.textContent?.includes(GOALIE_STYLES[goalieStyle].label) : b.textContent?.includes('Random')) ?? false));
     const cb = app.meta.colorblind ?? 'off';
     const clash = cb !== 'off' && awayColorFor(identity.color, '#d8262f', cb) !== '#d8262f';
     previewEl.innerHTML = `<span class="badge" style="background:${identity.color}">${logoIcons[identity.logo]}</span> <b>${identity.name || 'TEAM'}</b> <small>${shortFor(identity.name || 'TEAM')}</small>${clash ? ' <em>· away jerseys will auto-swap under your colorblind palette</em>' : ''}`;
@@ -45,7 +52,7 @@ export function captainScreen(app: App, weekly: string | null = null): void {
   const startRun = (capId: string) => {
     const cap = CAPTAINS.find((c) => c.id === capId)!;
     const unlockedPerks = app.meta.unlocked.filter((u) => u.startsWith('perk_'));
-    app.run = newRun(weekly ? weeklySeed(weekly) : seedInput.value.trim(), cap, weekly ? 0 : asc, unlockedPerks, { name: identity.name, short: shortFor(identity.name || 'TEAM'), color: identity.color, logo: identity.logo });
+    app.run = newRun(weekly ? weeklySeed(weekly) : seedInput.value.trim(), cap, weekly ? 0 : asc, unlockedPerks, { name: identity.name, short: shortFor(identity.name || 'TEAM'), color: identity.color, logo: identity.logo }, weekly ? null : goalieStyle);
     app.run.weekly = weekly;
     app.meta.runs++;
     app.saveMeta();
@@ -56,7 +63,7 @@ export function captainScreen(app: App, weekly: string | null = null): void {
     h('h2', { class: 'screen-title' }, weekly ? `WEEKLY RUN · ${weekly}` : 'PICK YOUR CAPTAIN'),
     h('p', { class: 'screen-sub', html: `Captain + 2 random skaters + bench + goalie. <span style="color:var(--gold)">${esc(statLine({ speed: 0, shot: 0, hands: 0, hit: 0, balance: 0, stamina: 0 }).replace(/ \d/g, ''))}</span>` }),
     h('div', { class: 'cards' }, ...cards),
-    h('div', { class: 'identity' }, h('div', { class: 'identity-row' }, h('span', { class: 'lbl' }, 'TEAM'), nameInput, btn('🎲', () => { identity.name = rnd.pick(TEAM_NAMES); nameInput.value = identity.name; preview(); })), h('div', { class: 'identity-row' }, h('span', { class: 'lbl' }, 'COLOR'), swatches), h('div', { class: 'identity-row' }, h('span', { class: 'lbl' }, 'LOGO'), logos), previewEl),
+    h('div', { class: 'identity' }, h('div', { class: 'identity-row' }, h('span', { class: 'lbl' }, 'TEAM'), nameInput, btn('🎲', () => { identity.name = rnd.pick(TEAM_NAMES); nameInput.value = identity.name; preview(); })), h('div', { class: 'identity-row' }, h('span', { class: 'lbl' }, 'COLOR'), swatches), h('div', { class: 'identity-row' }, h('span', { class: 'lbl' }, 'LOGO'), logos), weekly ? null : h('div', { class: 'identity-row' }, h('span', { class: 'lbl' }, 'GOALIE'), styleBtns), previewEl),
     h('div', { style: 'display:flex;gap:16px;align-items:center;margin-top:16px' },
       weekly ? h('span', { class: 'small' }, `Seed locked: ${weeklySeed(weekly)} · same map for everyone this week · no ascension`) : seedInput,
       maxAsc > 0 ? btn('‹', () => { asc = Math.max(0, asc - 1); ascLbl.textContent = `ASCENSION ${asc}`; }) : null,

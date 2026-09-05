@@ -1,4 +1,5 @@
 import type { App } from '../../app';
+import { copyText, seedLink } from '../../run/share';
 import { btn, h } from '../dom';
 import { titleScreen } from './title';
 import { captainScreen } from './captain';
@@ -46,7 +47,7 @@ export function runOverScreen(app: App): void {
           h('tr', {}, h('td', {}, 'Cash banked'), h('td', { class: 'num', style: 'color:var(--gold)' }, `+${earned}`)),
           h('tr', {}, h('td', {}, 'Total bank'), h('td', { class: 'num', style: 'color:var(--gold)' }, String(app.meta.cash))),
         )),
-      h('div', { class: 'menu' }, btn('New Run', () => captainScreen(app), 'primary'), btn('Title', () => titleScreen(app))),
+      h('div', { class: 'menu' }, btn('New Run', () => captainScreen(app), 'primary'), btn('Replay This Seed', () => captainScreen(app, null, run.seedText || String(run.seed))), btn('Copy Seed Link', () => { void copyText(seedLink(run.seedText || String(run.seed))).then((ok) => app.toast(ok ? 'Seed link copied' : 'Copy failed')); }), btn('Title', () => titleScreen(app))),
     ),
   );
   app.showScreen(el);

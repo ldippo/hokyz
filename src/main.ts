@@ -12,5 +12,7 @@ void app.init().then(() => {
   }
   app.start();
   titleScreen(app);
+  const seed = new URLSearchParams(location.search).get('seed');
+  if (seed) void import('./ui/screens/captain').then((m) => m.captainScreen(app, null, seed));
 });
 (window as any).__hokyz = app;

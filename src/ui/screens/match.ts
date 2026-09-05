@@ -81,10 +81,20 @@ export function playMatch(app: App, sim: MatchSim, perkNames: string[], done: (o
   };
   const openPause = () => {
     app.paused = true;
+    const st0 = sim.st;
+    const rows = st0.order.map((id) => st0.skaters[id]).filter((s) => !s.ejected).map((s) =>
+      h('tr', { style: `color:${s.team === 0 ? '#fff' : '#c8d4f0'}` },
+        h('td', {}, `${s.team === 0 ? '🔵' : '🔴'} ${s.name}${s.isGoalie ? ' (G)' : ''}`),
+        h('td', { class: 'num' }, String(s.goals)), h('td', { class: 'num' }, String(s.assists)), h('td', { class: 'num' }, String(s.shots)), h('td', { class: 'num' }, String(s.hits)), h('td', { class: 'num' }, String(s.bigHits)), h('td', { class: 'num' }, s.isGoalie ? String(s.saves) : String(s.blocks)),
+      ),
+    );
     pauseEl = h('div', { class: 'pause' },
       h('h2', { class: 'screen-title' }, 'PAUSED'),
-      h('div', { class: 'menu' },
+      h('table', { class: 'box', style: 'font-size:13px;min-width:460px' }, h('thead', {}, h('tr', {}, h('th', {}, 'PLAYER'), h('th', {}, 'G'), h('th', {}, 'A'), h('th', {}, 'SOG'), h('th', {}, 'HITS'), h('th', {}, 'BIG'), h('th', {}, 'SV/BLK'))), h('tbody', {}, ...rows)),
+      perkNames.length ? h('p', { class: 'small', style: 'max-width:560px;text-align:center;color:#8fa3d9' }, `PERKS · ${perkNames.join(' · ')}`) : null,
+      h('div', { class: 'menu', style: 'margin-top:14px' },
         btn('Resume', () => closePause(), 'primary'),
+        btn('Photo Mode', () => { void app.snap().then((ok) => app.toast(ok ? 'Photo saved to your downloads' : 'Photo failed')); }),
         btn('Forfeit Match', () => {
           closePause();
           finished = true;
