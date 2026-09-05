@@ -7,7 +7,7 @@ import type { TeamId, Vec2 } from '../sim/types';
  * camera resumes when `active` is false. Shots are keyframed in sim-space then
  * converted to world (x, y-up, z = sim y).
  */
-export type ShotKind = 'intro' | 'replay' | 'hit' | 'mvp' | 'fight' | null;
+export type ShotKind = 'intro' | 'replay' | 'hit' | 'mvp' | 'fight' | 'reel' | null;
 
 interface Key {
   t: number;
@@ -96,6 +96,27 @@ export class Director {
       { t: 1, pos: v3(pos.x + sx * 3.8 + nx * 1.0, 1.1, pos.y + sy * 3.8 + ny * 1.0), look: v3(pos.x + nx * 0.5, 0.8, pos.y + ny * 0.5), fov: 36 },
     ];
     this.shot = { kind: 'hit', t: 0, duration, keys, timeScale: 0.22 };
+  }
+
+  /** Highlight clip: wide-ish tracking shot around a point, kind-specific. */
+  reelShot(kind: 'goal' | 'hit' | 'save' | 'ankle' | 'fight', pos: Vec2, scoredOn: TeamId | null, duration: number): void {
+    if (kind === 'goal' && scoredOn !== null) {
+      this.replay(scoredOn, pos, duration);
+      this.shot!.kind = 'reel';
+      this.shot!.timeScale = 0.6;
+      return;
+    }
+    const side = pos.y >= 0 ? 1 : -1;
+    const keys: Key[] = kind === 'hit' || kind === 'ankle' || kind === 'fight'
+      ? [
+          { t: 0, pos: v3(pos.x + 5.5, 2.2, pos.y + side * 6), look: v3(pos.x, 0.9, pos.y), fov: 40 },
+          { t: 1, pos: v3(pos.x - 3.5, 1.6, pos.y + side * 5), look: v3(pos.x, 0.9, pos.y), fov: 38 },
+        ]
+      : [
+          { t: 0, pos: v3(pos.x - 6, 3.5, pos.y + 7), look: v3(pos.x, 0.6, pos.y), fov: 44 },
+          { t: 1, pos: v3(pos.x + 2, 2.5, pos.y + 6), look: v3(pos.x, 0.6, pos.y), fov: 42 },
+        ];
+    this.shot = { kind: 'reel', t: 0, duration, keys, timeScale: 0.6, label: 'HIGHLIGHTS' };
   }
 
   /** Fight: side-on low cam between two skaters, slow drift. */
