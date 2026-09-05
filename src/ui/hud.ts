@@ -25,6 +25,7 @@ export class Hud {
       <div class="announce" data-el="announce"></div>
       <div class="cine-tag" data-el="tag"></div>
       <div class="prompt" data-el="prompt"></div>
+      <div class="so" data-el="so"><div class="so-row" data-el="so0"></div><div class="so-mid">SHOOTOUT</div><div class="so-row" data-el="so1"></div></div>
       <div class="countdown" data-el="countdown"></div>
       <div class="flash" data-el="flash"></div>
       <div class="vignette-fire" data-el="vig"></div>
@@ -50,6 +51,20 @@ export class Hud {
     a.innerHTML = `${text}${sub ? `<span class="sub">${sub}</span>` : ''}`;
     a.className = `announce pop ${cls}`;
     this.announceTimer = 1.6;
+  }
+
+  /** Shootout tracker: per-team attempt results. */
+  shootout(on: boolean, results: [boolean[], boolean[]] = [[], []], rounds = 3, names: [string, string] = ['', '']): void {
+    this.els.so.classList.toggle('on', on);
+    if (!on) return;
+    for (const i of [0, 1] as const) {
+      const r = results[i];
+      const cells = [];
+      const n = Math.max(rounds, r.length);
+      for (let k = 0; k < n; k++) cells.push(k < r.length ? (r[k] ? '●' : '✕') : '○');
+      this.els[`so${i}`].textContent = `${names[i]}  ${cells.join(' ')}`;
+      this.els[`so${i}`].classList.toggle('lead', r.filter(Boolean).length > results[i === 0 ? 1 : 0].filter(Boolean).length);
+    }
   }
 
   /** Hide the clock/period block (training camp). */

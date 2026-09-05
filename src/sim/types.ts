@@ -141,7 +141,22 @@ export interface TeamState {
   ejected: string[];
 }
 
-export type MatchPhase = 'intro' | 'faceoff' | 'play' | 'goal' | 'periodEnd' | 'fight' | 'over';
+export type MatchPhase = 'intro' | 'faceoff' | 'play' | 'goal' | 'periodEnd' | 'fight' | 'shootout' | 'over';
+
+export interface ShootoutState {
+  rounds: number;
+  round: number; // 1-based
+  turn: TeamId;
+  stage: 'setup' | 'attempt' | 'result' | 'done';
+  t: number;
+  attempts: { team: TeamId; scored: boolean; shooter: string }[];
+  goals: [number, number];
+  shooterId: string | null;
+  suddenDeath: boolean;
+  lastScored: boolean | null;
+  /** ai shooter script memory */
+  ai: { deked: boolean; charging: number };
+}
 
 export type SpecialKind = 'laser' | 'shockwave' | 'afterburner' | 'blink' | 'brickwall';
 export type FightCue = 'high' | 'low' | 'feint' | 'mash';
@@ -210,6 +225,10 @@ export type MatchEvent =
   | { type: 'specialReady'; team: TeamId }
   | { type: 'teamFire'; team: TeamId }
   | { type: 'bossPhase'; label: string; desc: string }
+  | { type: 'shootoutStart'; rounds: number }
+  | { type: 'shootoutAttempt'; team: TeamId; shooter: string; round: number; suddenDeath: boolean }
+  | { type: 'shootoutResult'; team: TeamId; shooter: string; scored: boolean }
+  | { type: 'shootoutEnd'; winner: TeamId; goals: [number, number] }
   | { type: 'save'; goalie: string; pos: Vec2 }
   | { type: 'post'; pos: Vec2 }
   | { type: 'pass'; from: string; to: string | null }
@@ -273,6 +292,9 @@ export interface MatchMods {
   suddenDeath: boolean; // first goal wins
   mercyRule: number; // 0 = off, else lead needed to end
   noFights: boolean;
+  /** start directly in a shootout (skills node) */
+  shootoutOnly: boolean;
+  shootoutRounds: number;
   /** boss rule changes keyed by period */
   bossPhases: BossPhase[];
   /** pre-built 4th skater for an 'extraSkater' phase (team 1) */
@@ -309,6 +331,7 @@ export interface MatchState {
   mods: MatchMods;
   fight: FightState | null;
   fightsThisPeriod: number;
+  shootout: ShootoutState | null;
   /** camera shake request (decays outside sim) */
   shake: number;
   stats: {
