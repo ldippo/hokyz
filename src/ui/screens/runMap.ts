@@ -144,6 +144,9 @@ export function runMapScreen(app: App): void {
 
 export function pickNode(app: App, node: MapNode): void {
   const run = app.run!;
+  const tel = (app.meta.telemetry ??= { perkOffered: {}, perkPicked: {}, nodePicked: {}, runEndAct: {} });
+  tel.nodePicked[node.type] = (tel.nodePicked[node.type] ?? 0) + 1;
+  app.saveMeta();
   enterNode(run, node);
   app.saveRun();
   switch (node.type) {

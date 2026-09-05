@@ -37,6 +37,8 @@ export interface RunState {
   flags: { easyNext?: boolean; hardNext?: boolean; betNext?: boolean; scoutedBoss?: boolean; unlockedPerks: string[] };
   /** rivals we beat this run: they come back angrier */
   grudges: Record<string, { beaten: number; act: number }>;
+  /** weekly-seed run (records tracked separately) */
+  weekly?: string | null;
   over: boolean;
   won: boolean;
 }
@@ -198,6 +200,12 @@ export interface MatchOutcome {
   scoreFor: number;
   scoreAgainst: number;
   bigHits: number;
+  fightsWon?: number;
+  specialsUsed?: number;
+  ankleBreakers?: number;
+  bigSaves?: number;
+  shootoutWon?: boolean;
+  topCornerGoals?: number;
   /** hp by roster skater id after the match */
   hp: Record<string, number>;
   boxScore: { id: string; name: string; team: 0 | 1; goals: number; assists: number; hits: number; bigHits: number; shots: number; saves: number; isGoalie: boolean }[];

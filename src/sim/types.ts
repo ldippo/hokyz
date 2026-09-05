@@ -208,7 +208,7 @@ export const EMPTY_INPUT: Readonly<Input> = Object.freeze({
 });
 
 export type MatchEvent =
-  | { type: 'goal'; team: TeamId; scorer: string; assist: string | null; pos: Vec2; value: number; ownGoal: boolean }
+  | { type: 'goal'; team: TeamId; scorer: string; assist: string | null; pos: Vec2; value: number; ownGoal: boolean; high: boolean }
   | { type: 'hit'; hitter: string; victim: string; big: boolean; pos: Vec2 }
   | { type: 'shot'; shooter: string; power: number; pos: Vec2; oneTimer: boolean; zone: string }
   | { type: 'saucer'; from: string; to: string | null }

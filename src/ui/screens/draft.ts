@@ -26,10 +26,12 @@ export function draftScreen(app: App, node: MapNode): void {
   const count = node.type === 'boss' || node.type === 'elite' ? 4 : 3;
   const bonus = node.type === 'boss' ? 1.5 : node.type === 'elite' ? 0.8 : 0;
   const picks = draftPerks(run, count, bonus);
+  const tel = (app.meta.telemetry ??= { perkOffered: {}, perkPicked: {}, nodePicked: {}, runEndAct: {} });
+  for (const p of picks) tel.perkOffered[p.id] = (tel.perkOffered[p.id] ?? 0) + 1;
   const el = h('div', { class: 'screen' },
     h('h2', { class: 'screen-title' }, 'DRAFT A PERK'),
     h('p', { class: 'screen-sub' }, node.type === 'boss' ? 'Boss loot · rare odds boosted' : node.type === 'elite' ? 'Elite loot · rare odds boosted' : 'Pick one'),
-    h('div', { class: 'cards' }, ...picks.map((p) => perkCard(p, () => { run.perks.push(p.id); sfx.cash(); app.saveRun(); runMapScreen(app); }, undefined, false, run.perks))),
+    h('div', { class: 'cards' }, ...picks.map((p) => perkCard(p, () => { run.perks.push(p.id); tel.perkPicked[p.id] = (tel.perkPicked[p.id] ?? 0) + 1; app.saveMeta(); sfx.cash(); app.saveRun(); runMapScreen(app); }, undefined, false, run.perks))),
     h('div', { class: 'menu' }, btn('Skip (+25 cash)', () => { run.cash += 25; app.saveRun(); runMapScreen(app); })),
   );
   app.showScreen(el);

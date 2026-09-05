@@ -75,11 +75,33 @@ export interface MetaProfile {
   hitFx: boolean;
   music: boolean;
   trainingDone: boolean;
+  feats: string[];
+  totalFightsWon: number;
+  totalTopCorner: number;
+  totalAnkle: number;
+  totalSpecials: number;
+  totalShootoutWins: number;
+  bestGoalsMatch: number;
+  bestBigHitsMatch: number;
+  rivalRecord: Record<string, { w: number; l: number }>;
+  weekly: { week: string; bestAct: number; bestRow: number; won: boolean; runs: number } | null;
+  telemetry: { perkOffered: Record<string, number>; perkPicked: Record<string, number>; nodePicked: Record<string, number>; runEndAct: Record<string, number> };
 }
 
 export function defaultMeta(): MetaProfile {
-  return { version: 1, cash: 0, unlocked: ['cap_bricker', 'cap_flash'], runs: 0, wins: 0, bestAct: 0, bestRow: 0, totalGoals: 0, totalBigHits: 0, selectedRink: 'classic', volume: 0.7, seenIntro: false, quality: 'auto', cinematics: true, screenShake: true, hitFx: true, music: true, trainingDone: false };
+  return { version: 1, cash: 0, unlocked: ['cap_bricker', 'cap_flash'], runs: 0, wins: 0, bestAct: 0, bestRow: 0, totalGoals: 0, totalBigHits: 0, selectedRink: 'classic', volume: 0.7, seenIntro: false, quality: 'auto', cinematics: true, screenShake: true, hitFx: true, music: true, trainingDone: false, feats: [], totalFightsWon: 0, totalTopCorner: 0, totalAnkle: 0, totalSpecials: 0, totalShootoutWins: 0, bestGoalsMatch: 0, bestBigHitsMatch: 0, rivalRecord: {}, weekly: null, telemetry: { perkOffered: {}, perkPicked: {}, nodePicked: {}, runEndAct: {} } };
 }
 
 export const isUnlocked = (m: MetaProfile, id: string): boolean => m.unlocked.includes(id);
+
+/** ISO week id, e.g. 2026-W36. Same seed for everyone that week. */
+export function isoWeek(d = new Date()): string {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - day);
+  const yearStart = Date.UTC(date.getUTCFullYear(), 0, 1);
+  const week = Math.ceil(((date.getTime() - yearStart) / 86400000 + 1) / 7);
+  return `${date.getUTCFullYear()}-W${String(week).padStart(2, '0')}`;
+}
+export const weeklySeed = (week = isoWeek()): string => `weekly-${week}`;
 export const ascensionLevel = (m: MetaProfile): number => (isUnlocked(m, 'asc_2') ? 2 : isUnlocked(m, 'asc_1') ? 1 : 0);

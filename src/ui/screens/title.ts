@@ -6,6 +6,8 @@ import { unlocksScreen } from './unlocks';
 import { settingsScreen } from './settings';
 import { quickMatchScreen } from './quickMatch';
 import { trainingScreen } from '../../training/trainingScreen';
+import { recordsScreen } from './records';
+import { isoWeek } from '../../run/meta';
 
 export function titleScreen(app: App): void {
   app.attract();
@@ -17,7 +19,9 @@ export function titleScreen(app: App): void {
       saved ? btn('Continue Run', () => { app.run = saved; runMapScreen(app); }, 'primary') : null,
       btn('New Run', () => captainScreen(app), saved || !app.meta.trainingDone ? '' : 'primary'),
       btn(app.meta.trainingDone ? 'Training Camp' : 'Training Camp · NEW', () => trainingScreen(app), app.meta.trainingDone || saved ? '' : 'primary'),
+      btn(`Weekly Run · ${isoWeek()}${app.meta.weekly?.week === isoWeek() ? ` · best A${app.meta.weekly.bestAct}` : ''}`, () => captainScreen(app, isoWeek())),
       btn('Quick Match', () => quickMatchScreen(app)),
+      btn('Feats & Records', () => recordsScreen(app)),
       btn('Unlocks', () => unlocksScreen(app)),
       btn('Settings', () => settingsScreen(app)),
     ),

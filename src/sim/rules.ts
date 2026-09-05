@@ -39,7 +39,7 @@ export function checkGoal(st: MatchState, prevX: number, events: MatchEvent[]): 
     st.teams[scoringTeam].score += value;
     if (scorer) st.skaters[scorer].goals++;
     if (assist) st.skaters[assist].assists++;
-    events.push({ type: 'goal', team: scoringTeam, scorer: scorer ?? '', assist, pos: { ...p.pos }, value, ownGoal: scorerId === null });
+    events.push({ type: 'goal', team: scoringTeam, scorer: scorer ?? '', assist, pos: { ...p.pos }, value, ownGoal: scorerId === null, high: p.z > 0.6 });
     st.shake = Math.max(st.shake, 0.6);
     st.phase = 'goal';
     st.phaseTimer = RULES.goalCelebration;
