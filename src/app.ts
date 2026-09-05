@@ -16,6 +16,7 @@ import { PerfProbe, TIERS, Watchdog, probeTier, type Tier } from './render/quali
 import { h } from './ui/dom';
 import { loadRigs } from './render/skaterRig';
 import { loadRinkTextures } from './render/textures';
+import { titleScreen } from './ui/screens/title';
 import { setupEnvironment } from './render/environment';
 
 export class App {
@@ -40,6 +41,7 @@ export class App {
 
   private crashCount = 0;
   private crashWindowStart = 0;
+  private dead = false;
 
   /** Global error recovery: log, toast, drop the match view, return to the title. */
   private installErrorRecovery(): void {
@@ -51,6 +53,7 @@ export class App {
       }
       this.crashCount++;
       console.error('[recover]', msg);
+      if (this.dead) return;
       if (this.crashCount > 3) {
         this.hardError(msg);
         return;
@@ -63,7 +66,7 @@ export class App {
         this.showScreen(null);
         this.saveRun();
         this.toast('Something broke. Back to the title — your run is saved.');
-        void import('./ui/screens/title').then((m) => m.titleScreen(this));
+        titleScreen(this);
       } catch (e) {
         this.hardError(String(e));
       }
@@ -72,7 +75,13 @@ export class App {
     window.addEventListener('unhandledrejection', (e) => handle(String((e as PromiseRejectionEvent).reason)));
   }
   private hardError(msg: string): void {
+    this.dead = true;
     this.loop.stop();
+    try {
+      this.disposeView();
+    } catch {
+      /* ignore */
+    }
     this.showScreen(h('div', { class: 'screen' }, h('h2', { class: 'screen-title' }, 'HOKYZ HIT THE BOARDS'), h('p', { class: 'screen-sub' }, 'Repeated errors. Your run and profile are saved.'), h('pre', { style: 'max-width:640px;white-space:pre-wrap;font-size:12px;color:#8fa3d9' }, msg.slice(0, 400)), h('div', { class: 'menu' }, h('button', { class: 'btn primary', 'data-nav': '1', onClick: () => location.reload() }, 'Reload'))));
   }
 
