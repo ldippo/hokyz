@@ -45,7 +45,7 @@ export function makeSkater(
     knockdownsThisPeriod: 0,
     temper: 0.3,
     ejected: false,
-    specialKind: archetype === 'sniper' ? 'laser' : archetype === 'enforcer' ? 'shockwave' : archetype === 'speedster' ? 'afterburner' : archetype === 'goalie' ? 'brickwall' : 'blink',
+    specialKind: archetype === 'sniper' ? 'laser' : archetype === 'enforcer' ? 'shockwave' : archetype === 'speedster' ? 'afterburner' : archetype === 'goalie' ? 'brickwall' : archetype === 'grinder' ? 'bulldoze' : archetype === 'dangler' ? 'phantom' : 'blink',
     specialTimer: 0,
     perfectUntil: -1,
     onFire: 0,
@@ -90,6 +90,7 @@ export function stepSkater(sk: Skater, input: Input, st: MatchState, dt: number,
   sk.butterfly = tick(sk.butterfly, dt);
   sk.specialTimer = tick(sk.specialTimer, dt);
   if (sk.specialTimer > 0 && sk.specialKind === 'afterburner') sk.invuln = Math.max(sk.invuln, 0.1);
+  if (sk.specialTimer > 0 && sk.specialKind === 'phantom') sk.invuln = Math.max(sk.invuln, 0.1);
   if (sk.onFire > 0) {
     sk.onFire = Math.max(0, sk.onFire - dt);
     if (sk.onFire === 0) events.push({ type: 'onFireEnd', skater: sk.id });

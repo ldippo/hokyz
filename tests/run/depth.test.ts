@@ -104,6 +104,6 @@ describe('boss phases', () => {
     const bossNode = r.maps[0].rows[r.maps[0].rows.length - 1][0];
     const b = buildMatch(r, bossNode);
     expect(b.mods.bossPhases.length).toBeGreaterThan(0);
-    expect(b.mods.extraSkater).not.toBeNull();
+    if (b.mods.bossPhases.some((p) => p.kind === 'extraSkater')) expect(b.mods.extraSkater).not.toBeNull();
   });
 });

@@ -54,12 +54,13 @@ export function applyHit(st: MatchState, h: Skater, vic: Skater, rng: Rng, event
   const vm = st.mods.teams[vic.team];
   const dirV = norm(sub(vic.pos, h.pos));
   const hSpeed = len(h.vel);
-  if (vic.invuln > 0 || vic.deke > 0) {
+  const phantom = vic.specialTimer > 0 && vic.specialKind === 'phantom';
+  if (vic.invuln > 0 || vic.deke > 0 || phantom) {
     // dodged — hitter whiffs and stumbles
     h.stumble = SKATER.stumbleTime * 0.7;
     h.vel.x *= 0.3;
     h.vel.y *= 0.3;
-    if (vic.deke > 0 && vic.hasPuck) {
+    if ((vic.deke > 0 || phantom) && vic.hasPuck) {
       h.knockdown = Math.max(h.knockdown, 0.5);
       events.push({ type: 'ankleBreaker', skater: vic.id, victim: h.id });
     }
@@ -67,8 +68,10 @@ export function applyHit(st: MatchState, h: Skater, vic: Skater, rng: Rng, event
   }
   let power = SKATER.statScale(h.stats.hit) * hm.hitPowerMul * (0.55 + hSpeed / 18);
   if (h.onFire > 0) power *= ONFIRE.hitMul;
+  if (h.specialTimer > 0 && h.specialKind === 'bulldoze') power *= 2.2;
   if (h.turboActive) power *= 1.1;
   let resist = SKATER.statScale(vic.stats.balance) * vm.hitResistMul;
+  if (vic.specialTimer > 0 && vic.specialKind === 'bulldoze') resist *= 6;
   if (vic.hasPuck) resist *= 0.9;
   if (vic.isGoalie) resist *= 1.6;
   if (st.mods.slipperyIce) resist *= 0.7;
@@ -127,7 +130,7 @@ export function applyHit(st: MatchState, h: Skater, vic: Skater, rng: Rng, event
   }
   events.push({ type: 'hit', hitter: h.id, victim: vic.id, big, pos: { x: vic.pos.x, y: vic.pos.y } });
   // provoke a fight: repeat victim of big hits, or an enforcer flattening the carrier
-  if (!st.mods.noFights && !st.fight && !vic.isGoalie && !h.isGoalie && st.phase === 'play' && st.fightsThisPeriod < FIGHT.perPeriod) {
+  if (!st.mods.noFights && !st.fight && !vic.isGoalie && !h.isGoalie && st.phase === 'play' && st.fightsThisPeriod < st.mods.fightsPerPeriod) {
     const temper = Math.max(hm.temperMul, vm.temperMul);
     const provoked = (big && vic.knockdownsThisPeriod > Math.max(1, FIGHT.provokeKnockdowns / temper)) || (big && hadPuck && h.archetype === 'enforcer' && rng.next() < FIGHT.enforcerProvokeChance * temper);
     if (provoked) offerFight(st, h.id, vic.id, events);

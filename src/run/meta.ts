@@ -16,6 +16,8 @@ export const CAPTAINS: Captain[] = [
   { id: 'cap_flash', name: 'Flash Halvorsen', archetype: 'speedster', stats: { speed: 10, shot: 5, hands: 6, hit: 3, balance: 4, stamina: 9 }, traits: ['jets'], blurb: 'Blink and she is behind the net.', cost: 0, icon: '⚡' },
   { id: 'cap_sniperov', name: 'Ace Sniperov', archetype: 'sniper', stats: { speed: 6, shot: 10, hands: 7, hit: 3, balance: 4, stamina: 6 }, traits: ['cannon'], blurb: 'Top shelf, where mama keeps the cookies.', cost: 300, icon: '🎯' },
   { id: 'cap_wizard', name: 'Slick Fontaine', archetype: 'playmaker', stats: { speed: 7, shot: 6, hands: 10, hit: 4, balance: 5, stamina: 7 }, traits: ['hothands'], blurb: 'Has never lost a faceoff, allegedly.', cost: 300, icon: '🧠' },
+  { id: 'cap_grinder', name: 'Sully Kettleburn', archetype: 'grinder', stats: { speed: 6, shot: 5, hands: 5, hit: 8, balance: 9, stamina: 10 }, traits: ['lungs'], blurb: 'Forty shifts a night. Bulldozes through anything.', cost: 300, icon: '⚙️' },
+  { id: 'cap_dangler', name: 'Remy Frostbite', archetype: 'dangler', stats: { speed: 7, shot: 7, hands: 10, hit: 2, balance: 5, stamina: 6 }, traits: ['hothands'], blurb: 'Ankles are a renewable resource.', cost: 450, icon: '🪄' },
   { id: 'cap_tank', name: 'Tank Zamboni', archetype: 'enforcer', stats: { speed: 4, shot: 6, hands: 3, hit: 10, balance: 10, stamina: 8 }, traits: ['goon', 'ironjaw'], blurb: 'Part man, part resurfacer.', cost: 600, icon: '🚜' },
 ];
 

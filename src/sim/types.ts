@@ -15,7 +15,7 @@ export interface Stats {
   stamina: number;
 }
 
-export type Archetype = 'sniper' | 'enforcer' | 'playmaker' | 'speedster' | 'goalie';
+export type Archetype = 'sniper' | 'enforcer' | 'playmaker' | 'speedster' | 'grinder' | 'dangler' | 'goalie';
 
 export interface SkaterDef {
   id: string;
@@ -158,7 +158,7 @@ export interface ShootoutState {
   ai: { deked: boolean; charging: number };
 }
 
-export type SpecialKind = 'laser' | 'shockwave' | 'afterburner' | 'blink' | 'brickwall';
+export type SpecialKind = 'laser' | 'shockwave' | 'afterburner' | 'blink' | 'brickwall' | 'bulldoze' | 'phantom';
 export type FightCue = 'high' | 'low' | 'feint' | 'mash';
 
 export interface FightState {
@@ -292,6 +292,7 @@ export interface MatchMods {
   suddenDeath: boolean; // first goal wins
   mercyRule: number; // 0 = off, else lead needed to end
   noFights: boolean;
+  fightsPerPeriod: number;
   /** start directly in a shootout (skills node) */
   shootoutOnly: boolean;
   shootoutRounds: number;

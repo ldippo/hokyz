@@ -5,7 +5,7 @@ import { findNode, generateRunMap, type ActMap, type MapNode } from './mapGen';
 import { CAPTAINS, type Captain } from './meta';
 import { PERKS, PERK_BY_ID, RARITY_WEIGHT, activeSets, applySetBonuses, defaultRunEffects, type Perk, type Rarity, type RunEffects } from './perks';
 import { generateGoalie, generateSkater, isInjured, levelFor, newId, randomArchetype, xpForMatch, MAX_LEVEL } from './roster';
-import { RIVAL_BY_ID, buildRivalRoster } from './teams';
+import { RIVAL_BY_ID, RIVALS, buildRivalRoster } from './teams';
 import { MUTATOR_BY_ID } from './mutators';
 
 export interface RunState {
@@ -34,7 +34,9 @@ export interface RunState {
   goalsFor: number;
   goalsAgainst: number;
   bigHits: number;
-  flags: { easyNext?: boolean; hardNext?: boolean; unlockedPerks: string[] };
+  flags: { easyNext?: boolean; hardNext?: boolean; betNext?: boolean; scoutedBoss?: boolean; unlockedPerks: string[] };
+  /** rivals we beat this run: they come back angrier */
+  grudges: Record<string, { beaten: number; act: number }>;
   over: boolean;
   won: boolean;
 }
@@ -80,6 +82,7 @@ export function newRun(seedText: string, captain: Captain, ascension: number, un
     goalsAgainst: 0,
     bigHits: 0,
     flags: { unlockedPerks },
+    grudges: {},
     over: false,
     won: false,
   };
@@ -145,7 +148,7 @@ export function nodeDifficulty(run: RunState, node: MapNode): number {
 
 export interface MatchSetupBundle {
   home: { name: string; short: string; color: string; skaters: SkaterDef[]; goalie: SkaterDef };
-  away: { name: string; short: string; color: string; skaters: SkaterDef[]; goalie: SkaterDef; gimmick: string; difficulty: number; rivalId: string };
+  away: { name: string; short: string; color: string; skaters: SkaterDef[]; goalie: SkaterDef; gimmick: string; difficulty: number; rivalId: string; grudge: number; taunt: string | null };
   mods: MatchMods;
   mutatorName: string | null;
   seed: number;
@@ -154,7 +157,9 @@ export interface MatchSetupBundle {
 export function buildMatch(run: RunState, node: MapNode): MatchSetupBundle {
   const rng = runRng(run);
   const rival = RIVAL_BY_ID[node.rivalId ?? 'bruisers'];
-  const opp = buildRivalRoster(rng, rival, nodeTier(run, node));
+  const grudge = (run.grudges ?? {})[rival.id]?.beaten ?? 0;
+  const opp = buildRivalRoster(rng, rival, nodeTier(run, node) + Math.min(2, grudge));
+  const taunt = grudge ? rng.pick(TAUNTS).replace('{team}', rival.name) : null;
   const mods = defaultMatchMods();
   mods.teams[0] = teamMods(run);
   rival.mods?.(mods.teams[1]);
@@ -172,11 +177,16 @@ export function buildMatch(run: RunState, node: MapNode): MatchSetupBundle {
   }
   if (run.flags.easyNext) mods.teams[1].turboRegenMul *= 0.6;
   if (run.flags.hardNext) mods.teams[1].hitPowerMul *= 1.2;
+  if (run.flags.scoutedBoss && node.type === 'boss') mods.teams[1].speedMul *= 0.9;
+  if (grudge) {
+    mods.teams[1].hitPowerMul *= 1 + 0.1 * grudge;
+    mods.teams[1].onFireGainMul *= 1 + 0.15 * grudge;
+  }
   const seed = rng.int(1, 1e9);
   commitRng(run, rng);
   return {
     home: { name: run.teamName, short: run.teamShort, color: run.teamColor, skaters: lineup(run), goalie: run.goalie },
-    away: { name: rival.name, short: rival.short, color: rival.color, skaters: opp.skaters, goalie: opp.goalie, gimmick: rival.gimmick, difficulty: nodeDifficulty(run, node), rivalId: rival.id },
+    away: { name: rival.name, short: rival.short, color: rival.color, skaters: opp.skaters, goalie: opp.goalie, gimmick: rival.gimmick, difficulty: nodeDifficulty(run, node), rivalId: rival.id, grudge, taunt },
     mods,
     mutatorName,
     seed,
@@ -197,7 +207,31 @@ export function cashForNode(run: RunState, node: MapNode, outcome: MatchOutcome)
   const e = runEffects(run);
   const base = node.type === 'boss' ? 160 : node.type === 'elite' ? 95 : 55;
   const bonus = Math.max(0, outcome.scoreFor - outcome.scoreAgainst) * 6 + outcome.bigHits * 2;
-  return Math.round((base + bonus) * e.cashMul);
+  const grudge = node.rivalId ? ((run.grudges ?? {})[node.rivalId]?.beaten ?? 0) : 0;
+  const bounty = grudge ? 1 + 0.5 * grudge : 1;
+  const bet = run.flags.betNext ? 2 : 1;
+  return Math.round((base + bonus) * e.cashMul * bounty * bet);
+}
+
+const TAUNTS = [
+  'Remember us? {team} remembers you.',
+  '{team} did not come here to lose twice.',
+  'Word is you beat {team}. Word is wrong tonight.',
+  '{team} skated laps all week thinking about you.',
+  'Nobody beats {team} and gets a quiet bus ride home.',
+];
+
+/** When a new act opens, half its match nodes bring back rivals we already beat. */
+export function reassignActRivals(run: RunState): void {
+  const beaten = Object.keys(run.grudges ?? {});
+  if (!beaten.length) return;
+  const rng = runRng(run);
+  const act = currentAct(run);
+  const nodes = act.rows.flat().filter((n) => (n.type === 'match' || n.type === 'elite') && n.rivalId);
+  const picks = rng.shuffle([...nodes]).slice(0, Math.max(1, Math.floor(nodes.length / 2)));
+  for (const n of picks) n.rivalId = rng.pick(beaten);
+  commitRng(run, rng);
+  void RIVALS;
 }
 
 /** Apply match result. Returns { cash, ended } */
@@ -227,15 +261,27 @@ export function applyMatchOutcome(run: RunState, node: MapNode, outcome: MatchOu
       s.hp = Math.max(0, Math.round(s.hp - lost));
     }
   }
-  run.flags.easyNext = false;
-  run.flags.hardNext = false;
   let cash = 0;
   let usedLife = false;
   if (outcome.won) {
     run.matchesWon++;
     cash = cashForNode(run, node, outcome);
     run.cash += cash;
-  } else {
+    if (node.rivalId && node.type !== 'boss') {
+      run.grudges ??= {};
+      const g = run.grudges[node.rivalId] ?? { beaten: 0, act: run.act };
+      g.beaten++;
+      g.act = run.act;
+      run.grudges[node.rivalId] = g;
+    }
+  } else if (run.flags.betNext) {
+    run.cash = Math.max(0, run.cash - 40);
+  }
+  run.flags.easyNext = false;
+  run.flags.hardNext = false;
+  run.flags.betNext = false;
+  if (node.type === 'boss') run.flags.scoutedBoss = false;
+  if (!outcome.won) {
     if (run.livesUsed < e.extraLives) {
       run.livesUsed++;
       usedLife = true;
@@ -269,6 +315,7 @@ export function completeNode(run: RunState, node: MapNode): void {
       run.act++;
       run.row = 0;
       run.currentNodeId = null;
+      reassignActRivals(run);
     }
   }
 }

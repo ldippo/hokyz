@@ -27,6 +27,66 @@ const bump = (run: RunState, key: keyof Stats, n: number, who?: number) => {
 
 export const EVENTS: RunEvent[] = [
   {
+    id: 'fan_favorite',
+    title: 'Fan Favorite',
+    icon: '📣',
+    text: 'A section of the crowd has adopted one of your skaters. They chant the name. They have a banner. It is a little much.',
+    choices: [
+      { label: 'Feed the hype', detail: 'A random skater gains +1 hands and +1 shot.', effect: (r, rng) => { const s = rng.pick(r.roster); bump(r, 'hands', 1, r.roster.indexOf(s)); bump(r, 'shot', 1, r.roster.indexOf(s)); return `${s.name} plays to the crowd. +1 hands, +1 shot.`; } },
+      { label: 'Sell the banner', detail: '+45 cash.', effect: (r) => { r.cash += 45; return 'Somebody paid 45 cash for a bedsheet with a face on it.'; } },
+    ],
+  },
+  {
+    id: 'gear_sale',
+    title: 'Equipment Sale',
+    icon: '🛍️',
+    text: 'The pro shop is dumping last season\'s shoulder pads. "Slightly used. Mostly by professionals."',
+    choices: [
+      { label: 'Buy the lot (35)', detail: '+1 balance for every skater.', effect: (r) => { r.cash -= 35; bump(r, 'balance', 1); return 'Everyone looks 10% wider. +1 balance across the board.'; }, disabled: (r) => r.cash < 35 },
+      { label: 'Pass', detail: 'Nothing happens.', effect: () => 'You keep your cash and your current shoulders.' },
+    ],
+  },
+  {
+    id: 'super_fan',
+    title: 'Super Fan',
+    icon: '🎰',
+    text: 'A fan in a full body suit wants to bet on you. "Double or nothing on your next win. I believe."',
+    choices: [
+      { label: 'Take the bet', detail: 'Next match win pays double cash. A loss costs 40.', effect: (r) => { r.flags.betNext = true; return 'The suit nods solemnly. Next win pays double.'; } },
+      { label: 'Decline', detail: 'Nothing happens.', effect: () => 'The suit deflates a little.' },
+    ],
+  },
+  {
+    id: 'ice_time',
+    title: 'Extra Ice Time',
+    icon: '⏱️',
+    text: 'The rink is empty for an hour. Someone on the bench could use the reps.',
+    choices: [
+      { label: 'Run the bench', detail: 'Every non-starter gains 120 XP.', effect: (r) => { const bench = r.roster.slice(3); bench.forEach((s) => (s.xp = (s.xp ?? 0) + 120)); return bench.length ? `${bench.map((s) => s.name).join(', ')} put in the work.` : 'Nobody on the bench. The ice stays empty.'; } },
+      { label: 'Rest instead', detail: 'Everyone heals 20 HP.', effect: (r) => { healAll(r, 20); return 'Naps for everyone. +20 HP.'; } },
+    ],
+  },
+  {
+    id: 'scout',
+    title: 'The Scout',
+    icon: '🔭',
+    text: 'A scout with a clipboard offers intel on the next boss for a price. "Or I sell it to them. Your call."',
+    choices: [
+      { label: 'Buy the intel (30)', detail: 'Next boss fight: opponents start 10% slower.', effect: (r) => { r.cash -= 30; r.flags.scoutedBoss = true; return 'You know where they like to skate. Next boss: -10% speed.'; }, disabled: (r) => r.cash < 30 },
+      { label: 'No thanks', detail: 'Nothing happens.', effect: () => 'The scout shrugs and walks toward the visitors\' bus.' },
+    ],
+  },
+  {
+    id: 'old_grudge',
+    title: 'Old Grudge',
+    icon: '🥊',
+    text: 'An enforcer from a team you beat is waiting in the parking lot. He is holding his own teeth. "One round. If I win, I take your cash. If you win, I know a guy."',
+    choices: [
+      { label: 'Fight him', detail: '65%: gain a random rare perk. 35%: lose 50 cash and your captain takes 20 damage.', effect: (r, rng) => { if (rng.chance(0.65)) { const pool = PERKS.filter((p) => p.rarity === 'rare' && !r.perks.includes(p.id) && !p.unlock); const p = rng.pick(pool); if (p) { r.perks.push(p.id); return `He goes down. His guy delivers ${p.name}.`; } return 'He goes down. His guy never shows.'; } r.cash = Math.max(0, r.cash - 50); r.roster[0].hp = Math.max(1, r.roster[0].hp - 20); return 'He was not holding all of his teeth. -50 cash, captain -20 HP.'; } },
+      { label: 'Get on the bus', detail: 'Nothing happens.', effect: () => 'The bus pulls away. He waves with the teeth.' },
+    ],
+  },
+  {
     id: 'underground',
     title: 'Underground Game',
     icon: '🎲',

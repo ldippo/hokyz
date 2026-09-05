@@ -6,6 +6,8 @@ export const ARCHETYPES: Record<Exclude<Archetype, 'goalie'>, { label: string; i
   enforcer: { label: 'Enforcer', icon: '🔨', base: { speed: 5, shot: 4, hands: 3, hit: 9, balance: 8, stamina: 6 }, blurb: 'Lays out anything that moves. Hard to knock down.' },
   playmaker: { label: 'Playmaker', icon: '🧠', base: { speed: 6, shot: 6, hands: 8, hit: 4, balance: 5, stamina: 7 }, blurb: 'Tape-to-tape passes, wins draws, slick dekes.' },
   speedster: { label: 'Speedster', icon: '⚡', base: { speed: 9, shot: 5, hands: 6, hit: 3, balance: 4, stamina: 8 }, blurb: 'Blur on skates. Turbo for days.' },
+  grinder: { label: 'Grinder', icon: '⚙️', base: { speed: 6, shot: 4, hands: 5, hit: 7, balance: 8, stamina: 9 }, blurb: 'Never stops. Special: BULLDOZE, five seconds of unstoppable.' },
+  dangler: { label: 'Dangler', icon: '🪄', base: { speed: 7, shot: 6, hands: 9, hit: 2, balance: 5, stamina: 6 }, blurb: 'Silky mitts. Special: PHANTOM, every check whiffs.' },
 };
 export const GOALIE_BASE: Stats = { speed: 5, shot: 3, hands: 6, hit: 4, balance: 8, stamina: 6 };
 
@@ -69,7 +71,7 @@ export function generateGoalie(rng: Rng, tier = 0, idPrefix = 'g'): SkaterDef {
 }
 
 export function randomArchetype(rng: Rng): Exclude<Archetype, 'goalie'> {
-  return rng.pick(['sniper', 'enforcer', 'playmaker', 'speedster'] as const);
+  return rng.pick(['sniper', 'enforcer', 'playmaker', 'speedster', 'grinder', 'dangler'] as const);
 }
 
 export const XP_LEVELS = [0, 100, 250, 450, 700, 1000];

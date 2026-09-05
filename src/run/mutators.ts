@@ -17,5 +17,9 @@ export const MUTATORS: Mutator[] = [
   { id: 'sudden', name: 'Sudden Death', desc: 'First goal wins.', apply: (mm) => { mm.suddenDeath = true; } },
   { id: 'iron_men', name: 'Iron Men', desc: 'Everyone is hard to knock down. Hits are heavier.', apply: (mm) => { for (const t of mm.teams) { mulMod(t, 'hitResistMul', 1.3); mulMod(t, 'hitPowerMul', 1.3); } } },
   { id: 'short', name: 'Quick Skate', desc: 'One long period.', apply: (mm) => { mm.periods = 1; mm.periodLength = 180; } },
+  { id: 'no_specials', name: 'Meter Locked', desc: 'No special moves for anyone.', apply: (mm) => { for (const t of mm.teams) mulMod(t, 'specialGainMul', 0); } },
+  { id: 'fight_night', name: 'Fight Night', desc: 'Gloves come off on every big hit. Three fights a period.', apply: (mm) => { mm.fightsPerPeriod = 3; for (const t of mm.teams) mulMod(t, 'temperMul', 3); } },
+  { id: 'heavy_puck', name: 'Heavy Puck', desc: 'Slow ice: pucks die fast, passes crawl.', apply: (mm) => { mm.puckFrictionMul = 1.7; for (const t of mm.teams) mulMod(t, 'passSpeedMul', 0.85); } },
+  { id: 'outnumbered', name: 'Outnumbered', desc: 'They dress four skaters. You dress three.', apply: (mm) => { mm.bossPhases.push({ period: 1, kind: 'extraSkater', label: 'OUTNUMBERED', desc: 'A fourth skater on the other side all game.' }); } },
 ];
 export const MUTATOR_BY_ID: Record<string, Mutator> = Object.fromEntries(MUTATORS.map((m) => [m.id, m]));

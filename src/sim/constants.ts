@@ -162,6 +162,8 @@ export const SPECIAL = {
   shockwaveRadius: 4.2,
   blinkWindow: 0.7,
   brickWallSaves: 3,
+  bulldozeTime: 5,
+  phantomTime: 4,
 };
 
 export const TEAMFIRE = {
