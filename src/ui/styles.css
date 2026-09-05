@@ -155,3 +155,12 @@ p.screen-sub { color: #8fa3d9; letter-spacing: 0.15em; text-transform: uppercase
 .settings-row { display: flex; align-items: center; justify-content: space-between; width: 360px; padding: 8px 0; border-bottom: 1px solid #2b3352; font-family: var(--font-display); letter-spacing: 0.08em; font-size: 20px; }
 .settings-row input[type=range] { width: 160px; }
 .pause { position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+.cine-tag { position: absolute; left: 24px; top: 96px; font-family: var(--font-display); font-size: 22px; letter-spacing: 0.3em; color: #fff; background: rgba(216,38,47,0.85); padding: 4px 14px; opacity: 0; transition: opacity .2s; }
+.cine-tag.on { opacity: 1; }
+.cine-tag.on::after { content: '  ·  PRESS ANY BUTTON TO SKIP'; font-size: 12px; letter-spacing: 0.2em; color: #ffd0d0; }
+
+.mvp-card { display: inline-block; margin: 6px auto 14px; padding: 10px 26px; border: 3px solid var(--gold); background: linear-gradient(180deg, #2a2036, #0c0f1a); text-align: center; }
+.mvp-card .rarity { font-size: 11px; letter-spacing: 0.3em; color: var(--gold); }
+.mvp-card .cname { font-family: var(--font-display); font-size: 30px; letter-spacing: 0.06em; color: #fff; }
+.mvp-card .desc { font-size: 14px; color: #c8d4f0; }

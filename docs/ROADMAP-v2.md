@@ -56,8 +56,8 @@ Status 2026-09-05: `render/iceMaterial.ts` TSL ice: procedural baked scratch nor
 - Jumbotron: render target with score/clock canvas + replay frame; spotlights (`SpotLight` + volumetric cone mesh), rafters, banners. Port the 3 rink themes.
 - Gate: reflection + skate marks on High; Low disables both; frame budget holds.
 
-### D — Cinematics + audio (M)
-Branch `phase/presentation`.
+### D — Cinematics + audio (M) — IN REVIEW (branch `phase/presentation`, stacked on C)
+Status 2026-09-05: `render/director.ts` keyframed camera shots (intro fly-in with team/captain slam-ins, goal replay from behind the beaten net at 0.45×, on-fire big-hit cut-in at 0.22×, player-of-the-game orbit); `render/replay.ts` 300-frame ring buffer replayed onto scratch skater states so the live sim is untouched; sim is held during intro/replay/mvp and any button skips. Follow cam gained zone zoom, breakaway lead, hit roll. MVP card on the result screen. AUDIO DEVIATION: no reliably CC0 rink samples found (OGA crowd pack is CC-BY 4.0; horn/whistle/skate searches empty), so `assets/src/render_audio.py` pre-renders 13 samples with numpy/scipy (layered crowd voices + reverb, horn chord, pea whistle, skate carves, board slam, hits, organ riff) to `public/audio/*.ogg` (264 KB). `audio/samples.ts` layers them over the synth; drop CC0 recordings with the same file names to replace them.
 - Replay buffer: ring of last 240 sim snapshots (positions/facings/puck). Goal → replay cam behind net, 0.4× speed on the crossing, skippable.
 - Intro fly-in, team slam-in, captain close-up; MVP card at final.
 - Dynamic cam: zoom by zone/breakaway, roll on hits. Big-hit slow-mo cut-in only for on-fire hitters.

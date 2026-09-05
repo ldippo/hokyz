@@ -21,6 +21,7 @@ export class Hud {
       <div class="player-tag"><div class="pname" data-el="pname"></div><div class="ptype" data-el="ptype"></div><div class="hp"><div class="hp-fill" data-el="hp"></div></div></div>
       <div class="fire-streak" data-el="streak"><span></span><span></span><span></span></div>
       <div class="announce" data-el="announce"></div>
+      <div class="cine-tag" data-el="tag"></div>
       <div class="countdown" data-el="countdown"></div>
       <div class="flash" data-el="flash"></div>
       <div class="vignette-fire" data-el="vig"></div>
@@ -46,6 +47,11 @@ export class Hud {
     a.innerHTML = `${text}${sub ? `<span class="sub">${sub}</span>` : ''}`;
     a.className = `announce pop ${cls}`;
     this.announceTimer = 1.6;
+  }
+
+  tag(text: string | null): void {
+    this.els.tag.textContent = text ?? '';
+    this.els.tag.classList.toggle('on', !!text);
   }
 
   flash(): void {

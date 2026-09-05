@@ -41,3 +41,12 @@ pnpm build             # typecheck + vite build → dist/
 ```
 
 Deploys to Vercel as a static Vite site (`vercel.json`).
+
+## Asset builds
+
+```bash
+~/opt/blender-4.5.13-linux-x64/blender -b -P assets/src/build_skater.py -- --out public/models   # skater + goalie GLBs
+python3 assets/src/render_audio.py public/audio                                                  # pre-rendered SFX (numpy/scipy + ffmpeg)
+```
+
+Debug views: `/?perf=1` frame-time overlay, `/?rigview=1&poses=idle,skate,lunge,charge,down,celebrate&goalie=butterfly&cam=front` character poses.

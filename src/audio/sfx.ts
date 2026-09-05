@@ -1,5 +1,14 @@
-/** Procedural Web Audio SFX. No assets. */
+import { SampleBank } from './samples';
+
+const SAMPLE_NAMES = ['crowd_calm', 'crowd_roar', 'horn', 'whistle', 'skate0', 'skate1', 'skate2', 'boards', 'hit', 'bighit', 'pass', 'shot', 'organ'];
+
+/** Web Audio SFX: pre-rendered samples layered over synth, synth alone as fallback. */
 export class Sfx {
+  samples: SampleBank | null = null;
+  private calmLoop: { src: AudioBufferSourceNode; gain: GainNode } | null = null;
+  private roarLoop: { src: AudioBufferSourceNode; gain: GainNode } | null = null;
+  private organLoop: { src: AudioBufferSourceNode; gain: GainNode } | null = null;
+  private skateT = 0;
   ctx: AudioContext | null = null;
   master: GainNode | null = null;
   volume = 0.7;
@@ -23,6 +32,13 @@ export class Sfx {
     this.noiseBuf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
     const d = this.noiseBuf.getChannelData(0);
     for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    this.samples = new SampleBank(this.ctx, this.master);
+    void this.samples.load(SAMPLE_NAMES);
+  }
+  private s(name: string, opts: Parameters<SampleBank['play']>[1] = {}): boolean {
+    if (!this.samples?.has(name)) return false;
+    this.samples.play(name, opts);
+    return true;
   }
   resume(): void {
     this.init();
@@ -67,19 +83,23 @@ export class Sfx {
   }
 
   slapshot(power: number): void {
+    if (this.s('shot', { gain: 0.5 + power * 0.5, rate: 1.05 - power * 0.15 })) return;
     this.noise(0.12 + power * 0.1, 0.5 + power * 0.4, 1800, 0.8);
     this.tone(180, 0.08, 0.25, 'triangle', 60);
   }
   pass(): void {
+    if (this.s('pass', { gain: 0.7, detune: (Math.random() - 0.5) * 300 })) return;
     this.noise(0.08, 0.3, 2400, 1.2);
   }
   hit(big: boolean): void {
+    if (this.s(big ? 'bighit' : 'hit', { gain: big ? 1 : 0.7, detune: (Math.random() - 0.5) * 200 })) return;
     this.noise(big ? 0.35 : 0.18, big ? 1.1 : 0.5, big ? 300 : 500, 0.7, 'lowpass');
     this.tone(big ? 90 : 120, big ? 0.3 : 0.15, big ? 0.6 : 0.3, 'sine', 30);
     if (big) this.noise(0.5, 0.35, 4000, 0.5, 'highpass', 0.02);
   }
   boards(speed: number): void {
     const g = Math.min(0.7, speed / 20);
+    if (this.s('boards', { gain: g * 1.3, detune: (Math.random() - 0.5) * 300 })) return;
     this.noise(0.2, g, 700, 0.8, 'lowpass');
     this.tone(140, 0.12, g * 0.5, 'triangle', 80);
   }
@@ -91,6 +111,10 @@ export class Sfx {
     this.noise(0.15, 0.45, 900, 0.9, 'lowpass');
   }
   goal(): void {
+    if (this.s('horn', { gain: 0.9 })) {
+      this.crowdBurst(1);
+      return;
+    }
     // arena horn
     const f = 196;
     for (const [mul, gain] of [
@@ -110,6 +134,7 @@ export class Sfx {
     this.crowdBurst(0.6);
   }
   whistle(): void {
+    if (this.s('whistle', { gain: 0.6 })) return;
     this.tone(2400, 0.35, 0.35, 'square', 2600, 0.01);
     this.tone(2400 * 1.02, 0.35, 0.2, 'square', 2600, 0.01);
   }
@@ -119,6 +144,22 @@ export class Sfx {
   }
   knockdown(): void {
     this.noise(0.25, 0.4, 250, 0.7, 'lowpass');
+  }
+  /** Call every frame with the controlled skater's speed; emits carve sounds while turning/turboing. */
+  skate(dt: number, speed: number, turbo: boolean): void {
+    if (!this.samples || speed < 4) return;
+    this.skateT -= dt;
+    if (this.skateT > 0) return;
+    this.skateT = 0.28 + Math.random() * 0.2 - (turbo ? 0.08 : 0);
+    this.s(`skate${Math.floor(Math.random() * 3)}`, { gain: 0.12 + Math.min(0.25, speed / 40), rate: 0.9 + Math.random() * 0.25 });
+  }
+  startMusic(): void {
+    if (!this.samples?.has('organ') || this.organLoop) return;
+    this.organLoop = this.samples.loop('organ', 0.18);
+  }
+  stopMusic(): void {
+    this.organLoop?.src.stop();
+    this.organLoop = null;
   }
   ui(): void {
     this.tone(880, 0.06, 0.15, 'square');
@@ -142,6 +183,12 @@ export class Sfx {
   /** Continuous crowd bed */
   startCrowd(): void {
     if (!this.ctx || !this.master || !this.noiseBuf || this.crowdNode) return;
+    if (this.samples?.has('crowd_calm') && !this.calmLoop) {
+      this.calmLoop = this.samples.loop('crowd_calm', 0.35);
+      this.roarLoop = this.samples.loop('crowd_roar', 0);
+      this.crowdNode = null;
+      // keep a quiet synth bed under the samples
+    }
     const src = this.ctx.createBufferSource();
     src.buffer = this.noiseBuf;
     src.loop = true;
@@ -160,8 +207,19 @@ export class Sfx {
   stopCrowd(): void {
     this.crowdNode?.stop();
     this.crowdNode = null;
+    this.calmLoop?.src.stop();
+    this.roarLoop?.src.stop();
+    this.calmLoop = this.roarLoop = null;
   }
   crowdBurst(intensity: number): void {
+    if (this.ctx && this.roarLoop) {
+      const t = this.ctx.currentTime;
+      const g = this.roarLoop.gain.gain;
+      g.cancelScheduledValues(t);
+      g.setValueAtTime(g.value, t);
+      g.linearRampToValueAtTime(Math.min(1, 0.25 + 0.75 * intensity), t + 0.2);
+      g.exponentialRampToValueAtTime(0.001, t + 2.5 + intensity * 3);
+    }
     if (!this.ctx || !this.crowdGain || !this.crowdFilter) return;
     const t = this.ctx.currentTime;
     this.crowdGain.gain.cancelScheduledValues(t);

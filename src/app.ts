@@ -91,8 +91,15 @@ export class App {
   private simStep(): void {
     this.input.poll();
     if (this.view && !this.paused) {
-      const ev = this.view.sim.step(this.humanPlaying ? { 0: this.input.simInput() } : {});
-      this.view.afterStep(ev);
+      const v = this.view;
+      if (v.director.active && this.humanPlaying && (this.input.justPressed('confirm') || this.input.justPressed('pass') || this.input.justPressed('shoot') || this.input.justPressed('back'))) {
+        v.skipCinematic();
+      }
+      this.loop.speed = v.timeScale;
+      if (!v.holdSim) {
+        const ev = v.sim.step(this.humanPlaying ? { 0: this.input.simInput() } : {});
+        v.afterStep(ev);
+      }
     }
     this.nav?.update(this.input);
     this.onTick?.();
@@ -123,6 +130,8 @@ export class App {
   // ---------- match view ----------
   startView(sim: MatchSim, human: boolean, perkNames: string[] = []): MatchView {
     this.disposeView();
+    if (human) sfx.stopMusic();
+    this.loop.speed = 1;
     const theme = RINK_THEMES[this.meta.selectedRink] ?? RINK_THEMES.classic;
     this.view = new MatchView(this.rig, sim, this.ui, human ? 0 : null, perkNames, theme);
     this.humanPlaying = human;
@@ -154,6 +163,7 @@ export class App {
     const v = this.startView(sim, false);
     v.hud.root.style.display = 'none';
     v.silent = true;
+    sfx.startMusic();
   }
 
   // ---------- persistence ----------
