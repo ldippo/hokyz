@@ -14,6 +14,12 @@ export class Arena {
   private lastDraw = -1;
   private cones: THREE.Mesh[] = [];
   private spotAmount = uniform(0.35);
+  private spots: THREE.SpotLight[] = [];
+  private coneMat: THREE.MeshBasicNodeMaterial | null = null;
+  private baseSpot = new THREE.Color(0xfff2dd);
+  private flashT = 0;
+  private flashDur = 0;
+  private flashColor = new THREE.Color(0xffffff);
 
   constructor(theme: RinkTheme) {
     // --- rafters ---
@@ -74,6 +80,8 @@ export class Arena {
     // --- spotlights + volumetric cones ---
     const spotColor = new THREE.Color(theme.spot);
     const coneMat = new THREE.MeshBasicNodeMaterial();
+    this.coneMat = coneMat;
+    this.baseSpot.copy(spotColor);
     coneMat.transparent = true;
     coneMat.depthWrite = false;
     coneMat.blending = THREE.AdditiveBlending;
@@ -94,6 +102,7 @@ export class Arena {
       light.position.set(x, 16.5, z);
       light.target.position.set(x * 0.35, 0, z * 0.35);
       this.group.add(light, light.target);
+      this.spots.push(light);
       const h = 16.5;
       const cone = new THREE.Mesh(new THREE.ConeGeometry(4.2, h, 20, 1, true), coneMat);
       const dir = new THREE.Vector3(x * 0.35 - x, -h, z * 0.35 - z);
@@ -135,5 +144,36 @@ export class Arena {
 
   setSpotAmount(v: number): void {
     this.spotAmount.value = v;
+  }
+
+  /** Goal light show: spots + cones strobe in the scoring team's color. */
+  flash(color: string | number, seconds = 2.5): void {
+    this.flashColor.set(color);
+    this.flashT = 0;
+    this.flashDur = seconds;
+  }
+
+  update(dt: number): void {
+    if (this.flashDur <= 0) return;
+    this.flashT += dt;
+    const k = this.flashT / this.flashDur;
+    if (k >= 1) {
+      this.flashDur = 0;
+      for (const l of this.spots) {
+        l.color.copy(this.baseSpot);
+        l.intensity = 90;
+      }
+      if (this.coneMat) this.coneMat.color.copy(this.baseSpot).multiplyScalar(0.35);
+      this.spotAmount.value = 0.35;
+      return;
+    }
+    const strobe = 0.5 + 0.5 * Math.sin(this.flashT * 22);
+    const c = this.baseSpot.clone().lerp(this.flashColor, 0.8 * (1 - k));
+    for (const l of this.spots) {
+      l.color.copy(c);
+      l.intensity = 90 + 160 * strobe * (1 - k);
+    }
+    if (this.coneMat) this.coneMat.color.copy(c).multiplyScalar(0.35 + 0.5 * strobe * (1 - k));
+    this.spotAmount.value = 0.35 + 0.9 * strobe * (1 - k);
   }
 }

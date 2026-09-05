@@ -1,6 +1,6 @@
 import { SampleBank } from './samples';
 
-const SAMPLE_NAMES = ['crowd_calm', 'crowd_roar', 'horn', 'whistle', 'skate0', 'skate1', 'skate2', 'boards', 'hit', 'bighit', 'pass', 'shot', 'organ'];
+const SAMPLE_NAMES = ['crowd_calm', 'crowd_roar', 'horn', 'whistle', 'skate0', 'skate1', 'skate2', 'boards', 'hit', 'bighit', 'pass', 'shot', 'organ', 'chant'];
 
 /** Web Audio SFX: pre-rendered samples layered over synth, synth alone as fallback. */
 export class Sfx {
@@ -8,6 +8,7 @@ export class Sfx {
   private calmLoop: { src: AudioBufferSourceNode; gain: GainNode } | null = null;
   private roarLoop: { src: AudioBufferSourceNode; gain: GainNode } | null = null;
   private organLoop: { src: AudioBufferSourceNode; gain: GainNode } | null = null;
+  private chantLoop: { src: AudioBufferSourceNode; gain: GainNode } | null = null;
   private skateT = 0;
   ctx: AudioContext | null = null;
   master: GainNode | null = null;
@@ -153,6 +154,21 @@ export class Sfx {
     this.skateT = 0.28 + Math.random() * 0.2 - (turbo ? 0.08 : 0);
     this.s(`skate${Math.floor(Math.random() * 3)}`, { gain: 0.12 + Math.min(0.25, speed / 40), rate: 0.9 + Math.random() * 0.25 });
   }
+  /** Crowd chant for a few seconds (goal for the home side, late lead). */
+  chant(seconds = 8, gain = 0.5): void {
+    if (!this.ctx || !this.samples?.has('chant')) return;
+    const t = this.ctx.currentTime;
+    if (!this.chantLoop) {
+      this.chantLoop = this.samples.loop('chant', 0);
+      if (!this.chantLoop) return;
+    }
+    const g = this.chantLoop.gain.gain;
+    g.cancelScheduledValues(t);
+    g.setValueAtTime(g.value, t);
+    g.linearRampToValueAtTime(gain, t + 0.4);
+    g.setValueAtTime(gain, t + seconds - 1);
+    g.linearRampToValueAtTime(0.0001, t + seconds);
+  }
   startMusic(): void {
     if (!this.samples?.has('organ') || this.organLoop) return;
     this.organLoop = this.samples.loop('organ', 0.18);
@@ -209,7 +225,8 @@ export class Sfx {
     this.crowdNode = null;
     this.calmLoop?.src.stop();
     this.roarLoop?.src.stop();
-    this.calmLoop = this.roarLoop = null;
+    this.chantLoop?.src.stop();
+    this.calmLoop = this.roarLoop = this.chantLoop = null;
   }
   crowdBurst(intensity: number): void {
     if (this.ctx && this.roarLoop) {

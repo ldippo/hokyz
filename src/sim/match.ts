@@ -12,7 +12,7 @@ import { makeSkater } from './skater';
 import { stepSkater } from './skater';
 import { EMPTY_INPUT, type Input, type MatchEvent, type MatchMods, type MatchState, type SkaterDef, type TeamId, type TeamState } from './types';
 import { dist } from './vec';
-import { GOALIE } from './constants';
+import { GOALIE, AI } from './constants';
 import { restoreEjected, stepFight } from './fight';
 import { gainSpecial, stepSpecialInputs, stepTeamFire } from './specials';
 import { aiShooterInput, startShootout, stepShootout } from './shootout';
@@ -328,6 +328,12 @@ export class MatchSim {
           this.togglePull(team.id, events);
         }
         if (!inp?.passHeld) team.pullLatch = false;
+      } else if (!team.scripted && !st.overtime && st.period >= st.mods.periods && !st.shootout) {
+        // AI goalie pull: trailing by a little, late in regulation
+        const other = st.teams[team.id === 0 ? 1 : 0];
+        const deficit = other.score - team.score;
+        if (!team.pulled && deficit > 0 && deficit <= AI.pullDeficitMax && st.clock <= AI.pullClock && team.goalie && team.difficulty >= 1) this.togglePull(team.id, events);
+        else if (team.pulled && deficit <= 0) this.togglePull(team.id, events);
       }
     }
 
