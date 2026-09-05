@@ -164,6 +164,38 @@ export const DRILLS: Drill[] = [
     hint: 'Line him up and check from full speed.',
   },
   {
+    id: 'block',
+    title: 'SHOT BLOCK',
+    text: 'No stick needed: skate [{up}][{left}][{down}][{right}] into the lane between the shooter and your net. Block three shots with your body.',
+    setup: (c) => {
+      place(c.me, -14, 4, Math.PI);
+      c.me.stats.balance = Math.max(c.me.stats.balance, 7);
+      place(c.dummies[0], -9, 0, Math.PI);
+      givePuck(c.st, c.dummies[0], []);
+      const x = c as unknown as { shootAt: number; blocks: number };
+      x.shootAt = c.t + 2;
+      x.blocks = 0;
+      c.marker({ x: -12.4, y: 0 });
+    },
+    tick: (c) => {
+      const d = c.dummies[0];
+      const x = c as unknown as { shootAt: number; blocks: number };
+      if (c.t >= x.shootAt && d.hasPuck) c.sim.scriptInputs.set(d.id, { ...EMPTY_INPUT, move: { x: 0, y: 0 }, aim: { x: 0, y: 0 }, shoot: true, shootRelease: true });
+      else c.sim.scriptInputs.delete(d.id);
+      const p = c.st.puck;
+      if (!d.hasPuck && ((p.owner && p.owner !== d.id) || p.freeTime > 2.2)) {
+        if (p.owner) c.st.skaters[p.owner].hasPuck = false;
+        p.owner = null;
+        place(d, -9, 0, Math.PI);
+        givePuck(c.st, d, []);
+        x.shootAt = c.t + 2;
+      }
+      if (c.events.some((e) => e.type === 'shotBlock' && e.blocker === c.me.id)) x.blocks++;
+      return x.blocks >= 3;
+    },
+    hint: 'Stand still in the lane; the puck finds you.',
+  },
+  {
     id: 'saucer',
     title: 'SAUCER PASS',
     text: 'A body is in the lane. Hold [{pass}] / [A] a moment and release to saucer the puck over him to your teammate.',

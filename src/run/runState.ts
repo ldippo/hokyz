@@ -1,6 +1,6 @@
 import { Rng, hashSeed } from '../core/rng';
 import { migrateRun } from '../core/save';
-import type { MatchMods, SkaterDef, TeamMods } from '../sim/types';
+import type { MatchMods, SkaterDef, TeamMods, GoalieStyle } from '../sim/types';
 import { defaultMatchMods, defaultTeamMods } from '../sim/modifiers';
 import { findNode, generateRunMap, type ActMap, type MapNode } from './mapGen';
 import { CAPTAINS, type Captain } from './meta';
@@ -63,7 +63,7 @@ export function shortFor(name: string): string {
   return w.slice(0, 8) || 'TEAM';
 }
 
-export function newRun(seedText: string, captain: Captain, ascension: number, unlockedPerks: string[], identity?: Partial<TeamIdentity>): RunState {
+export function newRun(seedText: string, captain: Captain, ascension: number, unlockedPerks: string[], identity?: Partial<TeamIdentity>, goalieStyle: GoalieStyle | null = null): RunState {
   const seed = hashSeed(seedText || String(Date.now()));
   const rng = new Rng(seed);
   const maps = generateRunMap(rng.fork(), 3);
@@ -75,6 +75,7 @@ export function newRun(seedText: string, captain: Captain, ascension: number, un
   roster.push(generateSkater(rng, a1, 0), generateSkater(rng, a2, 0));
   roster.push(generateSkater(rng, randomArchetype(rng), 0)); // bench
   const goalie = generateGoalie(rng, 0);
+  if (goalieStyle) goalie.goalieStyle = goalieStyle;
   const ni = rng.int(0, TEAM_NAMES.length - 1);
   const name = identity?.name?.trim() || TEAM_NAMES[ni];
   return {

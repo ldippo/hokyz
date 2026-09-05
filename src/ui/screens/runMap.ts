@@ -5,6 +5,7 @@ import { availableNodes, currentAct, enterNode, lineup, runEffects, type RunStat
 import { COLS, nodeIcon, nodeLabel, type MapNode } from '../../run/mapGen';
 import { PERK_BY_ID, TAG_INFO, SET_SIZE, tagCounts, activeSets } from '../../run/perks';
 import { XP_LEVELS, MAX_LEVEL, GOALIE_STYLES } from '../../run/roster';
+import { copyText, seedLink } from '../../run/share';
 import { ARCHETYPES, isInjured, TRAITS } from '../../run/roster';
 import { matchIntroScreen } from './match';
 import { shopScreen } from './shop';
@@ -69,7 +70,7 @@ export function topBar(app: App, run: RunState, extra?: HTMLElement): HTMLElemen
       h('span', { class: 'stat' }, h('small', {}, 'RECORD'), `${run.matchesWon}-${run.matchesPlayed - run.matchesWon}`),
       lives > 0 ? h('span', { class: 'stat' }, h('small', {}, 'SECOND WIND'), '❤️'.repeat(lives)) : null,
       run.ascension ? h('span', { class: 'stat' }, h('small', {}, 'ASC'), String(run.ascension)) : null,
-      h('span', { class: 'stat', style: 'color:#8fa3d9;font-size:13px' }, h('small', {}, 'SEED'), run.seedText || String(run.seed)),
+      h('span', { class: 'stat', style: 'color:#8fa3d9;font-size:13px' }, h('small', {}, 'SEED'), run.seedText || String(run.seed), h('button', { class: 'linkbtn', title: 'Copy a link that starts a run on this seed', onClick: () => { void copyText(seedLink(run.seedText || String(run.seed))).then((ok) => app.toast(ok ? 'Seed link copied' : 'Copy failed')); } }, '🔗')),
     ),
     h('div', { style: 'display:flex;gap:10px' }, extra ?? null, btn('Save & Quit', () => { app.saveRun(); app.disposeView(); titleScreen(app); })),
   );

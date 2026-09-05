@@ -163,6 +163,63 @@ export class App {
     this.loop.start();
   }
 
+  /** Photo mode: fresh frame, scoreboard strip and watermark composited on a copy of the canvas. */
+  photo(): Promise<Blob | null> {
+    const src = this.rig.renderer.domElement as HTMLCanvasElement;
+    if (this.view) this.view.render(1, 0);
+    else this.rig.render(0);
+    const out = document.createElement('canvas');
+    out.width = src.width;
+    out.height = src.height;
+    const g = out.getContext('2d');
+    if (!g) return Promise.resolve(null);
+    g.drawImage(src, 0, 0);
+    const st = this.view?.sim.st;
+    const scale = out.width / 1280;
+    if (st) {
+      const [a, b] = st.teams;
+      const c = Math.max(0, st.clock);
+      const clock = `${Math.floor(c / 60)}:${Math.floor(c % 60).toString().padStart(2, '0')}`;
+      const per = st.overtime ? 'OT' : st.period === 1 ? '1ST' : st.period === 2 ? '2ND' : st.period === 3 ? '3RD' : `${st.period}TH`;
+      const text = `${a.short} ${a.score}   ${clock} ${per}   ${b.score} ${b.short}`;
+      g.font = `${Math.round(30 * scale)}px "Bebas Neue", Impact, sans-serif`;
+      const w = g.measureText(text).width + 48 * scale;
+      const x = (out.width - w) / 2,
+        y = 18 * scale,
+        hgt = 48 * scale;
+      g.fillStyle = 'rgba(8,10,20,0.78)';
+      g.fillRect(x, y, w, hgt);
+      g.fillStyle = a.color;
+      g.fillRect(x, y, 8 * scale, hgt);
+      g.fillStyle = b.color;
+      g.fillRect(x + w - 8 * scale, y, 8 * scale, hgt);
+      g.fillStyle = '#fff';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.fillText(text, out.width / 2, y + hgt / 2);
+    }
+    g.font = `${Math.round(22 * scale)}px "Bebas Neue", Impact, sans-serif`;
+    g.textAlign = 'right';
+    g.textBaseline = 'bottom';
+    g.fillStyle = 'rgba(255,255,255,0.7)';
+    g.fillText('HOKYZ', out.width - 16 * scale, out.height - 12 * scale);
+    return new Promise((resolve) => out.toBlob((blob) => resolve(blob), 'image/png'));
+  }
+
+  /** Photo mode → download. */
+  async snap(): Promise<boolean> {
+    const blob = await this.photo();
+    if (!blob) return false;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `hokyz-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    return true;
+  }
+
   private simStep(): void {
     this.input.poll();
     if (this.view && !this.paused) {
