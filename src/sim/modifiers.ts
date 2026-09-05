@@ -43,6 +43,7 @@ export function defaultMatchMods(): MatchMods {
     suddenDeath: false,
     mercyRule: 0,
     noFights: false,
+    fightsPerPeriod: 1,
     shootoutOnly: false,
     shootoutRounds: 3,
     bossPhases: [],

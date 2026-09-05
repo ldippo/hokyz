@@ -22,6 +22,7 @@ export function matchIntroScreen(app: App, node: MapNode): void {
   const diffName = ['ROOKIE', 'PRO', 'ALL-STAR', 'BRUTAL'][bundle.away.difficulty];
   const el = h('div', { class: 'screen transparent' },
     h('h2', { class: 'screen-title' }, node.type === 'boss' ? '👑 BOSS FIGHT' : node.type === 'elite' ? '💀 ELITE MATCH' : 'NEXT MATCH'),
+    bundle.away.taunt ? h('div', { class: 'taunt' }, `“${bundle.away.taunt}”`, h('span', {}, ` — GRUDGE MATCH · +${bundle.away.grudge * 50}% BOUNTY · TIER +${Math.min(2, bundle.away.grudge)}`)) : null,
     h('div', { class: 'matchup' },
       h('div', { class: 'team' }, h('div', { class: 'tn', style: `color:${bundle.home.color}` }, esc(run.teamName)), h('div', { class: 'gimmick' }, `${bundle.home.skaters.map((s) => s.name.split(' ')[0]).join(' · ')}`)),
       h('div', { class: 'vs' }, 'VS'),

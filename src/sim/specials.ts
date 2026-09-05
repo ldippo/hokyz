@@ -94,6 +94,13 @@ export function trySpecial(st: MatchState, sk: Skater, rng: Rng, events: MatchEv
       team.brickWall = SPECIAL.brickWallSaves;
       sk.specialTimer = 0.5;
       break;
+    case 'bulldoze':
+      sk.specialTimer = SPECIAL.bulldozeTime;
+      sk.turbo = 1;
+      break;
+    case 'phantom':
+      sk.specialTimer = SPECIAL.phantomTime;
+      break;
   }
   team.special = 0;
   events.push({ type: 'special', skater: sk.id, kind, pos });
@@ -125,6 +132,16 @@ export function aiWantsSpecial(st: MatchState, sk: Skater, rng: Rng): boolean {
     }
     case 'brickwall':
       return !p.owner && p.isShot && p.lastTouchTeam !== sk.team && rng.next() < 0.5;
+    case 'bulldoze': {
+      const carrierNear = p.owner && st.skaters[p.owner].team !== sk.team && dist(st.skaters[p.owner].pos, sk.pos) < 6;
+      return (!!carrierNear || sk.hasPuck) && rng.next() < 0.08;
+    }
+    case 'phantom': {
+      if (!sk.hasPuck) return false;
+      let pressured = false;
+      for (const id of st.teams[sk.team === 0 ? 1 : 0].skaters) if (dist(st.skaters[id].pos, sk.pos) < 3.5) pressured = true;
+      return pressured && rng.next() < 0.12;
+    }
   }
 }
 

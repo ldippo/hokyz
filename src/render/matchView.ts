@@ -353,7 +353,7 @@ export class MatchView {
       }
       case 'special': {
         const sk = st.skaters[e.skater];
-        const label = { laser: 'LASER SHOT', shockwave: 'SHOCKWAVE', afterburner: 'AFTERBURNER', blink: 'BLINK PASS', brickwall: 'BRICK WALL' }[e.kind];
+        const label = { laser: 'LASER SHOT', shockwave: 'SHOCKWAVE', afterburner: 'AFTERBURNER', blink: 'BLINK PASS', brickwall: 'BRICK WALL', bulldoze: 'BULLDOZE', phantom: 'PHANTOM' }[e.kind];
         if (sk.controlled || st.teams[sk.team].isHuman) this.hud.announce(label, 'fire', sk.name);
         else this.hud.announce(label, 'red', sk.name);
         if (e.kind === 'shockwave') {
@@ -370,7 +370,7 @@ export class MatchView {
           const to = st.puck.owner ? st.skaters[st.puck.owner] : null;
           if (to) this.particles.spawn({ x: to.pos.x, y: to.pos.y, z: 0.4, count: 30, color: [0x7fa6ff, 0xffffff], speed: 4, life: 0.5, size: 0.1, up: 3, gravity: 0 });
         } else {
-          this.particles.spawn({ x: e.pos.x, y: e.pos.y, z: 0.6, count: 36, color: e.kind === 'laser' ? [0xff2d3a, 0xffffff] : e.kind === 'afterburner' ? [0xff7a1a, 0xffc400] : [0xffffff, 0x7fa6ff], speed: 5, life: 0.6, size: 0.12, up: 4, gravity: 2 });
+          this.particles.spawn({ x: e.pos.x, y: e.pos.y, z: 0.6, count: 36, color: e.kind === 'laser' ? [0xff2d3a, 0xffffff] : e.kind === 'afterburner' ? [0xff7a1a, 0xffc400] : e.kind === 'bulldoze' ? [0xffd23f, 0x8a8f99] : e.kind === 'phantom' ? [0xc56bff, 0xffffff] : [0xffffff, 0x7fa6ff], speed: 5, life: 0.6, size: 0.12, up: 4, gravity: 2 });
         }
         sfx.onFire();
         break;
@@ -701,6 +701,8 @@ export class MatchView {
     for (const id of st.order) {
       const k = st.skaters[id];
       if (k.specialTimer > 0 && k.specialKind === 'afterburner') this.particles.spawn({ x: k.pos.x - Math.cos(k.facing) * 0.5, y: k.pos.y - Math.sin(k.facing) * 0.5, z: 0.5, count: 2, color: [0xff7a1a, 0xffc400], speed: 1.5, life: 0.4, size: 0.14, up: 1, gravity: 0 });
+      if (k.specialTimer > 0 && k.specialKind === 'phantom' && Math.random() < 0.6) this.particles.spawn({ x: k.pos.x, y: k.pos.y, z: 0.8, count: 1, color: [0xc56bff, 0xffffff], speed: 0.6, life: 0.5, size: 0.1, up: 1.2, gravity: -0.5 });
+      if (k.specialTimer > 0 && k.specialKind === 'bulldoze' && Math.random() < 0.5) this.particles.spawn({ x: k.pos.x, y: k.pos.y, z: 0.15, count: 1, color: [0xffd23f, 0xffffff], speed: 1.5, life: 0.35, size: 0.09, up: 1, gravity: 4 });
       if (k.specialTimer > 0 && k.specialKind === 'laser' && k.hasPuck && Math.random() < 0.5) this.particles.spawn({ x: st.puck.pos.x, y: st.puck.pos.y, z: 0.15, count: 1, color: 0xff2d3a, speed: 0.4, life: 0.3, size: 0.08, up: 0.6, gravity: 0 });
     }
     // aim reticle, pass lanes, one-timer ring for the controlled carrier
