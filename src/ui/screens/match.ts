@@ -12,6 +12,8 @@ import { sfx } from '../../audio/sfx';
 import { RIVAL_BY_ID } from '../../run/teams';
 import { MUTATOR_BY_ID } from '../../run/mutators';
 import { Nav } from '../nav';
+import { awardFeats } from '../../run/feats';
+import type { MetaProfile } from '../../run/meta';
 
 export function matchIntroScreen(app: App, node: MapNode): void {
   const run = app.run!;
@@ -49,11 +51,16 @@ function startRunMatch(app: App, node: MapNode, bundle: ReturnType<typeof buildM
   const perkNames = run.perks.map((id) => `${PERK_BY_ID[id]?.icon ?? ''} ${PERK_BY_ID[id]?.name ?? id}`);
   playMatch(app, sim, perkNames, (outcome) => {
     const res = applyMatchOutcome(run, node, outcome);
-    app.meta.totalGoals += outcome.scoreFor;
-    app.meta.totalBigHits += outcome.bigHits;
-    app.saveMeta();
     if (!res.ended) completeNode(run, node);
+    const rivalId = node.rivalId ?? 'unknown';
+    app.meta.rivalRecord ??= {};
+    const rr = (app.meta.rivalRecord[rivalId] ??= { w: 0, l: 0 });
+    if (outcome.won) rr.w++;
+    else rr.l++;
+    const feats = awardFeats(app.meta, { outcome, run, node });
+    app.saveMeta();
     app.saveRun();
+    if (feats.length) app.toast(`FEAT: ${feats.map((f) => `${f.icon} ${f.name} +${f.reward.cash ?? 0}`).join('  ·  ')}`);
     matchResultScreen(app, node, outcome, res);
   });
 }
@@ -107,17 +114,29 @@ export function playMatch(app: App, sim: MatchSim, perkNames: string[], done: (o
       scoreAgainst: st.teams[1].score,
       bigHits: st.stats.bigHits[0],
       hp,
+      ...extras,
       boxScore: st.order.map((id) => {
         const s = st.skaters[id];
         return { id, name: s.name, team: s.team, goals: s.goals, assists: s.assists, hits: s.hits, bigHits: s.bigHits, shots: s.shots, saves: s.saves, isGoalie: s.isGoalie };
       }),
     };
     app.disposeView();
+    recordMatch(app.meta, outcome, sim.st.teams[1].name);
     done(outcome);
   };
+  const extras = { fightsWon: 0, specialsUsed: 0, ankleBreakers: 0, bigSaves: 0, shootoutWon: false, topCornerGoals: 0, teamFire: false };
   let overSince = -1;
   app.onTick = () => {
     if (finished) return;
+    for (const e of app.view?.lastEvents ?? []) {
+      if (e.type === 'fightEnd' && e.winner && sim.st.skaters[e.winner]?.team === 0) extras.fightsWon++;
+      if (e.type === 'special' && sim.st.skaters[e.skater]?.team === 0) extras.specialsUsed++;
+      if (e.type === 'ankleBreaker' && sim.st.skaters[e.skater]?.team === 0) extras.ankleBreakers++;
+      if (e.type === 'bigSave' && sim.st.skaters[e.goalie]?.team === 0) extras.bigSaves++;
+      if (e.type === 'shootoutEnd' && e.winner === 0) extras.shootoutWon = true;
+      if (e.type === 'goal' && e.team === 0 && e.high) extras.topCornerGoals++;
+      if (e.type === 'teamFire' && e.team === 0) extras.teamFire = true;
+    }
     if (app.paused) {
       if (app.input.justPressed('pause')) closePause();
       return;
@@ -137,6 +156,20 @@ export function playMatch(app: App, sim: MatchSim, perkNames: string[], done: (o
       }
     }
   };
+}
+
+/** Meta records + lifetime stats from any match (run or quick). */
+export function recordMatch(meta: MetaProfile, outcome: MatchOutcome, opponent: string): void {
+  meta.totalGoals += outcome.scoreFor;
+  meta.totalBigHits += outcome.bigHits;
+  meta.totalFightsWon = (meta.totalFightsWon ?? 0) + (outcome.fightsWon ?? 0);
+  meta.totalTopCorner = (meta.totalTopCorner ?? 0) + (outcome.topCornerGoals ?? 0);
+  meta.totalAnkle = (meta.totalAnkle ?? 0) + (outcome.ankleBreakers ?? 0);
+  meta.totalSpecials = (meta.totalSpecials ?? 0) + (outcome.specialsUsed ?? 0);
+  meta.totalShootoutWins = (meta.totalShootoutWins ?? 0) + (outcome.shootoutWon ? 1 : 0);
+  meta.bestGoalsMatch = Math.max(meta.bestGoalsMatch ?? 0, outcome.scoreFor);
+  meta.bestBigHitsMatch = Math.max(meta.bestBigHitsMatch ?? 0, outcome.bigHits);
+  void opponent;
 }
 
 export function matchResultScreen(app: App, node: MapNode, outcome: MatchOutcome, res: { cash: number; ended: boolean; usedLife: boolean }): void {

@@ -3,6 +3,7 @@ import { btn, h } from '../dom';
 import { titleScreen } from './title';
 import { captainScreen } from './captain';
 import { PERK_BY_ID } from '../../run/perks';
+import { awardFeats } from '../../run/feats';
 
 export function runOverScreen(app: App): void {
   const run = app.run!;
@@ -13,9 +14,24 @@ export function runOverScreen(app: App): void {
     app.meta.bestAct = run.act;
     app.meta.bestRow = run.row;
   }
+  const m = app.meta;
+  m.telemetry ??= { perkOffered: {}, perkPicked: {}, nodePicked: {}, runEndAct: {} };
+  m.telemetry.runEndAct[String(run.won ? 'won' : run.act)] = (m.telemetry.runEndAct[String(run.won ? 'won' : run.act)] ?? 0) + 1;
+  if (run.weekly) {
+    const w = m.weekly && m.weekly.week === run.weekly ? m.weekly : { week: run.weekly, bestAct: 0, bestRow: 0, won: false, runs: 0 };
+    w.runs++;
+    if (run.won || run.act > w.bestAct || (run.act === w.bestAct && run.row > w.bestRow)) {
+      w.bestAct = run.act;
+      w.bestRow = run.row;
+    }
+    if (run.won) w.won = true;
+    m.weekly = w;
+  }
+  const feats = awardFeats(m, { run, runOver: true });
   app.saveMeta();
   app.clearSavedRun();
   app.run = null;
+  if (feats.length) app.toast(`FEAT: ${feats.map((f) => `${f.icon} ${f.name} +${f.reward.cash ?? 0}`).join('  ·  ')}`);
   app.attract();
   const el = h('div', { class: 'screen transparent' },
     h('div', { class: 'result' },

@@ -8,6 +8,7 @@ import { defaultMatchMods } from '../../sim/modifiers';
 import { MatchSim } from '../../sim/match';
 import { playMatch } from './match';
 import { MUTATORS } from '../../run/mutators';
+import { awardFeats } from '../../run/feats';
 
 export function quickMatchScreen(app: App): void {
   let diff = 1;
@@ -51,7 +52,9 @@ export function quickMatchScreen(app: App): void {
           rng.int(1, 1e9),
         );
         playMatch(app, sim, [], (outcome) => {
-          void outcome;
+          const feats = awardFeats(app.meta, { outcome });
+          app.saveMeta();
+          if (feats.length) app.toast(`FEAT: ${feats.map((f) => `${f.icon} ${f.name} +${f.reward.cash ?? 0}`).join('  ·  ')}`);
           titleScreen(app);
         });
       }, 'primary'),
