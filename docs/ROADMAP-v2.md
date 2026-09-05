@@ -31,8 +31,9 @@ Decisions locked 2026-09-05 (grill session). This is the execution plan. Every p
 
 ## Phases
 
-### A — Renderer foundation (L)
-Branch `phase/renderer`. Goal: same visuals as today, new pipeline.
+### A — Renderer foundation (L) — IN REVIEW (branch `phase/renderer`)
+Goal: same visuals as today, new pipeline.
+Status 2026-09-05: WebGPURenderer + WebGL2 fallback, RenderPipeline post stack (bloom, GTAO, TRAA/FXAA, radial-zoom + chroma hit fx, grade + vignette), Low/Med/High tiers with GPU probe + watchdog, `?perf=1` overlay, hit-stop, Settings quality row. Verified on the WebGL2 path in headless; WebGPU path needs a real-GPU playtest. Bundle grew to ~1 MB (292 KB gzip) from three/webgpu + addons; code-split is a Phase H item.
 - Swap `SceneRig` to `WebGPURenderer`; convert all materials to node materials (`MeshStandardNodeMaterial` etc.).
 - Post stack via `PostProcessing` + nodes: bloom, color grade (LUT-ish TSL), vignette, GTAO, TRAA.
 - Hit-reaction fx: hit-stop (loop.speed dip 3 frames), radial blur + chroma split uniform driven by `st.shake`, turbo speed lines.

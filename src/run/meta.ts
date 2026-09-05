@@ -64,10 +64,12 @@ export interface MetaProfile {
   selectedRink: string;
   volume: number;
   seenIntro: boolean;
+  /** 'auto' picks by GPU probe + watchdog */
+  quality: 'auto' | 'low' | 'med' | 'high';
 }
 
 export function defaultMeta(): MetaProfile {
-  return { version: 1, cash: 0, unlocked: ['cap_bricker', 'cap_flash'], runs: 0, wins: 0, bestAct: 0, bestRow: 0, totalGoals: 0, totalBigHits: 0, selectedRink: 'classic', volume: 0.7, seenIntro: false };
+  return { version: 1, cash: 0, unlocked: ['cap_bricker', 'cap_flash'], runs: 0, wins: 0, bestAct: 0, bestRow: 0, totalGoals: 0, totalBigHits: 0, selectedRink: 'classic', volume: 0.7, seenIntro: false, quality: 'auto' };
 }
 
 export const isUnlocked = (m: MetaProfile, id: string): boolean => m.unlocked.includes(id);

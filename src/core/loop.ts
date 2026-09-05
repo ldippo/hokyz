@@ -14,6 +14,8 @@ export class GameLoop {
   running = false;
   speed = 1;
   maxStepsPerFrame = 5;
+  /** frames to hold the sim still (hit-stop). Render continues. */
+  freezeFrames = 0;
   constructor(private hooks: LoopHooks) {}
 
   start(): void {
@@ -25,7 +27,10 @@ export class GameLoop {
       let dt = (now - this.last) / 1000;
       this.last = now;
       if (dt > 0.25) dt = 0.25;
-      this.acc += dt * this.speed;
+      if (this.freezeFrames > 0) {
+        this.freezeFrames--;
+        this.acc = 0;
+      } else this.acc += dt * this.speed;
       let steps = 0;
       while (this.acc >= SIM_DT && steps < this.maxStepsPerFrame) {
         this.hooks.simStep();

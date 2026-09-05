@@ -12,6 +12,8 @@ import { quickTeam } from './sim/fixtures';
 import { defaultMatchMods } from './sim/modifiers';
 import { RIVALS, buildRivalRoster } from './run/teams';
 import { Rng } from './core/rng';
+import { PerfProbe, TIERS, Watchdog, probeTier, type Tier } from './render/quality';
+import { h } from './ui/dom';
 
 export class App {
   rig: SceneRig;
@@ -27,6 +29,9 @@ export class App {
   onTick: (() => void) | null = null;
   paused = false;
   humanPlaying = false;
+  watchdog: Watchdog;
+  perf: PerfProbe;
+  private toastEl: HTMLElement | null = null;
 
   constructor(canvas: HTMLCanvasElement, ui: HTMLElement) {
     this.rig = new SceneRig(canvas);
@@ -39,6 +44,36 @@ export class App {
       simStep: () => this.simStep(),
       render: (a, dt) => this.render(a, dt),
     });
+    this.perf = new PerfProbe(ui);
+    this.watchdog = new Watchdog((from) => {
+      const next = TIERS[Math.max(0, TIERS.indexOf(from) - 1)];
+      this.rig.applyTier(next);
+      this.toast(`Quality auto-lowered to ${next.toUpperCase()}`);
+    });
+    this.rig.hitStopHandler = (frames) => {
+      this.loop.freezeFrames = Math.max(this.loop.freezeFrames, frames);
+    };
+  }
+
+  /** Await renderer backend init, then pick a quality tier. */
+  async init(): Promise<void> {
+    await this.rig.ready;
+    this.applyQualityPref();
+  }
+
+  applyQualityPref(): void {
+    const pref = this.meta.quality ?? 'auto';
+    const tier: Tier = pref === 'auto' ? probeTier(this.rig.gpu) : pref;
+    this.rig.applyTier(tier);
+    this.watchdog.reset();
+  }
+
+  toast(text: string): void {
+    this.toastEl?.remove();
+    this.toastEl = h('div', { class: 'toast' }, text);
+    this.ui.appendChild(this.toastEl);
+    const el = this.toastEl;
+    setTimeout(() => el.remove(), 2600);
   }
 
   start(): void {
@@ -57,7 +92,9 @@ export class App {
 
   private render(alpha: number, dt: number): void {
     if (this.view) this.view.render(alpha, this.paused ? 0 : dt);
-    else this.rig.render();
+    else this.rig.render(dt);
+    if ((this.meta.quality ?? 'auto') === 'auto') this.watchdog.push(dt, this.rig.tier);
+    this.perf.push(dt, `${this.rig.gpu.backend} ${this.rig.tier}`);
   }
 
   // ---------- screens ----------
