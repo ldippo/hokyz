@@ -14,6 +14,7 @@ import { RIVALS, buildRivalRoster } from './run/teams';
 import { Rng } from './core/rng';
 import { PerfProbe, TIERS, Watchdog, probeTier, type Tier } from './render/quality';
 import { h } from './ui/dom';
+import { loadRigs } from './render/skaterRig';
 
 export class App {
   rig: SceneRig;
@@ -59,6 +60,11 @@ export class App {
   async init(): Promise<void> {
     await this.rig.ready;
     this.applyQualityPref();
+    try {
+      await loadRigs();
+    } catch (e) {
+      console.warn('skater rigs failed to load, using fallback meshes', e);
+    }
   }
 
   applyQualityPref(): void {

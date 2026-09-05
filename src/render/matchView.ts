@@ -4,6 +4,7 @@ import type { MatchEvent, MatchState } from '../sim/types';
 import { SceneRig } from './scene';
 import { RinkMesh } from './rinkMesh';
 import { SkaterMesh } from './skaterMesh';
+import { SkaterRig, jerseySpecFor, loadRigs, rigsReady } from './skaterRig';
 import { PuckMesh } from './puckMesh';
 import { Particles } from './effects';
 import { FollowCamera } from './camera';
@@ -14,10 +15,16 @@ const SILENT = new Proxy({}, { get: () => () => {} }) as typeof realSfx;
 import { defendGoal } from '../sim/rink';
 import { RINK_THEMES, type RinkTheme } from '../run/meta';
 
+let rigTpl: Awaited<ReturnType<typeof loadRigs>> | null = null;
+void loadRigs().then((t) => (rigTpl = t)).catch(() => (rigTpl = null));
+function rigTemplate(goalie: boolean) {
+  return goalie ? rigTpl!.goalie : rigTpl!.skater;
+}
+
 /** Binds a MatchSim to the renderer + HUD + audio. */
 export class MatchView {
   rink: RinkMesh;
-  skaters = new Map<string, SkaterMesh>();
+  skaters = new Map<string, SkaterMesh | SkaterRig>();
   puck = new PuckMesh();
   particles = new Particles();
   cam: FollowCamera;
@@ -34,10 +41,19 @@ export class MatchView {
     rig.setTheme(theme);
     this.group.add(this.rink.group);
     const st = sim.st;
+    const numbers = [88, 9, 4, 31, 17, 22, 7, 44, 13, 66];
     for (const id of st.order) {
       const sk = st.skaters[id];
       const team = st.teams[sk.team];
-      const mesh = new SkaterMesh(id, team.color, sk.isGoalie, sk.team === 0 ? '#151520' : '#f2f2f2');
+      let mesh: SkaterMesh | SkaterRig;
+      if (rigsReady()) {
+        const idx = st.order.indexOf(id);
+        const tpl = rigTemplate(sk.isGoalie);
+        const spec = jerseySpecFor(team.color, sk.team, team.name, team.short, sk.isGoalie ? 1 : numbers[idx % numbers.length], sk.name.split(' ').pop());
+        mesh = new SkaterRig(id, tpl, sk.isGoalie, spec);
+      } else {
+        mesh = new SkaterMesh(id, team.color, sk.isGoalie, sk.team === 0 ? '#151520' : '#f2f2f2');
+      }
       mesh.snap(sk);
       this.skaters.set(id, mesh);
       this.group.add(mesh.group);
@@ -81,6 +97,10 @@ export class MatchView {
       case 'goal': {
         const scorer = st.skaters[e.scorer];
         const team = st.teams[e.team];
+        for (const id of team.skaters) {
+          const r = this.skaters.get(id);
+          if (r instanceof SkaterRig) r.celebrate();
+        }
         this.hud.announce('GOAL!', 'gold', `${scorer?.name ?? team.name}${e.value > 1 ? ` · ${e.value} PTS` : ''}`);
         this.hud.flash();
         this.rink.flashGoal(defendGoal(e.team === 0 ? 1 : 0).team);
@@ -169,7 +189,12 @@ export class MatchView {
     const st = this.sim.st;
     this.time += dt;
     this.excite = Math.max(0, this.excite - dt * 0.35);
-    for (const id of st.order) this.skaters.get(id)?.update(st.skaters[id], alpha, dt, this.time);
+    for (const id of st.order) {
+      const r = this.skaters.get(id);
+      if (!r) continue;
+      if (r instanceof SkaterRig) r.lookAt(st.skaters[id], st.puck.pos.x, st.puck.pos.y);
+      r.update(st.skaters[id], alpha, dt, this.time);
+    }
     this.puck.update(st.puck, alpha, this.time);
     // turbo trails
     for (const id of st.order) {
