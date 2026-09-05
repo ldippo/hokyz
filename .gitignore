@@ -4,3 +4,4 @@ dist
 .playwright-mcp
 /*.png
 assets/tex
+.transcend/index/
