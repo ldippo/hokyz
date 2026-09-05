@@ -1,7 +1,8 @@
 import { GOALIE, PUCK, RINK, SKATER } from './constants';
 import { damp, integrate } from './physics';
 import { defendGoal } from './rink';
-import { doPass, givePuck, pickPassTarget } from './puck';
+import { faceoffSpotAfterStoppage, setupFaceoff } from './rules';
+import { doPass, givePuck, pickPassTarget, releasePuck } from './puck';
 import type { MatchEvent, MatchState, Skater } from './types';
 import { clamp, len } from './vec';
 import type { Rng } from '../core/rng';
@@ -37,10 +38,45 @@ export function stepGoalie(st: MatchState, g: Skater, dt: number, rng: Rng, even
     return;
   }
 
-  // holding puck → quick outlet pass
+  // holding puck → quick outlet pass, or cover up under pressure and take the faceoff
   if (g.hasPuck) {
     gm.holdTimer += dt;
-    if (gm.holdTimer > 0.55) {
+    let pressure = 0,
+      pressY = 0;
+    for (const oid of st.teams[g.team === 0 ? 1 : 0].skaters) {
+      const o = st.skaters[oid];
+      if (o.knockdown === 0 && Math.hypot(o.pos.x - g.pos.x, o.pos.y - g.pos.y) < GOALIE.freezePressure) {
+        pressure++;
+        pressY += o.pos.y - g.pos.y;
+      }
+    }
+    if (pressure >= 2 && g.goalieStyle !== 'handler') {
+      // scrum in the crease: cover up and take the faceoff
+      if (gm.holdTimer > GOALIE.freezeTime) {
+        gm.holdTimer = 0;
+        events.push({ type: 'freeze', goalie: g.id });
+        st.faceoffSpot = faceoffSpotAfterStoppage(g.pos, g.team);
+        setupFaceoff(st, events);
+      }
+      return;
+    }
+    if (pressure === 1 && gm.holdTimer > 0.25) {
+      // one forechecker in the face: rim it hard around the boards on the far side
+      const side = pressY !== 0 ? -Math.sign(pressY) : g.pos.y >= 0 ? -1 : 1;
+      const target = { x: g.pos.x - goal.dir * 10, y: side * (RINK.width / 2 - 0.9) };
+      const dx = target.x - g.pos.x,
+        dy = target.y - g.pos.y;
+      const d = Math.hypot(dx, dy) || 1;
+      const sp = GOALIE.clearSpeed;
+      releasePuck(st, g, { x: (dx / d) * sp, y: (dy / d) * sp }, 1.6);
+      p.lastTouch = g.id;
+      p.lastTouchTeam = g.team;
+      p.isShot = false;
+      events.push({ type: 'pass', from: g.id, to: null });
+      gm.holdTimer = 0;
+      return;
+    }
+    if (gm.holdTimer > (g.goalieStyle === 'handler' ? 0.22 : 0.55)) {
       const t = pickPassTarget(st, g, null);
       doPass(st, g, t, events);
       gm.holdTimer = 0;
@@ -125,7 +161,12 @@ export function stepGoalie(st: MatchState, g: Skater, dt: number, rng: Rng, even
         const ang = Math.abs(Math.atan2(p.pos.y - goal.lineX * 0 - 0, Math.abs(p.pos.x - goal.lineX) + 0.1));
         const angleF = 1 + ang * 0.25;
         const powerF = clamp(1 - (speed - 16) / 60, 0.62, 1.05);
-        const highF = p.z > 0.8 ? 0.9 : 1;
+        let highF = p.z > 0.8 ? 0.9 : 1;
+        if (g.goalieStyle === 'butterfly') highF *= p.z < 0.5 ? 1.15 : 0.82;
+        else if (g.goalieStyle === 'standup') highF *= p.z > 0.6 ? 1.15 : 0.85;
+        // deep sudden death: goalies tire so shootouts end
+        const so = st.shootout;
+        if (so && so.suddenDeath) highF *= Math.max(0.4, 1 - 0.14 * Math.max(0, so.round - so.rounds - 2));
         // screened? opponent skater between puck path and goalie
         let screen = 1;
         for (const oid of st.teams[g.team === 0 ? 1 : 0].skaters) {

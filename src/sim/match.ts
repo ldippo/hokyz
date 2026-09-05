@@ -16,6 +16,7 @@ import { GOALIE, AI } from './constants';
 import { restoreEjected, stepFight } from './fight';
 import { gainSpecial, stepSpecialInputs, stepTeamFire } from './specials';
 import { aiShooterInput, startShootout, stepShootout } from './shootout';
+import { collidePuckSkaters } from './blocks';
 
 export interface TeamSetup {
   name: string;
@@ -59,7 +60,7 @@ export class MatchSim {
       });
       let goalie: string | null = null;
       if (t.goalie && !mods.noGoalies) {
-        const g = makeSkater(t.goalie.id, t.goalie.name, tid, t.goalie.stats, 'goalie', true, t.goalie.hp);
+        const g = makeSkater(t.goalie.id, t.goalie.name, tid, t.goalie.stats, 'goalie', true, t.goalie.hp, t.goalie.goalieStyle ?? null);
         skaters[g.id] = g;
         order.push(g.id);
         goalie = g.id;
@@ -375,7 +376,10 @@ export class MatchSim {
     // puck
     const prevX = st.puck.pos.x;
     if (st.puck.owner) carryPuck(st);
-    else stepPuckPhysics(st, dt, events);
+    else {
+      stepPuckPhysics(st, dt, events);
+      collidePuckSkaters(st, this.rng, events);
+    }
     tryPickups(st, events);
     checkGoal(st, prevX, events);
     for (const e of events) {

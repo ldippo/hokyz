@@ -43,6 +43,7 @@ export function recordsScreen(app: App): void {
         stat('Fights won', m.totalFightsWon ?? 0),
         stat('Top-corner goals', m.totalTopCorner ?? 0),
         stat('Ankle breakers', m.totalAnkle ?? 0),
+        stat('Shots blocked', m.totalBlocks ?? 0),
         stat('Specials fired', m.totalSpecials ?? 0),
         stat('Shootouts won', m.totalShootoutWins ?? 0),
       )),

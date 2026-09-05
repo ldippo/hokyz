@@ -203,7 +203,7 @@ export function pickPassTarget(st: MatchState, sk: Skater, aim: Vec2 | null): Sk
 
 export function doPass(st: MatchState, sk: Skater, target: Skater | null, events: MatchEvent[], saucer = false): void {
   const m = st.mods.teams[sk.team];
-  const speed = PUCK.passSpeed * m.passSpeedMul * (0.85 + sk.stats.hands / 40) * (saucer ? PUCK.saucerSpeedMul : 1);
+  const speed = PUCK.passSpeed * m.passSpeedMul * (0.85 + sk.stats.hands / 40) * (saucer ? PUCK.saucerSpeedMul : 1) * (sk.goalieStyle === 'handler' ? 1.25 : 1);
   let dirV: Vec2;
   if (target) {
     // lead the target

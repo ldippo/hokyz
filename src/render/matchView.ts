@@ -1,3 +1,4 @@
+import { GOALIE_STYLES } from '../run/roster';
 import * as THREE from 'three/webgpu';
 import { MatchSim } from '../sim/match';
 import type { MatchEvent, MatchState } from '../sim/types';
@@ -353,6 +354,29 @@ export class MatchView {
         sfx.crowdBurst(0.7);
         this.excite = Math.max(this.excite, 0.7);
         break;
+      case 'shotBlock': {
+        const bk = st.skaters[e.blocker];
+        this.particles.spawn({ x: e.pos.x, y: e.pos.y, z: 0.6, count: e.clean ? 14 : 8, color: e.clean ? [0xffffff, 0xbfe0ff] : [0xffffff, 0xffd23f], speed: e.clean ? 3 : 4.5, life: 0.4, size: 0.08, up: e.clean ? 1.5 : 3 });
+        sfx.block(e.clean);
+        if (bk && st.teams[bk.team].isHuman) {
+          if (e.clean) this.hud.announce('BLOCKED!', '', bk.name);
+          if (bk.controlled) this.access.rumble(0.3, 0.2, 90);
+        } else if (bk && e.clean && e.shooter && st.skaters[e.shooter]?.controlled) this.hud.announce('BLOCKED', 'red', bk.name);
+        break;
+      }
+      case 'freeze': {
+        const g = st.skaters[e.goalie];
+        this.hud.announce('COVERED UP', '', g ? `${g.name} · FACEOFF` : 'FACEOFF');
+        sfx.whistle();
+        break;
+      }
+      case 'sting': {
+        const sk = st.skaters[e.skater];
+        this.particles.spawn({ x: sk.pos.x, y: sk.pos.y, z: 0.9, count: 6, color: 0xff6a3a, speed: 1.5, life: 0.6, size: 0.1, up: 2 });
+        sfx.knockdown();
+        if (sk.controlled) this.hud.announce('STUNG!', 'red', 'THAT ONE HURT');
+        break;
+      }
       case 'ankleBreaker':
         this.hud.announce('ANKLE BREAKER!', 'fire', st.skaters[e.skater].name);
         if (this.presentation) this.markClip('ankle', st.skaters[e.victim].pos, null, `ANKLE BREAKER · ${st.skaters[e.skater].name}`);
@@ -585,8 +609,13 @@ export class MatchView {
       } else if (this.introBeats === 1 && p > 0.42) {
         this.introBeats = 2;
         this.hud.announce(b.name.toUpperCase(), 'red', 'VISITORS');
-      } else if (this.introBeats === 2 && p > 0.76) {
+      } else if (this.introBeats === 2 && p > 0.62) {
         this.introBeats = 3;
+        const g = b.goalie ? st.skaters[b.goalie] : null;
+        const style = g?.goalieStyle ? GOALIE_STYLES[g.goalieStyle] : null;
+        if (g && style) this.hud.announce(g.name.toUpperCase(), 'red', `${style.icon} ${style.label.toUpperCase()} GOALIE`);
+      } else if (this.introBeats === 3 && p > 0.8) {
+        this.introBeats = 4;
         const cap = a.controlledId ? st.skaters[a.controlledId] : null;
         if (cap) this.hud.announce(cap.name.toUpperCase(), '', 'CAPTAIN');
       }

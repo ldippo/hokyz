@@ -54,11 +54,31 @@ export const GOALIE = {
   accel: 22,
   depthFromGoalLine: 0.9,
   lateralRange: 1.8,
+  /** an opponent inside this radius means the goalie covers up instead of passing */
+  freezePressure: 2.6,
+  /** how long a scrummed goalie holds before the whistle */
+  freezeTime: 0.9,
+  /** speed of the around-the-boards clear when one forechecker is in the goalie's face */
+  clearSpeed: 16,
   reactDelay: 0.08,
-  baseSaveChance: 0.88,
+  baseSaveChance: 0.78, // skaters block ~7 shots a match now; goalies give a little back
   butterflyTime: 0.45,
   reboundSpeedMul: 0.35,
   reboundChance: 0.35,
+};
+
+export const BLOCK = {
+  minShotSpeed: 9,
+  maxZ: 1.0,
+  cleanBase: 0.22,
+  cleanPerBalance: 1 / 30,
+  deflectSpeedMul: 0.55,
+  cleanSpeedMul: 0.12,
+  stingSpeed: 23,
+  stingBalance: 6,
+  stingTime: 0.5,
+  selfBlockGrace: 0.3,
+  bodyLowZ: 0.45,
 };
 
 export const PUCK = {
@@ -124,6 +144,7 @@ export const AI = {
   checkAggression: [0.35, 0.5, 0.65, 0.8],
   checkRetry: [2.4, 2.0, 1.8, 1.6], // seconds between AI check attempts
   passSmarts: [0.4, 0.6, 0.85, 1.0],
+  laneBlock: [0.0, 0.35, 0.65, 0.9], // odds a defender steps into the lane on a wind-up
   shootRangeX: 9, // shoot when within this x of goal line
   pullClock: 90, // AI pulls the goalie when trailing by ≤2 inside this
   pullDeficitMax: 2,

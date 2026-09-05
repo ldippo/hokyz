@@ -257,11 +257,13 @@ export interface MatchOutcome {
   specialsUsed?: number;
   ankleBreakers?: number;
   bigSaves?: number;
+  /** shots blocked by the home team's skaters */
+  blocks?: number;
   shootoutWon?: boolean;
   topCornerGoals?: number;
   /** hp by roster skater id after the match */
   hp: Record<string, number>;
-  boxScore: { id: string; name: string; team: 0 | 1; goals: number; assists: number; hits: number; bigHits: number; shots: number; saves: number; isGoalie: boolean }[];
+  boxScore: { id: string; name: string; team: 0 | 1; goals: number; assists: number; hits: number; bigHits: number; shots: number; saves: number; blocks?: number; isGoalie: boolean }[];
 }
 
 export function cashForNode(run: RunState, node: MapNode, outcome: MatchOutcome): number {

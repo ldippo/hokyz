@@ -91,7 +91,7 @@ export function trySpecial(st: MatchState, sk: Skater, rng: Rng, events: MatchEv
       break;
     }
     case 'brickwall':
-      team.brickWall = SPECIAL.brickWallSaves;
+      team.brickWall = sk.goalieStyle === 'handler' ? SPECIAL.brickWallSaves - 1 : SPECIAL.brickWallSaves;
       sk.specialTimer = 0.5;
       break;
     case 'bulldoze':

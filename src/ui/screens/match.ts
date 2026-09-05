@@ -117,14 +117,14 @@ export function playMatch(app: App, sim: MatchSim, perkNames: string[], done: (o
       ...extras,
       boxScore: st.order.map((id) => {
         const s = st.skaters[id];
-        return { id, name: s.name, team: s.team, goals: s.goals, assists: s.assists, hits: s.hits, bigHits: s.bigHits, shots: s.shots, saves: s.saves, isGoalie: s.isGoalie };
+        return { id, name: s.name, team: s.team, goals: s.goals, assists: s.assists, hits: s.hits, bigHits: s.bigHits, shots: s.shots, saves: s.saves, blocks: s.blocks, isGoalie: s.isGoalie };
       }),
     };
     app.disposeView();
     recordMatch(app.meta, outcome, sim.st.teams[1].name);
     done(outcome);
   };
-  const extras = { fightsWon: 0, specialsUsed: 0, ankleBreakers: 0, bigSaves: 0, shootoutWon: false, topCornerGoals: 0, teamFire: false };
+  const extras = { fightsWon: 0, specialsUsed: 0, ankleBreakers: 0, bigSaves: 0, shootoutWon: false, topCornerGoals: 0, teamFire: false, blocks: 0 };
   let overSince = -1;
   app.onTick = () => {
     if (finished) return;
@@ -133,6 +133,7 @@ export function playMatch(app: App, sim: MatchSim, perkNames: string[], done: (o
       if (e.type === 'special' && sim.st.skaters[e.skater]?.team === 0) extras.specialsUsed++;
       if (e.type === 'ankleBreaker' && sim.st.skaters[e.skater]?.team === 0) extras.ankleBreakers++;
       if (e.type === 'bigSave' && sim.st.skaters[e.goalie]?.team === 0) extras.bigSaves++;
+      if (e.type === 'shotBlock' && sim.st.skaters[e.blocker]?.team === 0) extras.blocks++;
       if (e.type === 'shootoutEnd' && e.winner === 0) extras.shootoutWon = true;
       if (e.type === 'goal' && e.team === 0 && e.high) extras.topCornerGoals++;
       if (e.type === 'teamFire' && e.team === 0) extras.teamFire = true;
@@ -166,6 +167,7 @@ export function recordMatch(meta: MetaProfile, outcome: MatchOutcome, opponent: 
   meta.totalTopCorner = (meta.totalTopCorner ?? 0) + (outcome.topCornerGoals ?? 0);
   meta.totalAnkle = (meta.totalAnkle ?? 0) + (outcome.ankleBreakers ?? 0);
   meta.totalSpecials = (meta.totalSpecials ?? 0) + (outcome.specialsUsed ?? 0);
+  meta.totalBlocks = (meta.totalBlocks ?? 0) + (outcome.blocks ?? 0);
   meta.totalShootoutWins = (meta.totalShootoutWins ?? 0) + (outcome.shootoutWon ? 1 : 0);
   meta.bestGoalsMatch = Math.max(meta.bestGoalsMatch ?? 0, outcome.scoreFor);
   meta.bestBigHitsMatch = Math.max(meta.bestBigHitsMatch ?? 0, outcome.bigHits);
@@ -177,11 +179,11 @@ export function matchResultScreen(app: App, node: MapNode, outcome: MatchOutcome
   const rows = outcome.boxScore.map((b) =>
     h('tr', { style: `color:${b.team === 0 ? '#fff' : '#c8d4f0'}` },
       h('td', {}, `${b.team === 0 ? '🔵' : '🔴'} ${b.name}${b.isGoalie ? ' (G)' : ''}`),
-      h('td', { class: 'num' }, String(b.goals)), h('td', { class: 'num' }, String(b.assists)), h('td', { class: 'num' }, String(b.shots)), h('td', { class: 'num' }, String(b.hits)), h('td', { class: 'num' }, String(b.bigHits)), h('td', { class: 'num' }, String(b.saves)),
+      h('td', { class: 'num' }, String(b.goals)), h('td', { class: 'num' }, String(b.assists)), h('td', { class: 'num' }, String(b.shots)), h('td', { class: 'num' }, String(b.hits)), h('td', { class: 'num' }, String(b.bigHits)), h('td', { class: 'num' }, b.isGoalie ? String(b.saves) : String(b.blocks ?? 0)),
     ),
   );
   const injured = run.roster.filter((s) => s.hp <= 20);
-  const mvp = [...outcome.boxScore].sort((x, y) => (y.goals * 3 + y.assists * 2 + y.bigHits * 2 + y.hits * 0.3 + y.saves * 0.6) - (x.goals * 3 + x.assists * 2 + x.bigHits * 2 + x.hits * 0.3 + x.saves * 0.6))[0];
+  const mvp = [...outcome.boxScore].sort((x, y) => (y.goals * 3 + y.assists * 2 + y.bigHits * 2 + y.hits * 0.3 + y.saves * 0.6 + (y.blocks ?? 0) * 0.8) - (x.goals * 3 + x.assists * 2 + x.bigHits * 2 + x.hits * 0.3 + x.saves * 0.6 + (x.blocks ?? 0) * 0.8))[0];
   const el = h('div', { class: 'screen' },
     h('div', { class: 'result' },
       h('h2', { class: outcome.won ? 'win' : 'lose' }, outcome.won ? 'VICTORY' : res.usedLife ? 'SECOND WIND' : 'RUN OVER'),
@@ -189,8 +191,8 @@ export function matchResultScreen(app: App, node: MapNode, outcome: MatchOutcome
       res.cash ? h('div', { style: 'font-family:var(--font-display);font-size:24px;color:var(--gold);margin-bottom:12px' }, `+${res.cash} CASH`) : null,
       res.usedLife ? h('p', { class: 'screen-sub' }, 'Second Wind burned. You live to skate again.') : null,
       injured.length ? h('p', { class: 'screen-sub', style: 'color:#f66' }, `INJURED: ${injured.map((s) => s.name).join(', ')} — out until healed`) : null,
-      mvp ? h('div', { class: 'mvp-card' }, h('div', { class: 'rarity' }, 'PLAYER OF THE GAME'), h('div', { class: 'cname' }, `${mvp.team === 0 ? '🔵' : '🔴'} ${mvp.name}`), h('div', { class: 'desc' }, mvp.isGoalie ? `${mvp.saves} saves` : `${mvp.goals} G · ${mvp.assists} A · ${mvp.hits} hits · ${mvp.bigHits} big`)) : null,
-      h('table', { class: 'box' }, h('thead', {}, h('tr', {}, h('th', {}, 'PLAYER'), h('th', {}, 'G'), h('th', {}, 'A'), h('th', {}, 'SOG'), h('th', {}, 'HITS'), h('th', {}, 'BIG'), h('th', {}, 'SV'))), h('tbody', {}, ...rows)),
+      mvp ? h('div', { class: 'mvp-card' }, h('div', { class: 'rarity' }, 'PLAYER OF THE GAME'), h('div', { class: 'cname' }, `${mvp.team === 0 ? '🔵' : '🔴'} ${mvp.name}`), h('div', { class: 'desc' }, mvp.isGoalie ? `${mvp.saves} saves` : `${mvp.goals} G · ${mvp.assists} A · ${mvp.hits} hits · ${mvp.bigHits} big${(mvp.blocks ?? 0) > 0 ? ` · ${mvp.blocks} blk` : ''}`)) : null,
+      h('table', { class: 'box' }, h('thead', {}, h('tr', {}, h('th', {}, 'PLAYER'), h('th', {}, 'G'), h('th', {}, 'A'), h('th', {}, 'SOG'), h('th', {}, 'HITS'), h('th', {}, 'BIG'), h('th', { title: 'Saves for goalies, blocked shots for skaters' }, 'SV/BLK'))), h('tbody', {}, ...rows)),
       h('div', { class: 'menu' },
         btn(res.ended ? 'See Run Summary' : outcome.won ? 'Draft a Perk' : 'Back to Map', () => {
           if (res.ended) runOverScreen(app);

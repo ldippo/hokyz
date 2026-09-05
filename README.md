@@ -23,6 +23,8 @@ Controls (keyboard / gamepad):
 | Saucer pass | Hold J briefly | Hold A |
 | Pull goalie (last 2:00) | Hold J 1 s | Hold A 1 s |
 | Goalie dive (after an opponent's shot) | J + up/down | A + stick |
+
+Bodies matter: a skater standing in the lane blocks or deflects a shot (hard shots sting low-balance skaters), and AI defenders step into lanes when the carrier winds up. Goalies come in three styles: Butterfly (eats low shots), Stand-up (owns the top corners), Puck-handler (fast outlet passes, shorter Brick Wall).
 | Shoot (hold to charge) / body check | K | B |
 | Deke (with direction = toe drag) | L | X |
 | Special move (meter full) | Space | Y |

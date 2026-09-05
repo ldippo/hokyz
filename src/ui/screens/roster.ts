@@ -1,7 +1,7 @@
 import type { App } from '../../app';
 import { btn, h } from '../dom';
 import { cutSkater, cutValue, lineup, toggleStarter } from '../../run/runState';
-import { ARCHETYPES, isInjured, TRAITS, XP_LEVELS, MAX_LEVEL } from '../../run/roster';
+import { ARCHETYPES, isInjured, TRAITS, XP_LEVELS, MAX_LEVEL, GOALIE_STYLES } from '../../run/roster';
 import { runMapScreen, topBar } from './runMap';
 import { sfx } from '../../audio/sfx';
 
@@ -32,7 +32,7 @@ export function rosterScreen(app: App): void {
       );
     });
     const g = run.goalie;
-    cards.push(h('div', { class: 'card', style: 'width:260px;cursor:default' }, h('div', { class: 'rarity' }, 'GOALIE'), h('div', { class: 'ico' }, '🥅'), h('div', { class: 'cname' }, g.name), h('div', { class: 'cstats', html: `<span>SAVES <b>${g.stats.hands}</b></span><span>SPD <b>${g.stats.speed}</b></span><span>BAL <b>${g.stats.balance}</b></span>` })));
+    cards.push(h('div', { class: 'card', style: 'width:260px;cursor:default' }, h('div', { class: 'rarity' }, 'GOALIE'), h('div', { class: 'ico' }, '🥅'), h('div', { class: 'cname' }, g.name), h('div', { class: 'desc' }, `${GOALIE_STYLES[g.goalieStyle ?? 'butterfly'].icon} ${GOALIE_STYLES[g.goalieStyle ?? 'butterfly'].label}`), h('div', { class: 'desc', style: 'opacity:.75;font-size:.85em' }, GOALIE_STYLES[g.goalieStyle ?? 'butterfly'].desc), h('div', { class: 'cstats', html: `<span>SAVES <b>${g.stats.hands}</b></span><span>SPD <b>${g.stats.speed}</b></span><span>BAL <b>${g.stats.balance}</b></span>` })));
     const el = h('div', { class: 'run-shell' },
       topBar(app, run),
       h('div', { class: 'map-scroll' },

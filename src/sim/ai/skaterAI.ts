@@ -192,6 +192,11 @@ export function thinkSkater(st: MatchState, sk: Skater, brain: Brain, dt: number
       if (brain.role === 'pressure') {
         brain.target = predict(ownerSk.pos, ownerSk.vel, 0.25);
         brain.turbo = rng.next() < diff(st, sk, 'turboUse') && dist(sk.pos, ownerSk.pos) > 3;
+      } else if ((brain.role === 'mark' || brain.role === 'back') && ownerSk.charging && Math.hypot(ownerSk.pos.x - own.lineX, ownerSk.pos.y) < 15 && rng.next() < diff(st, sk, 'laneBlock')) {
+        // the carrier is winding up: step into the shooting lane
+        const toGoal = norm(sub({ x: own.lineX, y: 0 }, ownerSk.pos));
+        brain.target = keepInRink({ x: ownerSk.pos.x + toGoal.x * 2.6, y: ownerSk.pos.y + toGoal.y * 2.6 });
+        brain.timer = Math.min(brain.timer, 0.08);
       } else if (brain.role === 'mark') {
         // mark the most dangerous other opponent
         let mark: Skater | null = null;
