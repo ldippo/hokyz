@@ -15,6 +15,7 @@ import { dist } from './vec';
 import { GOALIE } from './constants';
 import { restoreEjected, stepFight } from './fight';
 import { gainSpecial, stepSpecialInputs, stepTeamFire } from './specials';
+import { aiShooterInput, startShootout, stepShootout } from './shootout';
 
 export interface TeamSetup {
   name: string;
@@ -105,6 +106,7 @@ export class MatchSim {
       mods,
       fight: null,
       fightsThisPeriod: 0,
+      shootout: null,
       shake: 0,
       stats: { hits: [0, 0], bigHits: [0, 0], shots: [0, 0] },
     };
@@ -137,6 +139,11 @@ export class MatchSim {
       case 'intro':
         st.phaseTimer -= dt;
         if (st.phaseTimer <= 0) {
+          if (st.mods.shootoutOnly) {
+            this.freezeClock = true;
+            startShootout(st, events, st.mods.shootoutRounds);
+            break;
+          }
           setupFaceoff(st, events);
           events.push({ type: 'period', period: st.period, overtime: st.overtime });
         }
@@ -161,6 +168,18 @@ export class MatchSim {
         break;
       case 'fight':
         stepFight(st, dt, humanInputs, this.rng, events);
+        break;
+      case 'shootout':
+        stepShootout(st, dt, this.rng, events, () => {
+          const so = st.shootout!;
+          const sh = so.shooterId ? st.skaters[so.shooterId] : null;
+          if (sh && !st.teams[sh.team].isHuman) this.scriptInputs.set(sh.id, aiShooterInput(st, so, sh, this.rng));
+          this.stepPlay(humanInputs, dt, events);
+        }, (winner) => {
+          st.winner = winner;
+          st.phase = 'over';
+          events.push({ type: 'over', winner });
+        });
         break;
       case 'goal':
         st.phaseTimer -= dt;
@@ -230,6 +249,16 @@ export class MatchSim {
     const st = this.st;
     const [a, b] = st.teams;
     events.push({ type: 'periodEnd', period: st.period });
+    if (st.overtime && a.score === b.score) {
+      // one OT period, then a shootout
+      this.freezeClock = true;
+      if (st.puck.owner) {
+        st.skaters[st.puck.owner].hasPuck = false;
+        st.puck.owner = null;
+      }
+      startShootout(st, events, st.mods.shootoutRounds);
+      return;
+    }
     const lastRegulation = st.period >= st.mods.periods;
     if (lastRegulation && a.score !== b.score) {
       this.finish(events);
@@ -288,8 +317,8 @@ export class MatchSim {
           } else {
             const sorted = team.skaters.map((id) => st.skaters[id]).sort((a, b) => dist(a.pos, st.puck.pos) - dist(b.pos, st.puck.pos));
             let next = sorted[0];
-            if (next.id === team.controlledId && sorted.length > 1) next = sorted[1];
-            if (next.id !== team.controlledId) setControlled(st, team.id, next.id, events);
+            if (next && next.id === team.controlledId && sorted.length > 1) next = sorted[1];
+            if (next && next.id !== team.controlledId && !st.shootout) setControlled(st, team.id, next.id, events);
           }
           team.switchLock = 0.3;
         }

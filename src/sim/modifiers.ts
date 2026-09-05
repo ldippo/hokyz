@@ -43,6 +43,8 @@ export function defaultMatchMods(): MatchMods {
     suddenDeath: false,
     mercyRule: 0,
     noFights: false,
+    shootoutOnly: false,
+    shootoutRounds: 3,
     bossPhases: [],
     extraSkater: null,
     teams: [defaultTeamMods(), defaultTeamMods()],

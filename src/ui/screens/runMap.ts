@@ -14,6 +14,7 @@ import { runOverScreen } from './runOver';
 import { RIVAL_BY_ID } from '../../run/teams';
 import { levelUpScreen } from './levelUp';
 import { pendingLevelUps } from '../../run/runState';
+import { skillsScreen } from './skills';
 import { MUTATOR_BY_ID } from '../../run/mutators';
 
 function xpPct(xp: number, level: number): number {
@@ -127,7 +128,7 @@ export function runMapScreen(app: App): void {
       if (isAvail) el.setAttribute('data-nav', '1');
       map.appendChild(el);
     }
-  const legend = h('div', { style: 'text-align:center;color:#8fa3d9;font-size:12px;letter-spacing:0.15em;margin-top:10px' }, '🏒 MATCH · 💀 ELITE (mutator, better loot) · 🛒 SHOP · ❓ EVENT · 🔥 REST · 👑 BOSS');
+  const legend = h('div', { style: 'text-align:center;color:#8fa3d9;font-size:12px;letter-spacing:0.15em;margin-top:10px' }, '🏒 MATCH · 💀 ELITE · 🥅 SHOOTOUT · 💥 HIT PARADE · 🛒 SHOP · ❓ EVENT · 🔥 REST · 👑 BOSS');
   const el = h('div', { class: 'run-shell' },
     topBar(app, run),
     h('div', { class: 'run-body' }, h('div', { class: 'map-scroll' }, h('div', { style: 'text-align:center;font-family:var(--font-display);letter-spacing:0.2em;color:#ffd23f;margin-bottom:8px' }, `ACT ${run.act} OF 3 · PICK YOUR NEXT STOP`), map, legend), rosterPanel(run)),
@@ -159,6 +160,10 @@ export function pickNode(app: App, node: MapNode): void {
       break;
     case 'rest':
       restScreen(app, node);
+      break;
+    case 'shootout':
+    case 'hitparade':
+      skillsScreen(app, node);
       break;
   }
 }

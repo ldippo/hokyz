@@ -3,7 +3,7 @@ import { RIVALS } from './teams';
 import { MUTATORS } from './mutators';
 import { EVENTS } from './events';
 
-export type NodeType = 'match' | 'elite' | 'shop' | 'event' | 'rest' | 'boss';
+export type NodeType = 'match' | 'elite' | 'shop' | 'event' | 'rest' | 'boss' | 'shootout' | 'hitparade';
 
 export interface MapNode {
   id: string;
@@ -27,20 +27,22 @@ export interface ActMap {
 export const COLS = 5;
 export const ROWS_PER_ACT = 6;
 
-const ICONS: Record<NodeType, string> = { match: '🏒', elite: '💀', shop: '🛒', event: '❓', rest: '🔥', boss: '👑' };
+const ICONS: Record<NodeType, string> = { match: '🏒', elite: '💀', shop: '🛒', event: '❓', rest: '🔥', boss: '👑', shootout: '🥅', hitparade: '💥' };
 export const nodeIcon = (t: NodeType): string => ICONS[t];
-export const nodeLabel = (t: NodeType): string => ({ match: 'MATCH', elite: 'ELITE', shop: 'SHOP', event: 'EVENT', rest: 'REST', boss: 'BOSS' })[t];
+export const nodeLabel = (t: NodeType): string => ({ match: 'MATCH', elite: 'ELITE', shop: 'SHOP', event: 'EVENT', rest: 'REST', boss: 'BOSS', shootout: 'SHOOTOUT', hitparade: 'HIT PARADE' })[t];
 
 function pickType(rng: Rng, row: number, lastRow: number, prevTypes: NodeType[]): NodeType {
   if (row === 0) return 'match';
   if (row === lastRow) return 'boss';
   if (row === lastRow - 1) return rng.chance(0.55) ? 'rest' : 'shop';
   const w: [NodeType, number][] = [
-    ['match', 46],
-    ['elite', row >= 2 ? 16 : 6],
-    ['shop', 12],
-    ['event', 18],
-    ['rest', 8],
+    ['match', 40],
+    ['elite', row >= 2 ? 15 : 6],
+    ['shop', 11],
+    ['event', 16],
+    ['rest', 7],
+    ['shootout', row >= 1 ? 6 : 0],
+    ['hitparade', row >= 1 ? 5 : 0],
   ];
   // avoid duplicating non-match types adjacent in same row
   const filtered = w.filter(([t]) => t === 'match' || !prevTypes.includes(t));
@@ -78,6 +80,9 @@ export function generateAct(rng: Rng, act: number, usedRivals: Set<string>): Act
       const type = pickType(rng, r, lastRow, prevTypes);
       prevTypes.push(type);
       const node: MapNode = { id: `a${act}r${r}c${cols[i]}`, act, row: r, col: cols[i], type, next: [], done: false };
+      if (type === 'shootout') {
+        node.rivalId = rng.pick(regular).id;
+      }
       if (type === 'match' || type === 'elite') {
         // prefer rivals not used yet in this act
         const fresh = regular.filter((t) => !usedRivals.has(t.id));

@@ -378,6 +378,28 @@ export class MatchView {
           sfx.cash();
         }
         break;
+      case 'shootoutStart':
+        this.hud.announce('SHOOTOUT', 'red', `BEST OF ${e.rounds}`);
+        sfx.whistle();
+        sfx.crowdBurst(0.8);
+        this.excite = 1;
+        break;
+      case 'shootoutAttempt': {
+        const sh = st.skaters[e.shooter];
+        this.hud.announce(sh.name.toUpperCase(), st.teams[e.team].isHuman ? 'gold' : 'red', e.suddenDeath ? 'SUDDEN DEATH' : `ROUND ${e.round}`);
+        break;
+      }
+      case 'shootoutResult':
+        this.hud.announce(e.scored ? 'GOAL!' : 'NO GOAL', e.scored ? 'gold' : '', st.skaters[e.shooter].name);
+        if (e.scored) {
+          sfx.goal();
+          this.rink.flashGoal(defendGoal(e.team === 0 ? 1 : 0).team);
+        } else sfx.save();
+        break;
+      case 'shootoutEnd':
+        this.hud.announce(`${st.teams[e.winner].short} WIN`, 'gold', `SHOOTOUT ${e.goals[0]} - ${e.goals[1]}`);
+        this.excite = 1;
+        break;
       case 'bossPhase':
         this.hud.announce(e.label, 'red', e.desc);
         this.lastAnnounce = e.label;
@@ -615,6 +637,12 @@ export class MatchView {
       this.cam.update(dt, fx, fy, st.shake * this.shakeMul, this.time, spread);
     }
     if (directing && this.director.kind === 'replay') this.hud.tag('REPLAY');
+    // shootout tracker
+    if (st.shootout) {
+      const so = st.shootout;
+      const res: [boolean[], boolean[]] = [so.attempts.filter((a) => a.team === 0).map((a) => a.scored), so.attempts.filter((a) => a.team === 1).map((a) => a.scored)];
+      this.hud.shootout(true, res, so.rounds, [st.teams[0].short, st.teams[1].short]);
+    } else this.hud.shootout(false);
     // fight overlay
     if (st.fight) {
       const f = st.fight;
