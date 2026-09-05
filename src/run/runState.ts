@@ -1,4 +1,5 @@
 import { Rng, hashSeed } from '../core/rng';
+import { migrateRun } from '../core/save';
 import type { MatchMods, SkaterDef, TeamMods } from '../sim/types';
 import { defaultMatchMods, defaultTeamMods } from '../sim/modifiers';
 import { findNode, generateRunMap, type ActMap, type MapNode } from './mapGen';
@@ -376,9 +377,7 @@ export function serializeRun(run: RunState): string {
 }
 export function deserializeRun(json: string): RunState | null {
   try {
-    const r = JSON.parse(json) as RunState;
-    if (r.version !== 1 || !r.maps) return null;
-    return r;
+    return migrateRun(JSON.parse(json));
   } catch {
     return null;
   }
