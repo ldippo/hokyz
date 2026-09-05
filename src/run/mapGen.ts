@@ -62,7 +62,7 @@ export function generateAct(rng: Rng, act: number, usedRivals: Set<string>): Act
   const counts: number[] = [];
   for (let r = 0; r < ROWS_PER_ACT; r++) counts.push(r === lastRow ? 1 : r === 0 ? rng.int(2, 3) : rng.int(2, 4));
   const regular = RIVALS.filter((t) => !t.boss);
-  const bossPool = bossesForAct(act);
+  const bossPool = act >= 4 ? RIVALS.filter((t) => t.boss) : bossesForAct(act);
   const boss = bossPool.length ? rng.pick(bossPool) : RIVALS.find((t) => t.boss)!;
   const evPool = rng.shuffle([...EVENTS]);
   let evIdx = 0;

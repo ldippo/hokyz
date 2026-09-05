@@ -2,7 +2,8 @@ import { Rng, hashSeed } from '../core/rng';
 import { migrateRun } from '../core/save';
 import type { MatchMods, SkaterDef, TeamMods, GoalieStyle } from '../sim/types';
 import { defaultMatchMods, defaultTeamMods } from '../sim/modifiers';
-import { findNode, generateRunMap, type ActMap, type MapNode } from './mapGen';
+import { findNode, generateAct, generateRunMap, type ActMap, type MapNode } from './mapGen';
+import type { BossPhase } from '../sim/types';
 import { CAPTAINS, type Captain } from './meta';
 import { PERKS, PERK_BY_ID, RARITY_WEIGHT, activeSets, applySetBonuses, defaultRunEffects, type Perk, type Rarity, type RunEffects } from './perks';
 import { generateGoalie, generateSkater, isInjured, levelFor, newId, randomArchetype, xpForMatch, MAX_LEVEL } from './roster';
@@ -43,6 +44,10 @@ export interface RunState {
   grudges: Record<string, { beaten: number; act: number }>;
   /** weekly-seed run (records tracked separately) */
   weekly?: string | null;
+  /** Overtime League: acts played past the act-3 boss */
+  league?: number;
+  /** an act just ended past the base run: bank the win or keep skating */
+  leagueOffer?: boolean;
   over: boolean;
   won: boolean;
 }
@@ -140,6 +145,10 @@ export function runEffects(run: RunState): RunEffects {
   applySetBonuses(activeSets(run.perks), defaultTeamMods(), e);
   if (run.ascension >= 1) e.cashMul *= 1.25;
   if (run.ascension >= 2) e.cashMul *= 1.2;
+  if (run.ascension >= 3) e.cashMul *= 1.15;
+  if (run.ascension >= 4) e.cashMul *= 1.15;
+  if (run.ascension >= 5) e.cashMul *= 1.15;
+  if ((run.league ?? 0) > 0) e.cashMul *= 1 + 0.25 * (run.league ?? 0);
   return e;
 }
 
@@ -192,7 +201,7 @@ export function cutSkater(run: RunState, id: string): number {
 export function nodeTier(run: RunState, node: MapNode): number {
   let t = run.act - 1 + (node.type === 'elite' ? 1 : 0) + (node.type === 'boss' ? 1 : 0);
   t += run.ascension;
-  return Math.min(4, t);
+  return Math.min(run.act >= 4 ? 6 : 4, t);
 }
 export function nodeDifficulty(run: RunState, node: MapNode): number {
   let d = run.act - 1 + (node.type === 'elite' ? 1 : 0) + (node.type === 'boss' ? 1 : 0);
@@ -229,6 +238,11 @@ export function buildMatch(run: RunState, node: MapNode): MatchSetupBundle {
   if (node.type === 'boss') {
     mods.teams[1].speedMul *= 1.05;
     mods.bossPhases = (rival.phases ?? []).map((p) => ({ ...p, applied: false }));
+    const stacks = (run.ascension >= 5 ? 1 : 0) + (run.act >= 4 ? 1 : 0);
+    for (let i = 0; i < stacks; i++) {
+      const extra = extraBossPhase(rng, mods.bossPhases);
+      if (extra) mods.bossPhases.push({ ...extra, label: `${run.act >= 4 && i === stacks - 1 ? 'OVERTIME RULES' : 'ASCENSION RULES'} · ${extra.label}` });
+    }
     if (mods.bossPhases.some((p) => p.kind === 'extraSkater')) mods.extraSkater = generateSkater(rng, 'enforcer', nodeTier(run, node) + 1, 'opp');
   }
   if (run.flags.easyNext) mods.teams[1].turboRegenMul *= 0.6;
@@ -373,8 +387,9 @@ export function completeNode(run: RunState, node: MapNode): void {
   const act = currentAct(run);
   if (run.row >= act.rows.length) {
     if (run.act >= run.maps.length) {
-      run.over = true;
+      // base run cleared (or another league act): champion status sticks, the player chooses what happens next
       run.won = true;
+      run.leagueOffer = true;
     } else {
       run.act++;
       run.row = 0;
@@ -382,6 +397,42 @@ export function completeNode(run: RunState, node: MapNode): void {
       reassignActRivals(run);
     }
   }
+}
+
+/** Overtime League: bolt a fresh act onto the run at a higher tier. */
+export function extendRun(run: RunState): ActMap {
+  const rng = runRng(run);
+  const act = run.maps.length + 1;
+  const map = generateAct(rng, act, new Set());
+  run.maps.push(map);
+  run.act = act;
+  run.row = 0;
+  run.currentNodeId = null;
+  run.league = (run.league ?? 0) + 1;
+  run.leagueOffer = false;
+  run.over = false;
+  commitRng(run, rng);
+  reassignActRivals(run);
+  return map;
+}
+
+/** Take the trophy and end the run. */
+export function bankRun(run: RunState): void {
+  run.leagueOffer = false;
+  run.over = true;
+}
+
+const EXTRA_PHASES: BossPhase[] = [
+  { period: 2, kind: 'slickIce', label: 'BLACK ICE', desc: 'Slick ice from the second period on.' },
+  { period: 3, kind: 'bouncy', label: 'TRAMPOLINE TIME', desc: 'Boards turn to trampolines in the third.' },
+  { period: 3, kind: 'turboAll', label: 'REDLINE', desc: 'Infinite turbo for everyone in the third.' },
+  { period: 3, kind: 'extraSkater', label: 'SIXTH MAN', desc: 'A fourth skater jumps the boards for the third.' },
+  { period: 0, kind: 'goalieFire', goalsAgainst: 2, label: 'HOT GLOVE', desc: 'Score twice and their goalie catches fire.' },
+];
+/** A boss phase not already in the list (ascension 5 and the Overtime League stack these). */
+export function extraBossPhase(rng: Rng, existing: BossPhase[]): BossPhase | null {
+  const cands = EXTRA_PHASES.filter((e) => !existing.some((x) => x.kind === e.kind));
+  return cands.length ? { ...rng.pick(cands), applied: false } : null;
 }
 
 export function enterNode(run: RunState, node: MapNode): void {
@@ -413,6 +464,14 @@ export function draftPerks(run: RunState, count: number, rarityBonus = 0): Perk[
     if (!cands.length) cands = pool.filter((p) => !picks.includes(p));
     if (!cands.length) break;
     picks.push(rng.pick(cands));
+  }
+  // ascension 3: every draft carries a curse, and epic slots are cursed-only
+  if (run.ascension >= 3 && picks.length && !picks.some((p) => p.curse)) {
+    const cursed = pool.filter((p) => p.curse && !picks.includes(p));
+    if (cursed.length) {
+      const idx = Math.max(0, picks.findIndex((p) => p.rarity === 'epic'));
+      picks[idx] = rng.pick(cursed);
+    }
   }
   commitRng(run, rng);
   return picks;

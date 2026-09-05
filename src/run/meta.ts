@@ -37,6 +37,9 @@ export const UNLOCKABLES: Unlockable[] = [
   { id: 'rink_frost', name: 'Rink: Frostbite Arena', desc: 'Outdoor ice, teal glow. Cosmetic.', cost: 250, kind: 'rink', icon: '🧊' },
   { id: 'asc_1', name: 'Ascension 1', desc: 'Opponents +1 tier. +25% cash.', cost: 400, kind: 'ascension', icon: '🔺' },
   { id: 'asc_2', name: 'Ascension 2', desc: 'Opponents +2 tiers, no base heal. +50% cash.', cost: 800, kind: 'ascension', icon: '🔻' },
+  { id: 'asc_3', name: 'Ascension 3', desc: 'Every draft carries a cursed perk; epic slots are cursed-only. +75% cash.', cost: 1200, kind: 'ascension', icon: '🍷' },
+  { id: 'asc_4', name: 'Ascension 4', desc: 'Rest stops only train: no heals. +100% cash.', cost: 1600, kind: 'ascension', icon: '🩸' },
+  { id: 'asc_5', name: 'Ascension 5', desc: 'Every boss gets an extra phase. +125% cash.', cost: 2000, kind: 'ascension', icon: '☠️' },
 ];
 
 export interface RinkTheme {
@@ -81,6 +84,10 @@ export interface MetaProfile {
   totalAnkle: number;
   totalSpecials: number;
   totalBlocks?: number;
+  /** highest ascension a run was won at (0 = none yet) */
+  bestAscWon?: number;
+  /** deepest Overtime League act reached */
+  leagueBestAct?: number;
   totalShootoutWins: number;
   bestGoalsMatch: number;
   bestBigHitsMatch: number;
@@ -96,7 +103,7 @@ export interface MetaProfile {
 }
 
 export function defaultMeta(): MetaProfile {
-  return { version: 1, cash: 0, unlocked: ['cap_bricker', 'cap_flash'], runs: 0, wins: 0, bestAct: 0, bestRow: 0, totalGoals: 0, totalBigHits: 0, selectedRink: 'classic', volume: 0.7, seenIntro: false, quality: 'auto', cinematics: true, screenShake: true, hitFx: true, music: true, trainingDone: false, feats: [], totalFightsWon: 0, totalTopCorner: 0, totalAnkle: 0, totalSpecials: 0, totalBlocks: 0, totalShootoutWins: 0, bestGoalsMatch: 0, bestBigHitsMatch: 0, rivalRecord: {}, weekly: null, telemetry: { perkOffered: {}, perkPicked: {}, nodePicked: {}, runEndAct: {} }, keymap: null, colorblind: 'off', nameTags: 'all', textScale: 1, reducedMotion: false, rumble: true };
+  return { version: 1, cash: 0, unlocked: ['cap_bricker', 'cap_flash'], runs: 0, wins: 0, bestAct: 0, bestRow: 0, totalGoals: 0, totalBigHits: 0, selectedRink: 'classic', volume: 0.7, seenIntro: false, quality: 'auto', cinematics: true, screenShake: true, hitFx: true, music: true, trainingDone: false, feats: [], totalFightsWon: 0, totalTopCorner: 0, totalAnkle: 0, totalSpecials: 0, totalBlocks: 0, bestAscWon: 0, leagueBestAct: 0, totalShootoutWins: 0, bestGoalsMatch: 0, bestBigHitsMatch: 0, rivalRecord: {}, weekly: null, telemetry: { perkOffered: {}, perkPicked: {}, nodePicked: {}, runEndAct: {} }, keymap: null, colorblind: 'off', nameTags: 'all', textScale: 1, reducedMotion: false, rumble: true };
 }
 
 export const isUnlocked = (m: MetaProfile, id: string): boolean => m.unlocked.includes(id);
@@ -111,4 +118,4 @@ export function isoWeek(d = new Date()): string {
   return `${date.getUTCFullYear()}-W${String(week).padStart(2, '0')}`;
 }
 export const weeklySeed = (week = isoWeek()): string => `weekly-${week}`;
-export const ascensionLevel = (m: MetaProfile): number => (isUnlocked(m, 'asc_2') ? 2 : isUnlocked(m, 'asc_1') ? 1 : 0);
+export const ascensionLevel = (m: MetaProfile): number => [5, 4, 3, 2, 1].find((n) => isUnlocked(m, `asc_${n}`)) ?? 0;

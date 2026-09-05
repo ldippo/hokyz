@@ -34,6 +34,8 @@ export const FEATS: Feat[] = [
   { id: 'firestarter', name: 'Firestarter', icon: '🔥', desc: 'Get your whole team on fire.', reward: { cash: 60, unlock: 'perk_gasoline' }, check: ({ outcome }) => !!(outcome as { teamFire?: boolean } | undefined)?.teamFire },
   { id: 'century', name: 'Century', icon: '💯', desc: '100 career goals.', reward: { cash: 100 }, check: ({ meta }) => meta.totalGoals >= 100 },
   { id: 'hitman', name: 'Hitman', icon: '💀', desc: '200 career big hits.', reward: { cash: 100 }, check: ({ meta }) => meta.totalBigHits >= 200 },
+  { id: 'overtime', name: 'Overtime League', icon: '⏱️', desc: 'Clear Act 4 in the Overtime League.', reward: { cash: 200 }, check: ({ run }) => !!run && run.act >= 5 },
+  { id: 'asc_champ', name: 'Cursed Crown', icon: '👑', desc: 'Win a run at Ascension 3 or higher.', reward: { cash: 250 }, check: ({ run, runOver }) => !!runOver && !!run?.won && run.ascension >= 3 },
   { id: 'weekly', name: 'Regular', icon: '📅', desc: 'Finish a weekly run.', reward: { cash: 40 }, check: ({ run, runOver }) => !!runOver && !!run?.weekly },
 ];
 export const FEAT_BY_ID: Record<string, Feat> = Object.fromEntries(FEATS.map((f) => [f.id, f]));

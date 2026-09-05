@@ -64,6 +64,8 @@ Deploys to Vercel as a static Vite site (`vercel.json`).
 python3 assets/src/render_audio.py public/audio                                                  # pre-rendered SFX (numpy/scipy + ffmpeg)
 ```
 
+Beat the act-3 boss and you can bank the trophy or keep skating in the Overtime League: fresh acts at rising tiers, any boss with an extra phase, bigger payouts, injuries carried. Ascensions 1-5 unlock with cash (tiers, no base heal, cursed drafts, no rest heals, extra boss phases).
+
 Share a run: the map's SEED chip and the run-over screen copy a `/?seed=<text>` link that opens captain select with that seed prefilled. Pause (P/Esc) shows the live box score and your perks, and Photo Mode saves a PNG of the current frame with a scoreboard strip.
 
 Debug views: `/?perf=1` frame-time overlay, `/?rigview=1&poses=idle,skate,lunge,charge,down,celebrate&goalie=butterfly&cam=front` character poses.

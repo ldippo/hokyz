@@ -12,6 +12,7 @@ import { shopScreen } from './shop';
 import { eventScreen } from './event';
 import { restScreen } from './rest';
 import { runOverScreen } from './runOver';
+import { leagueOfferScreen } from './league';
 import { RIVAL_BY_ID } from '../../run/teams';
 import { levelUpScreen } from './levelUp';
 import { pendingLevelUps } from '../../run/runState';
@@ -65,7 +66,7 @@ export function topBar(app: App, run: RunState, extra?: HTMLElement): HTMLElemen
   const lives = e.extraLives - run.livesUsed;
   return h('div', { class: 'topbar' },
     h('div', { style: 'display:flex;align-items:center' },
-      h('span', { class: 'title' }, `ACT ${run.act} · ${run.teamName}`),
+      h('span', { class: 'title' }, `${run.act >= 4 ? `OVERTIME LEAGUE · ACT ${run.act}` : `ACT ${run.act}`} · ${run.teamName}`),
       h('span', { class: 'stat' }, h('small', {}, 'CASH'), String(run.cash)),
       h('span', { class: 'stat' }, h('small', {}, 'RECORD'), `${run.matchesWon}-${run.matchesPlayed - run.matchesWon}`),
       lives > 0 ? h('span', { class: 'stat' }, h('small', {}, 'SECOND WIND'), '❤️'.repeat(lives)) : null,
@@ -81,6 +82,10 @@ export function runMapScreen(app: App): void {
   const run = app.run!;
   if (run.over) {
     runOverScreen(app);
+    return;
+  }
+  if (run.leagueOffer) {
+    leagueOfferScreen(app);
     return;
   }
   if (pendingLevelUps(run).length) {

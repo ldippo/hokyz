@@ -8,13 +8,16 @@ import { awardFeats } from '../../run/feats';
 
 export function runOverScreen(app: App): void {
   const run = app.run!;
-  const earned = Math.floor(run.cash * 0.5) + run.matchesWon * 25 + (run.won ? 500 : 0) + run.ascension * 50;
+  const leagueActs = Math.max(0, run.act - 3);
+  const earned = Math.floor(run.cash * 0.5) + run.matchesWon * 25 + (run.won ? 500 : 0) + run.ascension * 50 + leagueActs * 150;
   app.meta.cash += earned;
   if (run.won) app.meta.wins++;
   if (run.act > app.meta.bestAct || (run.act === app.meta.bestAct && run.row > app.meta.bestRow)) {
     app.meta.bestAct = run.act;
     app.meta.bestRow = run.row;
   }
+  if (run.won) app.meta.bestAscWon = Math.max(app.meta.bestAscWon ?? 0, run.ascension);
+  if (run.act >= 4) app.meta.leagueBestAct = Math.max(app.meta.leagueBestAct ?? 0, run.act);
   const m = app.meta;
   m.telemetry ??= { perkOffered: {}, perkPicked: {}, nodePicked: {}, runEndAct: {} };
   m.telemetry.runEndAct[String(run.won ? 'won' : run.act)] = (m.telemetry.runEndAct[String(run.won ? 'won' : run.act)] ?? 0) + 1;
@@ -37,7 +40,7 @@ export function runOverScreen(app: App): void {
   const el = h('div', { class: 'screen transparent' },
     h('div', { class: 'result' },
       h('h2', { class: run.won ? 'win' : 'lose' }, run.won ? '🏆 CHAMPIONS' : 'RUN OVER'),
-      h('div', { class: 'score-line' }, run.won ? 'You beat The Legends. Legend status: confirmed.' : `Knocked out in Act ${run.act}, stop ${run.row + 1}.`),
+      h('div', { class: 'score-line' }, run.won ? (run.act >= 4 ? (run.row >= (run.maps[run.act - 1]?.rows.length ?? 99) ? `Overtime League: cleared through Act ${run.act}. Trophy banked.` : `Overtime League run ended in Act ${run.act}, stop ${run.row + 1}. The trophy stays.`) : 'You beat the act-3 boss. Legend status: confirmed.') : `Knocked out in Act ${run.act}, stop ${run.row + 1}.`),
       h('table', { class: 'box' },
         h('tbody', {},
           h('tr', {}, h('td', {}, 'Record'), h('td', { class: 'num' }, `${run.matchesWon}-${run.matchesPlayed - run.matchesWon}`)),
