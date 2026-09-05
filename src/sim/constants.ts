@@ -129,4 +129,43 @@ export const AI = {
   supportSpacing: 6,
 };
 
+export const FIGHT = {
+  offerTime: 1.6,
+  duelTime: 8,
+  cueEvery: 1.05,
+  cueWindow: 0.5,
+  punchDmg: 22,
+  counterDmg: 26,
+  wrongDmg: 10,
+  feintDmg: 14,
+  mashNeeded: 6,
+  mashHeal: 24,
+  resultTime: 2.2,
+  /** knockdowns in a period before a big hit provokes a fight */
+  provokeKnockdowns: 3,
+  /** max fights per period (both teams combined) */
+  perPeriod: 1,
+  enforcerProvokeChance: 0.3,
+};
+
+export const SPECIAL = {
+  gainPerSec: 1 / 115,
+  gainBigHit: 0.09,
+  gainGoal: 0.18,
+  gainSave: 0.04,
+  gainAnkle: 0.08,
+  laserTime: 6,
+  afterburnerTime: 3.2,
+  afterburnerSpeed: 1.6,
+  shockwaveRadius: 4.2,
+  blinkWindow: 0.7,
+  brickWallSaves: 3,
+};
+
+export const TEAMFIRE = {
+  duration: 20,
+  cooldown: 45,
+  unansweredGoals: 3,
+};
+
 export const SIM_DT = 1 / 60;

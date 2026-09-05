@@ -1,4 +1,5 @@
-import { HIT, ONFIRE, SKATER } from './constants';
+import { FIGHT, HIT, ONFIRE, SKATER } from './constants';
+import { offerFight } from './fight';
 import { releasePuck } from './puck';
 import type { Input, MatchEvent, MatchState, Skater } from './types';
 import { angleDiff, angleOf, fromAngle, len, norm, sub } from './vec';
@@ -83,8 +84,10 @@ export function applyHit(st: MatchState, h: Skater, vic: Skater, rng: Rng, event
   h.vel.x *= 0.45;
   h.vel.y *= 0.45;
 
+  const hadPuck = vic.hasPuck;
   if (knock) {
     vic.knockdown = SKATER.knockdownTime * (big ? 1.3 : 1);
+    vic.knockdownsThisPeriod++;
     vic.turboActive = false;
     events.push({ type: 'knockdown', skater: vic.id });
     const dmg = (big ? HIT.injuryPerBigHit : HIT.injuryPerHit) * vm.injuryMul;
@@ -116,4 +119,9 @@ export function applyHit(st: MatchState, h: Skater, vic: Skater, rng: Rng, event
     st.shake = Math.max(st.shake, 0.5);
   }
   events.push({ type: 'hit', hitter: h.id, victim: vic.id, big, pos: { x: vic.pos.x, y: vic.pos.y } });
+  // provoke a fight: repeat victim of big hits, or an enforcer flattening the carrier
+  if (!st.mods.noFights && !st.fight && !vic.isGoalie && !h.isGoalie && st.phase === 'play' && st.fightsThisPeriod < FIGHT.perPeriod) {
+    const provoked = (big && vic.knockdownsThisPeriod > FIGHT.provokeKnockdowns) || (big && hadPuck && h.archetype === 'enforcer' && rng.next() < FIGHT.enforcerProvokeChance);
+    if (provoked) offerFight(st, h.id, vic.id, events);
+  }
 }

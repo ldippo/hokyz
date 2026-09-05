@@ -42,6 +42,12 @@ export function makeSkater(
     dekeWindow: 0,
     dive: 0,
     diveDir: 0,
+    knockdownsThisPeriod: 0,
+    temper: 0.3,
+    ejected: false,
+    specialKind: archetype === 'sniper' ? 'laser' : archetype === 'enforcer' ? 'shockwave' : archetype === 'speedster' ? 'afterburner' : archetype === 'goalie' ? 'brickwall' : 'blink',
+    specialTimer: 0,
+    perfectUntil: -1,
     onFire: 0,
     streak: 0,
     hp,
@@ -63,6 +69,7 @@ export function skaterMaxSpeed(sk: Skater, st: MatchState): number {
   const m = st.mods.teams[sk.team];
   let s = SKATER.baseMaxSpeed * SKATER.statScale(sk.stats.speed) * m.speedMul;
   if (sk.onFire > 0) s *= ONFIRE.speedMul;
+  if (sk.specialTimer > 0 && sk.specialKind === 'afterburner') s *= 1.6;
   if (sk.turboActive) s *= SKATER.turboSpeedMul;
   if (sk.hasPuck) s *= 0.9 + sk.stats.hands / 100;
   if (sk.stumble > 0) s *= 0.6;
@@ -81,6 +88,8 @@ export function stepSkater(sk: Skater, input: Input, st: MatchState, dt: number,
   sk.dekeWindow = tick(sk.dekeWindow, dt);
   if (sk.dekeWindow === 0) sk.dekeChain = 0;
   sk.butterfly = tick(sk.butterfly, dt);
+  sk.specialTimer = tick(sk.specialTimer, dt);
+  if (sk.specialTimer > 0 && sk.specialKind === 'afterburner') sk.invuln = Math.max(sk.invuln, 0.1);
   if (sk.onFire > 0) {
     sk.onFire = Math.max(0, sk.onFire - dt);
     if (sk.onFire === 0) events.push({ type: 'onFireEnd', skater: sk.id });

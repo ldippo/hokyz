@@ -1,6 +1,6 @@
 import type { Input } from '../sim/types';
 
-export type Action = 'up' | 'down' | 'left' | 'right' | 'aimUp' | 'aimDown' | 'aimLeft' | 'aimRight' | 'turbo' | 'pass' | 'shoot' | 'deke' | 'pause' | 'confirm' | 'back';
+export type Action = 'up' | 'down' | 'left' | 'right' | 'aimUp' | 'aimDown' | 'aimLeft' | 'aimRight' | 'turbo' | 'pass' | 'shoot' | 'deke' | 'special' | 'pause' | 'confirm' | 'back';
 
 const DEFAULT_KEYS: Record<string, Action> = {
   KeyW: 'up',
@@ -16,7 +16,8 @@ const DEFAULT_KEYS: Record<string, Action> = {
   KeyJ: 'pass',
   KeyK: 'shoot',
   KeyL: 'deke',
-  Space: 'shoot',
+  Space: 'special',
+  KeyI: 'special',
   Enter: 'confirm',
   Escape: 'back',
   KeyP: 'pause',
@@ -27,7 +28,7 @@ const PAD_BUTTONS: Record<number, Action> = {
   0: 'pass', // A
   1: 'shoot', // B
   2: 'deke', // X
-  3: 'turbo', // Y (alt)
+  3: 'special', // Y
   5: 'turbo', // RB
   7: 'turbo', // RT
   9: 'pause',
@@ -168,6 +169,7 @@ export class InputManager {
       shootRelease: this.justReleased('shoot'),
       check: this.justPressed('shoot'),
       deke: this.justPressed('deke'),
+      special: this.justPressed('special'),
     };
   }
 }

@@ -61,6 +61,15 @@ export interface Skater {
   /** goalie dive timer + direction (sim y sign) */
   dive: number;
   diveDir: number;
+  knockdownsThisPeriod: number;
+  /** 0..1 fight temper from traits/archetype */
+  temper: number;
+  /** out for the rest of the period (lost a fight) */
+  ejected: boolean;
+  specialKind: SpecialKind;
+  specialTimer: number;
+  /** extended one-timer window (blink pass) until match time */
+  perfectUntil: number;
   onFire: number; // seconds remaining
   streak: number;
   hp: number;
@@ -94,6 +103,8 @@ export interface Puck {
   saucer: boolean;
   /** charge of the last shot (goalie read) */
   shotCharge: number;
+  /** laser shot: unsavable if on net */
+  laser: boolean;
 }
 
 export interface TeamState {
@@ -118,9 +129,30 @@ export interface TeamState {
   diveReturnId: string | null;
   pullLatch: boolean;
   pulledGoalieId?: string | null;
+  /** special meter 0..1 */
+  special: number;
+  brickWall: number; // auto-saves remaining
+  teamFireCooldown: number;
+  ejected: string[];
 }
 
-export type MatchPhase = 'intro' | 'faceoff' | 'play' | 'goal' | 'periodEnd' | 'over';
+export type MatchPhase = 'intro' | 'faceoff' | 'play' | 'goal' | 'periodEnd' | 'fight' | 'over';
+
+export type SpecialKind = 'laser' | 'shockwave' | 'afterburner' | 'blink' | 'brickwall';
+export type FightCue = 'high' | 'low' | 'feint' | 'mash';
+
+export interface FightState {
+  a: string; // initiator
+  b: string; // opponent
+  stage: 'offer' | 'duel' | 'result';
+  t: number; // stage time
+  hp: [number, number];
+  accepted: [boolean | null, boolean | null];
+  cue: { kind: FightCue; target: 0 | 1; t: number; window: number; done: boolean; mash: number } | null;
+  nextCue: number;
+  winner: 0 | 1 | null;
+  lastHit: { by: 0 | 1; t: number } | null;
+}
 
 export interface Input {
   move: Vec2;
@@ -137,6 +169,8 @@ export interface Input {
   shootRelease: boolean;
   check: boolean;
   deke: boolean;
+  /** special move button (edge) */
+  special: boolean;
 }
 
 export const EMPTY_INPUT: Readonly<Input> = Object.freeze({
@@ -150,6 +184,7 @@ export const EMPTY_INPUT: Readonly<Input> = Object.freeze({
   shootRelease: false,
   check: false,
   deke: false,
+  special: false,
 });
 
 export type MatchEvent =
@@ -161,6 +196,14 @@ export type MatchEvent =
   | { type: 'bigSave'; goalie: string; pos: Vec2 }
   | { type: 'divePrompt'; team: TeamId }
   | { type: 'goaliePulled'; team: TeamId; pulled: boolean }
+  | { type: 'fightOffer'; a: string; b: string }
+  | { type: 'fightStart'; a: string; b: string }
+  | { type: 'fightCue'; kind: FightCue; target: string }
+  | { type: 'fightHit'; attacker: string; defender: string; dmg: number; counter: boolean }
+  | { type: 'fightEnd'; winner: string | null; loser: string | null; a: string; b: string }
+  | { type: 'special'; skater: string; kind: SpecialKind; pos: Vec2 }
+  | { type: 'specialReady'; team: TeamId }
+  | { type: 'teamFire'; team: TeamId }
   | { type: 'save'; goalie: string; pos: Vec2 }
   | { type: 'post'; pos: Vec2 }
   | { type: 'pass'; from: string; to: string | null }
@@ -202,6 +245,8 @@ export interface TeamMods {
   /** extra goalie rebound control (lower = fewer rebounds) */
   reboundMul: number;
   staminaMul: number;
+  specialGainMul: number;
+  fightPowerMul: number;
 }
 
 export interface MatchMods {
@@ -215,6 +260,7 @@ export interface MatchMods {
   slipperyIce: boolean;
   suddenDeath: boolean; // first goal wins
   mercyRule: number; // 0 = off, else lead needed to end
+  noFights: boolean;
   teams: [TeamMods, TeamMods];
 }
 
@@ -235,6 +281,8 @@ export interface MatchState {
   events: MatchEvent[];
   winner: TeamId | null;
   mods: MatchMods;
+  fight: FightState | null;
+  fightsThisPeriod: number;
   /** camera shake request (decays outside sim) */
   shake: number;
   stats: {

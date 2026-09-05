@@ -75,6 +75,11 @@ export class SkaterRig {
   private headYaw = 0;
   private lean = 0;
   private roll = 0;
+  /** fight animation: stance while >0, punch/stagger timers */
+  fightStance = false;
+  private punchT = 0;
+  private punchHigh = true;
+  private staggerT = 0;
 
   constructor(public id: string, tpl: THREE.Object3D, public isGoalie: boolean, spec: JerseySpec) {
     this.model = skeletonClone(tpl);
@@ -174,6 +179,13 @@ export class SkaterRig {
   }
   celebrate(): void {
     this.celebrateT = 1.6;
+  }
+  punch(high: boolean): void {
+    this.punchT = 0.32;
+    this.punchHigh = high;
+  }
+  stagger(): void {
+    this.staggerT = 0.4;
   }
 
   update(sk: Skater, alpha: number, dt: number, time: number): void {
@@ -279,6 +291,38 @@ export class SkaterRig {
       this.rot('upperArm.R', AX_Z, -2.3 * c);
       this.rot('upperArm.L', AX_X, 0.5 * c);
       this.rot('upperArm.R', AX_X, -0.5 * c);
+    }
+    // fight: guard stance, punches, staggers
+    this.punchT = Math.max(0, this.punchT - dt);
+    this.staggerT = Math.max(0, this.staggerT - dt);
+    if (this.fightStance) {
+      this.rot('upperArm.L', AX_Z, -1.5);
+      this.rot('upperArm.R', AX_Z, -1.6);
+      this.rot('upperArm.L', AX_X, 0.35);
+      this.rot('upperArm.R', AX_X, -0.35);
+      this.rot('foreArm.L', AX_Z, 1.4);
+      this.rot('foreArm.R', AX_Z, 1.5);
+      this.rot('chest', AX_Z, -0.15);
+      this.rot('stick', AX_Z, 1.2);
+      if (this.punchT > 0) {
+        const k = Math.sin((this.punchT / 0.32) * Math.PI);
+        this.rot('upperArm.R', AX_Z, -0.9 * k + (this.punchHigh ? -0.3 : 0.4) * k);
+        this.rot('foreArm.R', AX_Z, -1.3 * k);
+        this.rot('chest', AX_Y, -0.5 * k);
+      }
+      if (this.staggerT > 0) {
+        const k = Math.sin((this.staggerT / 0.4) * Math.PI);
+        this.rot('chest', AX_Z, 0.6 * k);
+        this.rot('head', AX_Z, 0.5 * k);
+        this.rot('head', AX_Y, 0.4 * k);
+      }
+    }
+    // shockwave / laser windup poses
+    if (sk.specialTimer > 0 && sk.specialKind === 'shockwave') {
+      const k = Math.min(1, sk.specialTimer / 0.6);
+      this.rot('chest', AX_Z, -0.9 * k);
+      this.rot('upperArm.L', AX_Z, -2.4 * k);
+      this.rot('upperArm.R', AX_Z, -2.4 * k);
     }
     // head tracks the puck direction (set externally via lookAt) — small yaw
     this.rot('head', AX_Y, this.headYaw);

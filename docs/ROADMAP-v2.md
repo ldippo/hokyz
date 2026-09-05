@@ -72,8 +72,8 @@ Status 2026-09-05: aim input (arrows / right stick / mouse) picks the post, char
 - Tests: aim zones map to net coords, saucer clears fallen skater, deke chain cost, pull-goalie lineup.
 - Gate: balance batch still in range (goals 6-11), user feel ok.
 
-### F — Spectacle (M)
-Branch `phase/spectacle`.
+### F — Spectacle (M) — IN REVIEW (branch `phase/spectacle`, stacked on E)
+Status 2026-09-05: `sim/fight.ts` fight state machine: a big hit on a repeat victim (>3 knockdowns this period) or an Enforcer flattening the carrier offers DROP THE GLOVES (1.6 s, K = fight, J = walk away; AI accepts by hit stat + temper trait), then an 8 s cue duel (HIGH = K, LOW = L, FEINT = block with J, MASH = K when low; AI reacts by hit + difficulty), loser is ejected until the period break and the winner goes on-fire; capped at 1 fight per period. `sim/specials.ts`: per-team meter (~115 s of play, big hits/goals/saves/ankle-breakers accelerate), Space / pad Y fires the controlled skater's kit: Sniper LASER SHOT (next shot unsavable if on net), Enforcer SHOCKWAVE (floors everyone within 4.2 m, puck pops), Speedster AFTERBURNER (3.2 s at 1.6× speed, phases through checks), Playmaker BLINK PASS (puck jumps to the best teammate with a 0.7 s guaranteed one-timer window), Goalie BRICK WALL (next 3 shots saved; AI goalies use it on incoming shots). AI uses kits situationally. Team fire: two skaters on fire at once or 3 unanswered goals ignites the whole team for 20 s. Presentation: fight camera + HP bars + cue prompts, guard/punch/stagger poses, shockwave ring, laser trail, afterburner flames, meter HUD. `TeamMods` gained `specialGainMul` and `fightPowerMul` for Phase G perks; `MatchMods.noFights` for mutators. Batch: fights 0.3-2.3, specials 8-10, team fire 1-2 per match.
 - Sim: fight state machine (trigger rules, duel rounds, outcomes), specials meter + 5 kits, team-fire.
 - AI: fight decisions by hit stat + temper trait; special usage heuristics.
 - Render: fight cam + UI prompts, special VFX (laser trail, shockwave ring, afterburner, blink), meter HUD.

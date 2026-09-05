@@ -23,6 +23,8 @@ export function defaultTeamMods(): TeamMods {
     hpOnBigHit: 0,
     reboundMul: 1,
     staminaMul: 1,
+    specialGainMul: 1,
+    fightPowerMul: 1,
   };
 }
 
@@ -37,6 +39,7 @@ export function defaultMatchMods(): MatchMods {
     slipperyIce: false,
     suddenDeath: false,
     mercyRule: 0,
+    noFights: false,
     teams: [defaultTeamMods(), defaultTeamMods()],
   };
 }

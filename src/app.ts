@@ -92,7 +92,7 @@ export class App {
     this.input.poll();
     if (this.view && !this.paused) {
       const v = this.view;
-      if (v.director.active && this.humanPlaying && (this.input.justPressed('confirm') || this.input.justPressed('pass') || this.input.justPressed('shoot') || this.input.justPressed('back'))) {
+      if (v.director.active && v.director.kind !== 'fight' && this.humanPlaying && (this.input.justPressed('confirm') || this.input.justPressed('pass') || this.input.justPressed('shoot') || this.input.justPressed('back'))) {
         v.skipCinematic();
       }
       this.loop.speed = v.timeScale;

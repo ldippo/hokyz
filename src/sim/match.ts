@@ -13,6 +13,8 @@ import { stepSkater } from './skater';
 import { EMPTY_INPUT, type Input, type MatchEvent, type MatchMods, type MatchState, type SkaterDef, type TeamId, type TeamState } from './types';
 import { dist } from './vec';
 import { GOALIE } from './constants';
+import { restoreEjected, stepFight } from './fight';
+import { gainSpecial, stepSpecialInputs, stepTeamFire } from './specials';
 
 export interface TeamSetup {
   name: string;
@@ -29,6 +31,8 @@ export class MatchSim {
   rng: Rng;
   brains: [TeamBrains, TeamBrains] = [new TeamBrains(), new TeamBrains()];
   mash: [number, number] = [0, 0];
+  /** goals scored without reply, per team */
+  unanswered: [number, number] = [0, 0];
   private prevInputs: Map<string, Input> = new Map();
 
   constructor(teams: [TeamSetup, TeamSetup], mods: MatchMods = defaultMatchMods(), seed = 1) {
@@ -68,6 +72,10 @@ export class MatchSim {
         diveWindow: 0,
         diveReturnId: null,
         pullLatch: false,
+        special: 0,
+        brickWall: 0,
+        teamFireCooldown: 0,
+        ejected: [],
       };
     }) as [TeamState, TeamState];
 
@@ -88,9 +96,22 @@ export class MatchSim {
       events: [],
       winner: null,
       mods,
+      fight: null,
+      fightsThisPeriod: 0,
       shake: 0,
       stats: { hits: [0, 0], bigHits: [0, 0], shots: [0, 0] },
     };
+    // temper from traits
+    teams.forEach((t) => {
+      for (const def of t.skaters) {
+        const sk = skaters[def.id];
+        if (!sk) continue;
+        if (def.traits.includes('goon')) sk.temper = 0.9;
+        else if (def.traits.includes('brawler')) sk.temper = 0.75;
+        else if (def.traits.includes('ironjaw')) sk.temper = 0.55;
+        else if (def.archetype === 'enforcer') sk.temper = 0.6;
+      }
+    });
     const ev: MatchEvent[] = [];
     setupFaceoff(this.st, ev);
     this.st.phase = 'intro';
@@ -131,6 +152,9 @@ export class MatchSim {
       case 'play':
         this.stepPlay(humanInputs, dt, events);
         break;
+      case 'fight':
+        stepFight(st, dt, humanInputs, this.rng, events);
+        break;
       case 'goal':
         st.phaseTimer -= dt;
         // let puck & fallen skaters settle visually
@@ -145,6 +169,7 @@ export class MatchSim {
       case 'periodEnd':
         st.phaseTimer -= dt;
         if (st.phaseTimer <= 0) {
+          restoreEjected(st);
           st.period++;
           if (st.period > st.mods.periods) st.overtime = true;
           st.clock = st.overtime ? RULES.otLength : st.mods.periodLength;
@@ -304,7 +329,18 @@ export class MatchSim {
     else stepPuckPhysics(st, dt, events);
     tryPickups(st, events);
     checkGoal(st, prevX, events);
+    for (const e of events) {
+      if (e.type === 'goal') {
+        this.unanswered[e.team]++;
+        this.unanswered[e.team === 0 ? 1 : 0] = 0;
+      }
+    }
     stepOnFire(st, events);
+    stepSpecialInputs(st, inputs, this.rng, events);
+    const extra: MatchEvent[] = [];
+    gainSpecial(st, dt, events, extra);
+    stepTeamFire(st, dt, extra, this.unanswered);
+    events.push(...extra);
 
     if (st.phase === 'play' && st.clock <= 0) {
       st.clock = 0;

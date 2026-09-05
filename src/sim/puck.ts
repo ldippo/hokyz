@@ -20,6 +20,7 @@ export function makePuck(): Puck {
     isShot: false,
     saucer: false,
     shotCharge: 0,
+    laser: false,
   };
 }
 
@@ -39,6 +40,7 @@ export function givePuck(st: MatchState, sk: Skater, events: MatchEvent[]): void
   p.passTarget = null;
   p.isShot = false;
   p.saucer = false;
+  p.laser = false;
   p.freeTime = 0;
   p.z = 0;
   p.vz = 0;
@@ -213,12 +215,14 @@ export function doPass(st: MatchState, sk: Skater, target: Skater | null, events
 export function doShot(st: MatchState, sk: Skater, aim: Vec2, charge: number, rng: Rng, events: MatchEvent[]): void {
   const m = st.mods.teams[sk.team];
   const goal = attackGoal(sk.team);
-  const isOneTimer = st.t - sk.receivedAt < PUCK.oneTimerWindow;
+  const isOneTimer = st.t - sk.receivedAt < PUCK.oneTimerWindow || st.t < sk.perfectUntil;
   let power = clamp(charge, 0.15, 1);
   if (isOneTimer) power = Math.min(1.2, power * PUCK.oneTimerPowerMul + 0.3);
   const shotStat = SKATER.statScale(sk.stats.shot);
   let speed = (PUCK.shotSpeedMin + (PUCK.shotSpeedMax - PUCK.shotSpeedMin) * power) * shotStat * m.shotPowerMul;
   if (sk.onFire > 0) speed *= ONFIRE.shotMul;
+  const laser = sk.specialTimer > 0 && sk.specialKind === 'laser';
+  if (laser) speed *= 1.35;
   // aim zones: aim.y picks the post (screen up = far post = -y), charge > 0.6 lifts to the top corners.
   // No aim input → auto far side from the goalie.
   const goalieId = st.teams[sk.team === 0 ? 1 : 0].goalie;
@@ -254,6 +258,8 @@ export function doShot(st: MatchState, sk: Skater, aim: Vec2, charge: number, rn
   releasePuck(st, sk, fromAngle(ang, speed), Math.max(0, lift));
   st.puck.isShot = true;
   st.puck.shotCharge = charge;
+  st.puck.laser = laser;
+  if (laser) sk.specialTimer = 0;
   sk.shots++;
   st.stats.shots[sk.team]++;
   events.push({ type: 'shot', shooter: sk.id, power, pos: { ...st.puck.pos }, oneTimer: isOneTimer, zone });

@@ -7,7 +7,7 @@ import type { TeamId, Vec2 } from '../sim/types';
  * camera resumes when `active` is false. Shots are keyframed in sim-space then
  * converted to world (x, y-up, z = sim y).
  */
-export type ShotKind = 'intro' | 'replay' | 'hit' | 'mvp' | null;
+export type ShotKind = 'intro' | 'replay' | 'hit' | 'mvp' | 'fight' | null;
 
 interface Key {
   t: number;
@@ -96,6 +96,23 @@ export class Director {
       { t: 1, pos: v3(pos.x + sx * 3.8 + nx * 1.0, 1.1, pos.y + sy * 3.8 + ny * 1.0), look: v3(pos.x + nx * 0.5, 0.8, pos.y + ny * 0.5), fov: 36 },
     ];
     this.shot = { kind: 'hit', t: 0, duration, keys, timeScale: 0.22 };
+  }
+
+  /** Fight: side-on low cam between two skaters, slow drift. */
+  fight(a: Vec2, b: Vec2, duration = 30): void {
+    const mx = (a.x + b.x) / 2,
+      my = (a.y + b.y) / 2;
+    const dx = b.x - a.x,
+      dy = b.y - a.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const sx = -dy / len,
+      sy = dx / len;
+    const side = sy > 0 ? 1 : -1; // prefer the camera side (+y)
+    const keys: Key[] = [
+      { t: 0, pos: v3(mx + sx * side * 4.6, 1.5, my + sy * side * 4.6), look: v3(mx, 1.0, my), fov: 40 },
+      { t: 1, pos: v3(mx + sx * side * 4.0 + dx * 0.15, 1.3, my + sy * side * 4.0 + dy * 0.15), look: v3(mx, 1.0, my), fov: 38 },
+    ];
+    this.shot = { kind: 'fight', t: 0, duration, keys, timeScale: 1, label: 'FIGHT' };
   }
 
   /** Slow orbit around the player of the game. */

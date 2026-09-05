@@ -142,8 +142,14 @@ export function stepGoalie(st: MatchState, g: Skater, dt: number, rng: Rng, even
           diveF = right ? GOALIE.diveRightMul : GOALIE.diveWrongMul;
           bigSave = right;
         }
-        const chance = GOALIE.baseSaveChance * SKATER.statScale(g.stats.hands) * m.goalieSaveMul * angleF * powerF * highF * screen * readF * diveF * (gm.beaten > 0 ? 0.3 : 1);
-        if (rng.next() < clamp(chance, 0.15, 0.97)) {
+        let chance = GOALIE.baseSaveChance * SKATER.statScale(g.stats.hands) * m.goalieSaveMul * angleF * powerF * highF * screen * readF * diveF * (gm.beaten > 0 ? 0.3 : 1);
+        const team = st.teams[g.team];
+        if (team.brickWall > 0) {
+          chance = 2;
+          team.brickWall--;
+          bigSave = true;
+        } else if (p.laser) chance = 0;
+        if (rng.next() < clamp(chance, 0.15, 0.97) || chance >= 2) {
           if (bigSave) events.push({ type: 'bigSave', goalie: g.id, pos: { ...p.pos } });
           // SAVE
           g.saves++;

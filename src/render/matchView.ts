@@ -53,6 +53,9 @@ export class MatchView {
   private lanes: THREE.Mesh[] = [];
   private otRing: THREE.Mesh;
   private pullHint = 0;
+  private shockRing: THREE.Mesh;
+  private shockT = 0;
+  private laserTrail = 0;
   cam: FollowCamera;
   hud: Hud;
   time = 0;
@@ -114,6 +117,12 @@ export class MatchView {
       this.lanes.push(l);
       this.group.add(l);
     }
+    // shockwave ring
+    this.shockRing = new THREE.Mesh(new THREE.RingGeometry(0.8, 1.0, 40), new THREE.MeshBasicMaterial({ color: 0xff7a1a, transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
+    this.shockRing.rotation.x = -Math.PI / 2;
+    this.shockRing.position.y = 0.1;
+    this.shockRing.visible = false;
+    this.group.add(this.shockRing);
     // one-timer timing ring
     this.otRing = new THREE.Mesh(new THREE.TorusGeometry(1, 0.06, 8, 32), new THREE.MeshBasicMaterial({ color: 0xffd23f, transparent: true, opacity: 0.85, depthTest: false }));
     this.otRing.rotation.x = -Math.PI / 2;
@@ -269,6 +278,92 @@ export class MatchView {
         break;
       case 'saucer':
         sfx.pass();
+        break;
+      case 'fightOffer': {
+        this.hud.announce('DROP THE GLOVES?', 'red', 'K = FIGHT  ·  J = WALK AWAY');
+        sfx.crowdBurst(0.6);
+        this.excite = 1;
+        const a = st.skaters[e.a],
+          b = st.skaters[e.b];
+        if (!this.silent) this.director.fight(a.pos, b.pos, 40);
+        break;
+      }
+      case 'fightStart': {
+        this.hud.announce('FIGHT!', 'fire');
+        sfx.crowdBurst(1);
+        for (const id of [e.a, e.b]) {
+          const r = this.skaters.get(id);
+          if (r instanceof SkaterRig) r.fightStance = true;
+        }
+        break;
+      }
+      case 'fightHit': {
+        const ra = this.skaters.get(e.attacker);
+        const rd = this.skaters.get(e.defender);
+        if (ra instanceof SkaterRig) ra.punch(e.dmg > 20);
+        if (rd instanceof SkaterRig) rd.stagger();
+        const d = st.skaters[e.defender];
+        this.particles.spawn({ x: d.pos.x, y: d.pos.y, z: 1.4, count: e.counter ? 22 : 10, color: e.counter ? [0xffd23f, 0xffffff] : [0xffffff, 0xff5a5a], speed: 3, life: 0.4, size: 0.08, up: 2 });
+        sfx.hit(e.counter);
+        if (!this.silent) this.rig.punch(e.counter ? 0.6 : 0.3);
+        break;
+      }
+      case 'fightEnd': {
+        for (const id of [e.a, e.b]) {
+          const r = this.skaters.get(id);
+          if (r instanceof SkaterRig) r.fightStance = false;
+        }
+        this.hud.fight(false);
+        if (e.winner) {
+          this.hud.announce(st.skaters[e.winner].name.toUpperCase(), 'gold', 'WINS THE FIGHT · LOSER SITS');
+          const r = this.skaters.get(e.winner);
+          if (r instanceof SkaterRig) r.celebrate();
+          sfx.crowdBurst(1);
+        } else if (this.director.kind === 'fight') {
+          this.hud.announce('NO FIGHT', '', 'PLAY ON');
+        }
+        if (this.director.kind === 'fight') this.director.stop();
+        break;
+      }
+      case 'special': {
+        const sk = st.skaters[e.skater];
+        const label = { laser: 'LASER SHOT', shockwave: 'SHOCKWAVE', afterburner: 'AFTERBURNER', blink: 'BLINK PASS', brickwall: 'BRICK WALL' }[e.kind];
+        if (sk.controlled || st.teams[sk.team].isHuman) this.hud.announce(label, 'fire', sk.name);
+        else this.hud.announce(label, 'red', sk.name);
+        if (e.kind === 'shockwave') {
+          this.shockT = 0.7;
+          this.shockRing.position.set(e.pos.x, 0.1, e.pos.y);
+          this.particles.spawn({ x: e.pos.x, y: e.pos.y, z: 0.2, count: 60, color: [0xff7a1a, 0xffd23f, 0xffffff], speed: 8, life: 0.7, size: 0.14, up: 4 });
+          if (!this.silent) {
+            this.rig.punch(1);
+            this.rig.hitStopHandler?.(4);
+          }
+          sfx.hit(true);
+        } else if (e.kind === 'blink') {
+          this.particles.spawn({ x: e.pos.x, y: e.pos.y, z: 0.4, count: 30, color: [0x7fa6ff, 0xffffff], speed: 4, life: 0.5, size: 0.1, up: 3, gravity: 0 });
+          const to = st.puck.owner ? st.skaters[st.puck.owner] : null;
+          if (to) this.particles.spawn({ x: to.pos.x, y: to.pos.y, z: 0.4, count: 30, color: [0x7fa6ff, 0xffffff], speed: 4, life: 0.5, size: 0.1, up: 3, gravity: 0 });
+        } else {
+          this.particles.spawn({ x: e.pos.x, y: e.pos.y, z: 0.6, count: 36, color: e.kind === 'laser' ? [0xff2d3a, 0xffffff] : e.kind === 'afterburner' ? [0xff7a1a, 0xffc400] : [0xffffff, 0x7fa6ff], speed: 5, life: 0.6, size: 0.12, up: 4, gravity: 2 });
+        }
+        sfx.onFire();
+        break;
+      }
+      case 'specialReady':
+        if (st.teams[e.team].isHuman) {
+          this.hud.prompt('SPECIAL READY · SPACE / Y', 2.2);
+          sfx.cash();
+        }
+        break;
+      case 'teamFire':
+        this.hud.announce('TEAM ON FIRE!', 'fire', st.teams[e.team].name.toUpperCase());
+        for (const id of st.teams[e.team].skaters) {
+          const k = st.skaters[id];
+          this.particles.spawn({ x: k.pos.x, y: k.pos.y, z: 0.6, count: 30, color: [0xff5a00, 0xffc400], speed: 4, life: 0.9, size: 0.12, up: 5, gravity: 2 });
+        }
+        sfx.onFire();
+        sfx.crowdBurst(1);
+        this.excite = 1;
         break;
       case 'save':
         sfx.save();
@@ -487,6 +582,43 @@ export class MatchView {
       this.cam.update(dt, fx, fy, st.shake, this.time, spread);
     }
     if (directing && this.director.kind === 'replay') this.hud.tag('REPLAY');
+    // fight overlay
+    if (st.fight) {
+      const f = st.fight;
+      const A = st.skaters[f.a],
+        B = st.skaters[f.b];
+      let cue = '',
+        cls = '';
+      if (f.stage === 'offer') {
+        cue = 'DROP THE GLOVES?';
+      } else if (f.stage === 'duel' && f.cue && !f.cue.done) {
+        const mine = st.teams[(f.cue.target === 0 ? A : B).team].isHuman;
+        cls = f.cue.kind;
+        cue = f.cue.kind === 'high' ? (mine ? 'HIGH!  K' : 'HIGH') : f.cue.kind === 'low' ? (mine ? 'LOW!  L' : 'LOW') : f.cue.kind === 'feint' ? (mine ? 'FEINT — BLOCK  J' : 'FEINT') : mine ? 'MASH  K!' : 'RECOVER';
+      } else if (f.stage === 'result') {
+        cue = f.winner === null ? 'DRAW' : 'K.O.';
+        cls = 'feint';
+      }
+      this.hud.fight(true, [A.name, B.name], f.hp, cue, cls);
+    }
+    // shockwave ring
+    if (this.shockT > 0) {
+      this.shockT -= dt;
+      const k = 1 - this.shockT / 0.7;
+      this.shockRing.visible = true;
+      this.shockRing.scale.setScalar(0.3 + k * 4.5);
+      (this.shockRing.material as THREE.MeshBasicMaterial).opacity = 0.9 * (1 - k);
+    } else this.shockRing.visible = false;
+    // laser puck trail + afterburner flames
+    if (st.puck.laser && !st.puck.owner) {
+      this.laserTrail += dt;
+      this.particles.spawn({ x: st.puck.pos.x, y: st.puck.pos.y, z: st.puck.z + 0.1, count: 3, color: [0xff2d3a, 0xffffff], speed: 0.5, life: 0.35, size: 0.1, up: 0.3, gravity: 0 });
+    }
+    for (const id of st.order) {
+      const k = st.skaters[id];
+      if (k.specialTimer > 0 && k.specialKind === 'afterburner') this.particles.spawn({ x: k.pos.x - Math.cos(k.facing) * 0.5, y: k.pos.y - Math.sin(k.facing) * 0.5, z: 0.5, count: 2, color: [0xff7a1a, 0xffc400], speed: 1.5, life: 0.4, size: 0.14, up: 1, gravity: 0 });
+      if (k.specialTimer > 0 && k.specialKind === 'laser' && k.hasPuck && Math.random() < 0.5) this.particles.spawn({ x: st.puck.pos.x, y: st.puck.pos.y, z: 0.15, count: 1, color: 0xff2d3a, speed: 0.4, life: 0.3, size: 0.08, up: 0.6, gravity: 0 });
+    }
     // aim reticle, pass lanes, one-timer ring for the controlled carrier
     this.reticle.visible = false;
     for (const l of this.lanes) l.visible = false;

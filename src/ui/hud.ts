@@ -18,7 +18,8 @@ export class Hud {
       </div>
       <div class="perks-mini" data-el="perks"></div>
       <div class="charge-wrap" data-el="chargeWrap"><div class="charge-fill" data-el="charge"></div></div>
-      <div class="turbo-wrap"><div class="turbo-label">TURBO</div><div class="turbo" data-el="turbo"><div class="turbo-fill" data-el="turboFill"></div></div></div>
+      <div class="turbo-wrap"><div class="turbo-label">TURBO</div><div class="turbo" data-el="turbo"><div class="turbo-fill" data-el="turboFill"></div></div><div class="special-label" data-el="specialLabel">SPECIAL</div><div class="special" data-el="special"><div class="special-fill" data-el="specialFill"></div></div></div>
+      <div class="fight" data-el="fight"><div class="fighter f0"><div class="fname" data-el="fname0"></div><div class="fhp"><div class="fhp-fill" data-el="fhp0"></div></div></div><div class="fcue" data-el="fcue"></div><div class="fighter f1"><div class="fname" data-el="fname1"></div><div class="fhp"><div class="fhp-fill" data-el="fhp1"></div></div></div></div>
       <div class="player-tag"><div class="pname" data-el="pname"></div><div class="ptype" data-el="ptype"></div><div class="hp"><div class="hp-fill" data-el="hp"></div></div></div>
       <div class="fire-streak" data-el="streak"><span></span><span></span><span></span></div>
       <div class="announce" data-el="announce"></div>
@@ -70,6 +71,18 @@ export class Hud {
     f.classList.add('on');
   }
 
+  /** Fight overlay. cue text empty hides the prompt. */
+  fight(on: boolean, names: [string, string] = ['', ''], hp: [number, number] = [100, 100], cue = '', cueCls = ''): void {
+    this.els.fight.classList.toggle('on', on);
+    if (!on) return;
+    this.els.fname0.textContent = names[0];
+    this.els.fname1.textContent = names[1];
+    this.els.fhp0.style.width = `${Math.max(0, hp[0])}%`;
+    this.els.fhp1.style.width = `${Math.max(0, hp[1])}%`;
+    this.els.fcue.textContent = cue;
+    this.els.fcue.className = `fcue ${cueCls} ${cue ? 'on' : ''}`;
+  }
+
   update(st: MatchState, dt: number): void {
     const [a, b] = st.teams;
     this.els.name0.textContent = a.short;
@@ -118,6 +131,9 @@ export class Hud {
     this.els.ptype.textContent = sk.archetype.toUpperCase() + (sk.onFire > 0 ? ' · ON FIRE' : '');
     this.els.hp.style.width = `${Math.round(sk.hp)}%`;
     this.els.hp.style.background = sk.hp > 50 ? '#3f3' : sk.hp > 25 ? '#fc3' : '#f33';
+    this.els.specialFill.style.width = `${Math.round(team.special * 100)}%`;
+    this.els.special.classList.toggle('ready', team.special >= 1);
+    this.els.specialLabel.textContent = team.special >= 1 ? `${sk.specialKind.toUpperCase()} READY · SPACE / Y` : `SPECIAL · ${sk.specialKind.toUpperCase()}`;
     const lit = sk.onFire > 0 ? ONFIRE.streakNeeded : Math.min(ONFIRE.streakNeeded, Math.floor(sk.streak));
     this.els.streak.querySelectorAll('span').forEach((e, i) => e.classList.toggle('lit', i < lit));
     // fire vignette if any human skater on fire
