@@ -52,6 +52,11 @@ export class Hud {
     this.announceTimer = 1.6;
   }
 
+  /** Hide the clock/period block (training camp). */
+  showClock(on: boolean): void {
+    (this.els.clock.parentElement as HTMLElement).style.display = on ? '' : 'none';
+  }
+
   /** Short-lived contextual prompt (dive window, pull goalie). */
   prompt(text: string, seconds = 0.6, cls = ''): void {
     this.els.prompt.textContent = text;

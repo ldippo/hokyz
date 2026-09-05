@@ -133,6 +133,7 @@ export interface TeamState {
   diveReturnId: string | null;
   pullLatch: boolean;
   pulledGoalieId?: string | null;
+  scripted?: boolean;
   /** special meter 0..1 */
   special: number;
   brickWall: number; // auto-saves remaining

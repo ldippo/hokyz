@@ -197,3 +197,11 @@ p.screen-sub { color: #8fa3d9; letter-spacing: 0.15em; text-transform: uppercase
 .card .curse { font-size: 12px; letter-spacing: 0.1em; color: #ff6b6b; }
 .roster-card .xpbar { grid-column: 1 / -1; height: 3px; background: #1c2033; }
 .roster-card .xpbar i { display: block; height: 100%; background: #7fa6ff; }
+
+.drill { position: absolute; left: 50%; top: 96px; transform: translateX(-50%); width: 640px; padding: 12px 18px; background: rgba(8,10,18,0.85); border: 3px solid var(--gold); font-family: var(--font-display); text-align: center; }
+.drill-prog { font-size: 12px; letter-spacing: 0.3em; color: #8fa3d9; }
+.drill-title { font-size: 34px; letter-spacing: 0.1em; color: var(--gold); text-shadow: 0 3px 0 #000; }
+.drill-text { font-family: var(--font-body); font-size: 16px; color: #dbe9ff; margin: 6px 0 10px; line-height: 1.5; }
+.drill-text kbd { font-size: 14px; margin: 0 2px; }
+.drill-btns { display: flex; gap: 10px; justify-content: center; }
+.drill-btns .btn { font-size: 16px; padding: 6px 14px; }
