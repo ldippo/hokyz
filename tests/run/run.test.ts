@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CAPTAINS } from '../../src/run/meta';
-import { applyMatchOutcome, availableNodes, buildMatch, completeNode, deserializeRun, draftPerks, newRun, serializeRun, teamMods, type MatchOutcome } from '../../src/run/runState';
+import { applyMatchOutcome, availableNodes, buildMatch, completeNode, deserializeRun, draftPerks, newRun, serializeRun, teamMods, type MatchOutcome, bankRun } from '../../src/run/runState';
 import { PERKS, PERK_BY_ID } from '../../src/run/perks';
 import { defaultTeamMods } from '../../src/sim/modifiers';
 
@@ -62,14 +62,17 @@ describe('run state', () => {
     expect(loss2.ended).toBe(true);
     expect(r.over).toBe(true);
   });
-  it('completing the act 3 boss wins the run', () => {
+  it('completing the act 3 boss wins the run and offers the Overtime League', () => {
     const r = newRun('win', CAPTAINS[0], 0, []);
-    for (let guard = 0; guard < 40 && !r.over; guard++) {
+    for (let guard = 0; guard < 40 && !r.leagueOffer; guard++) {
       const n = availableNodes(r)[0];
       completeNode(r, n);
     }
-    expect(r.over).toBe(true);
     expect(r.won).toBe(true);
+    expect(r.over).toBe(false);
+    expect(r.leagueOffer).toBe(true);
+    bankRun(r);
+    expect(r.over).toBe(true);
   });
   it('serializes round-trip', () => {
     const r = newRun('save', CAPTAINS[0], 1, []);

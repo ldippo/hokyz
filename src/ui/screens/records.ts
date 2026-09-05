@@ -35,6 +35,8 @@ export function recordsScreen(app: App): void {
       h('table', { class: 'box', style: 'min-width:320px' }, h('thead', {}, h('tr', {}, h('th', {}, 'RECORDS'), h('th', {}, ''))), h('tbody', {},
         stat('Runs / wins', `${m.runs} / ${m.wins}`),
         stat('Best run', m.bestAct ? `Act ${m.bestAct}, stop ${m.bestRow + 1}` : '—'),
+        stat('Overtime League', m.leagueBestAct ? `Act ${m.leagueBestAct}` : '—'),
+        stat('Best ascension won', m.wins ? String(m.bestAscWon ?? 0) : '—'),
         stat('Weekly best', m.weekly ? `${m.weekly.week}: ${m.weekly.won ? 'WON' : `Act ${m.weekly.bestAct}`} (${m.weekly.runs} runs)` : '—'),
         stat('Most goals in a match', m.bestGoalsMatch ?? 0),
         stat('Most big hits in a match', m.bestBigHitsMatch ?? 0),
