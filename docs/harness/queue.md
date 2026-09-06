@@ -102,6 +102,15 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed missing reinforcement model: syncSkaterModels runs after sim steps,
+creates only missing IDs with existing detailed jersey/rig/name tag path. Browser
+baseline1788716182208-jVlsFM fails8 models/9 bodies; final1788716260796-TOfeC0
+under .gaming/map-focus passes9/9, scene attachment/position/visibility and stable
+model identities over10 ticks. Inspected extra now visible. Gates
+.gaming/runs/1788716240675-31teyl build/157 tests/bot pass, bot reports unchanged;
+playtest1788716270647-M5wAoM passes. Self-review prefers visible opposition,
+abstains on GPU/human feel. Next: narrow scoreboard and bottom HUD clipping.
+
 Completed compact HUD feedback: stacked below scoreboard, readable dark-backed
 32px announcements/48px countdown, wrapping subcopy, same1.6s expiry and reduced
 motion. Before .gaming/map-focus/1788715904975-5Tl4vr; final1788716097171-d172hT

@@ -120,6 +120,8 @@ resize before rendering and checks the captured ice region is not blank.
 Opening feedback checks scoreboard/announcement/countdown separation and center
 ice clearance. `--feedback-layout` additionally checks a long boss announcement
 through Hud.announce at desktop and narrow150% text (presentation fixture).
+Outnumbered also verifies model count matches simulation, reinforcement scene
+attachment/visibility/position, and model identity remains stable over ten ticks.
 
 `node scripts/harness/route.mjs` exercises event -> shop -> rest in one run,
 reloading between encounters. It preserves generated links while preparing the

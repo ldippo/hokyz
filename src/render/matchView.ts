@@ -91,24 +91,7 @@ export class MatchView {
     rig.setTheme(theme);
     this.group.add(this.rink.group);
     const st = sim.st;
-    const numbers = [88, 9, 4, 31, 17, 22, 7, 44, 13, 66];
-    for (const id of st.order) {
-      const sk = st.skaters[id];
-      const team = st.teams[sk.team];
-      let mesh: SkaterMesh | SkaterRig;
-      if (rigsReady()) {
-        const idx = st.order.indexOf(id);
-        const tpl = rigTemplate(sk.isGoalie);
-        const spec = jerseySpecFor(team.color, sk.team, team.name, team.short, sk.isGoalie ? 1 : numbers[idx % numbers.length], sk.name.split(' ').pop(), team.logo);
-        mesh = new SkaterRig(id, tpl, sk.isGoalie, spec);
-      } else {
-        mesh = new SkaterMesh(id, team.color, sk.isGoalie, sk.team === 0 ? '#151520' : '#f2f2f2');
-      }
-      mesh.snap(sk);
-      this.skaters.set(id, mesh);
-      this.group.add(mesh.group);
-      if (mesh instanceof SkaterRig && this.access.nameTags !== 'off') mesh.makeTag(sk.name, sk.team === 0 ? '#ffffff' : team.color);
-    }
+    this.syncSkaterModels();
     this.puck.snap(st.puck);
     this.puck.addTo(rig.scene);
     this.group.add(this.particles.mesh);
@@ -266,6 +249,7 @@ export class MatchView {
   /** Call after each sim step with produced events. */
   afterStep(events: MatchEvent[]): void {
     const st = this.sim.st;
+    this.syncSkaterModels();
     this.lastEvents = events;
     if (st.phase === 'play' || st.phase === 'shootout' || st.phase === 'fight' || st.phase === 'goal') this.replayBuf.push(captureFrame(st));
     for (let i = this.pendingClips.length - 1; i >= 0; i--) {
@@ -287,6 +271,29 @@ export class MatchView {
     }
     for (const e of events) this.handleEvent(e, st);
 
+  }
+
+  /** Reinforcements can join after construction. Never leave a simulated body invisible. */
+  private syncSkaterModels(): void {
+    const st = this.sim.st;
+    const numbers = [88, 9, 4, 31, 17, 22, 7, 44, 13, 66];
+    for (const [idx, id] of st.order.entries()) {
+      if (this.skaters.has(id)) continue;
+      const sk = st.skaters[id];
+      const team = st.teams[sk.team];
+      let mesh: SkaterMesh | SkaterRig;
+      if (rigsReady()) {
+        const tpl = rigTemplate(sk.isGoalie);
+        const spec = jerseySpecFor(team.color, sk.team, team.name, team.short, sk.isGoalie ? 1 : numbers[idx % numbers.length], sk.name.split(' ').pop(), team.logo);
+        mesh = new SkaterRig(id, tpl, sk.isGoalie, spec);
+      } else {
+        mesh = new SkaterMesh(id, team.color, sk.isGoalie, sk.team === 0 ? '#151520' : '#f2f2f2');
+      }
+      mesh.snap(sk);
+      this.skaters.set(id, mesh);
+      this.group.add(mesh.group);
+      if (mesh instanceof SkaterRig && this.access.nameTags !== 'off') mesh.makeTag(sk.name, sk.team === 0 ? '#ffffff' : team.color);
+    }
   }
 
   private handleEvent(e: MatchEvent, st: MatchState): void {

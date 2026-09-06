@@ -39,6 +39,23 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest render fix: MatchView.syncSkaterModels reuses constructor creation path
+after each sim step, adding only missing IDs before snapshots/events. Dynamic
+reinforcement now gets detailed rig, team jersey and name tag; existing models
+not recreated. Baseline .gaming/map-focus/1788716182208-jVlsFM failed mesh8 vs
+sim9; after .gaming/map-focus/1788716260796-TOfeC0 passes9/9, extra attached,
+visible, exact x/z position and stable identities/child count over ten ticks.
+Before/after opening images inspected: extra Jinx Delgado now visible in rear
+row. Gates baseline1788716183216-O1YRfh/final1788716240675-31teyl under
+.gaming/runs pass build/157 tests/bot, eight match reports identical. Browser
+playtest .gaming/playtests/1788716270647-M5wAoM passes. Self-review prefers
+visible opponents and consistent detailed equipment; no GPU performance claim.
+Next precise action: improve narrow HUD layout (scoreboard and bottom panels
+clip/overlap at390px/150% text in feedback-390.png from1788716097171-d172hT).
+Use Impeccable, preserve scoreboard/clock, meters and current player information;
+verify live match at desktop/narrow/large-text and real control flow. Additional
+later-period reinforcement/replay visual coverage remains useful. Goal active.
+
 Latest HUD polish: hud-feedback stacks compact announcement/countdown below
 scoreboard.32px main/16px sub/48px countdown, dark broadcast backing, wrapped
 copy, restrained entry motion;1.6s timing and reduced-motion expiry unchanged.

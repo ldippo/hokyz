@@ -141,6 +141,19 @@ try {
       }
       assert.equal(roster.phase,'faceoff');
       if(!process.argv.includes('--baseline'))assert.ok(roster.minSeparation>1.1,JSON.stringify(roster));
+      const rendered=await page.evaluate(()=>{
+        const view=window.__hokyz.view,st=view.sim.st,id=st.mods.extraSkater?.id,mesh=view.skaters.get(id);
+        const originals=new Map(view.skaters),children=view.group.children.length;
+        for(let i=0;i<10;i++)window.__hokyz.simStep();
+        return {id,simCount:st.order.length,meshCount:view.skaters.size,extraMesh:!!mesh,attached:mesh?.group.parent===view.group,visible:mesh?.group.visible,position:mesh?.group.position.toArray(),expected:st.skaters[id]?.pos,stableModels:[...originals].every(([id,mesh])=>view.skaters.get(id)===mesh)&&view.group.children.length===children};
+      });
+      checks.push({renderedRoster:rendered});
+      if(!process.argv.includes('--baseline')) {
+        assert.equal(rendered.meshCount,rendered.simCount,'Simulation skater has no model');
+        assert.ok(rendered.extraMesh&&rendered.attached&&rendered.visible,'Extra skater is not rendered');
+        assert.ok(rendered.stableModels,'Model synchronization recreated or duplicated existing models');
+        assert.ok(Math.abs(rendered.position[0]-rendered.expected.x)<0.01&&Math.abs(rendered.position[2]-rendered.expected.y)<0.01);
+      }
       if(process.argv.includes('--feedback-layout')) {
         for(const [width,height,scale] of [[1280,720,1],[390,844,1.5]]) {
           await page.setViewportSize({width,height});
