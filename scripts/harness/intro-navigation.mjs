@@ -27,6 +27,22 @@ try {
   await page.locator('.node.available').first().click();
   assert.equal(await page.getByRole('button',{name:'Drop the Puck',exact:true}).count(),1);
   await page.screenshot({path:join(out,'intro.png')});
+  if(process.argv.includes('--layout')) {
+    for(const [label,width,height,scale] of [['desktop',1280,900,1],['narrow',390,844,1],['large-text',390,844,1.5]]) {
+      await page.setViewportSize({width,height});
+      await page.evaluate(scale=>{const app=window.__hokyz;app.meta.textScale=scale;app.applyAccessPrefs();},scale);
+      const bounds=[];
+      for(const item of await page.locator('.match-intro .gimmick, .match-intro .perk-chip, .match-intro button').all()) {
+        await item.scrollIntoViewIfNeeded();
+        const b=await item.boundingBox();bounds.push({text:await item.innerText(),...b});
+        assert.ok(b&&b.x>=-1&&b.x+b.width<=width+1&&b.y>=-1&&b.y+b.height<=height+1,`${label}: intro content clipped`);
+      }
+      checks.push({layout:label,bounds});
+      await page.screenshot({path:join(out,`intro-${label}.png`)});
+    }
+    await page.setViewportSize({width:1280,height:900});
+    await page.evaluate(()=>{window.__hokyz.meta.textScale=1;window.__hokyz.applyAccessPrefs();});
+  }
   await page.getByRole('button',{name:'Back to Map',exact:true}).click();
   const after=await state();checks.push({before,after});
   await page.screenshot({path:join(out,'back-to-map.png')});

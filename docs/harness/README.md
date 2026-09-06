@@ -176,6 +176,8 @@ then consumes and persists setup RNG. The first available node
 must be a hockey match. Evidence: `.gaming/intro-navigation/`; `--baseline` records
 without recovery assertions. Unit tests separately cover roster-stat/seed stability
 and fresh home lineup selection. Generated identity-only opponent IDs may change.
+Add `--layout` for desktop,390px and390px/150%-text captures and scroll-reachability
+checks of team summaries, phase cards and actions using that earned encounter.
 
 `node scripts/harness/hit-parade-full.mjs` runs idle and scripted pursuit through
 all 60 simulated seconds, using DOM movement/check keys and natural timer expiry.

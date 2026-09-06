@@ -39,6 +39,25 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest completed boss-copy pass: Velocity Blur descriptions in src/run/teams.ts
+now explain period onset, both-team slick ice, early turns/checks, and holding
+turbo once REDLINE enables unlimited turbo. Original falling claim was correct:
+src/sim/hits.ts applies*.7 resistance; skater.ts applies*.55 acceleration and*.5
+coasting friction. No balance change. tests/sim/slickIce.test.ts adds four cases
+for both teams' steering/coasting and marginal hits. First candidate typecheck
+failed on array vs tuple1788723832178-rn9Cxy; repaired explicit tuple, no game fix.
+Final gates .gaming/runs/1788723853805-U5Qsn6 pass build/211 tests/bots;
+baseline1788723735257-RWObvg. intro-navigation.mjs --layout adds desktop/narrow/
+150% phase/action scroll reachability. Before1788723769103-xR1sOF, after
+1788723860927-lE9wUC under .gaming/intro-navigation/ both pass; desktop/large-text
+captures inspected. Back/reload/RNG/real start still pass. Self-review prefers
+concrete player guidance; Impeccable informed concise action-first copy. Narrow
+large text requires scroll, all content/actions reachable; no human fun claim.
+Next precise action: return to visual polish at gameplay camera, capturing a
+seeded full-team skating/checking scene with the detailed models. Inspect puck,
+stick and silhouette readability in motion before choosing further model edits.
+Keep full goal active and unrelated README/roadmap modifications untouched.
+
 Latest completed preview RNG fix: previewMatch in runState builds against a shallow
 run copy. matchIntroScreen commits returned RNG state only on Drop the Puck and
 saves before start; existing buildMatch consumers remain unchanged. Three tests in

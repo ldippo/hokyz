@@ -102,6 +102,19 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed Velocity Blur counterplay copy: phase descriptions now give period,
+affected teams and early-turn/check/held-turbo guidance. Source audit found original
+slick-ice claim correct (skater acceleration*.55, idle friction*.5, hit resistance
+*.7); no balance edits. Four tests cover steering/coasting and marginal knockdowns
+for both teams. Initial fixture failed tuple typecheck1788723832178-rn9Cxy; focused
+repair uses explicit team tuple. Final gates1788723853805-U5Qsn6 pass build/211
+tests/bots; baseline1788723735257-RWObvg. Browser .gaming/intro-navigation/
+1788723769103-xR1sOF before and1788723860927-lE9wUC after pass desktop/narrow/150%
+reachability, Back/reload/RNG/start. Desktop and large-text captures inspected.
+Self-review prefers actionable guidance for first-session players; Impeccable
+guided concise action-oriented copy. More text requires scrolling at narrow150%,
+but every rule/action is reachable. Human counterplay effectiveness unverified.
+
 Completed non-consuming match previews: previewMatch builds against a shallow run
 copy; Drop the Puck commits its resulting RNG state. Three tests verify unchanged
 run/reload, original setup equivalence, and updated home lineup with stable away
