@@ -17,6 +17,78 @@ try {
     if (version === 'before') await page.route('**/models/*.glb', route => route.fulfill({ path: resolve('.gaming/models-before', new URL(route.request().url()).pathname.split('/').pop()), contentType: 'model/gltf-binary' }));
     await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/?rigview=1&capture=1&poses=idle,skate,charge,lunge,down&goalie=butterfly${process.argv.includes('--puck')?'&puck=1':''}`);
     await page.waitForFunction(() => window.__rigview, null, { timeout: 90000 });
+    if(process.argv.includes('--reach-study')) {
+      const study=await page.evaluate(()=>{
+        const {rig,st}=window.__rigview.entries[0];
+        const vector=(x=0,y=0,z=0)=>rig.group.position.clone().set(x,y,z);
+        const quat=()=>rig.group.quaternion.clone().identity();
+        const results=[];
+        for(const action of ['skate','charge','dragL','dragR']) {
+          Object.assign(st,{hasPuck:true,vel:{x:6,y:0},charging:action==='charge',shotCharge:.75,deke:action.startsWith('drag')?.3:0,dekeKind:action});
+          Object.assign(rig,{fall:0,spin:0,lean:.21,roll:0,turnRate:0,stride:0});
+          rig.update(st,1,0,0);rig.group.updateMatrixWorld(true);
+          const stick=rig.bones.get('stick'),puck=window.__rigview.placePuck(st);
+          const center=vector();for(const p of rig.stickContacts)center.add(p);center.multiplyScalar(1/rig.stickContacts.length);
+          const grips=['L','R'].map(side=>{
+            const shoulder=rig.bones.get(`upperArm${side}`).bone.getWorldPosition(vector());
+            const elbow=rig.bones.get(`foreArm${side}`).bone.getWorldPosition(vector());
+            const hand=rig.bones.get(`hand${side}`).bone.getWorldPosition(vector());
+            return {side,shoulder,max:shoulder.distanceTo(elbow)+elbow.distanceTo(hand)-.015,
+              offset:side==='L'?rig.grips[0].offset.clone():stick.bone.worldToLocal(hand.clone())};
+          });
+          const body={min:vector(Infinity,Infinity,Infinity),max:vector(-Infinity,-Infinity,-Infinity)};
+          const shaftRange={min:Infinity,max:-Infinity};
+          rig.model.traverse(mesh=>{
+            if(!mesh.isSkinnedMesh)return;
+            const skin=mesh.geometry.attributes.skinIndex;
+            for(let i=0;i<skin.count;i++) {
+              if(mesh.material.name==='stick'&&mesh.skeleton.bones[skin.getX(i)]?.name==='stick') {
+                const p=vector();mesh.getVertexPosition(i,p);mesh.localToWorld(p);stick.bone.worldToLocal(p);
+                shaftRange.min=Math.min(shaftRange.min,p.y);shaftRange.max=Math.max(shaftRange.max,p.y);
+              }
+              if(!['hips','spine','chest'].includes(mesh.skeleton.bones[skin.getX(i)]?.name))continue;
+              const p=vector();mesh.getVertexPosition(i,p);mesh.localToWorld(p);rig.group.worldToLocal(p);
+              body.min.min(p);body.max.max(p);
+            }
+          });
+          const intersects=(a,b)=>{
+            a=rig.group.worldToLocal(a.clone());b=rig.group.worldToLocal(b.clone());let lo=0,hi=1;
+            for(const axis of ['x','y','z']) {
+              const d=b[axis]-a[axis];
+              if(Math.abs(d)<1e-8){if(a[axis]<body.min[axis]||a[axis]>body.max[axis])return false;continue;}
+              const t0=(body.min[axis]-a[axis])/d,t1=(body.max[axis]-a[axis])/d;
+              lo=Math.max(lo,Math.min(t0,t1));hi=Math.min(hi,Math.max(t0,t1));if(lo>hi)return false;
+            }return true;
+          };
+          const counts={total:0,reachable:0,inFront:0,clear:0};let best=null;
+          for(let yi=-36;yi<=36;yi++)for(let ti=0;ti<=20;ti++) {
+            counts.total++;const yaw=yi*Math.PI/36,tilt=ti/20;
+            const flat=quat().setFromAxisAngle(vector(0,1,0),yaw).multiply(stick.invRestWorld.clone().invert());
+            const shaft=grips[1].offset.clone().sub(center).applyQuaternion(flat).normalize();
+            const upright=quat().setFromUnitVectors(shaft,vector(0,1,0));
+            const rotation=quat().slerp(upright,tilt).multiply(flat);
+            const blade=vector(puck.x-.33,0,puck.y),position=blade.clone().sub(center.clone().applyQuaternion(rotation));
+            let low=Infinity;for(const p of rig.stickContacts)low=Math.min(low,p.clone().applyQuaternion(rotation).y+position.y);
+            position.y+=.003-low;
+            const targets=grips.map(g=>g.offset.clone().applyQuaternion(rotation).add(position));
+            if(targets.some((t,i)=>t.distanceTo(grips[i].shoulder)>grips[i].max))continue;counts.reachable++;
+            if(targets.some(t=>rig.group.worldToLocal(t.clone()).x<body.max.x+.02))continue;counts.inFront++;
+            const bladeWorld=center.clone().applyQuaternion(rotation).add(position);
+            if(intersects(position,bladeWorld))continue;counts.clear++;
+            const score=yaw*yaw+tilt*tilt;
+            if(!best||score<best.score)best={yaw,tilt,score,targets:targets.map(t=>t.toArray()),blade:bladeWorld.toArray(),origin:position.toArray()};
+          }
+          const gripShaftDistance=grips.map(g=>({side:g.side,distance:g.offset.distanceTo(vector(0,Math.max(shaftRange.min,Math.min(shaftRange.max,g.offset.y)),0))}));
+          results.push({action,shaftRange,gripShaftDistance,body:{min:body.min.toArray(),max:body.max.toArray()},counts,best});
+        }
+        return results;
+      });
+      writeFileSync(join(out,'reach-study.json'),JSON.stringify({study,scope:'Offline facing0 pose feasibility, conservative torso AABB and shaft centerline; not a runtime pose or exact collision/contact proof.'},null,2));
+      assert.ok(study.every(s=>s.counts.total===1533));
+      assert.ok(study.every(s=>Number.isFinite(s.shaftRange.min)&&s.shaftRange.max>s.shaftRange.min&&s.gripShaftDistance.every(g=>Number.isFinite(g.distance))),'Missing shaft geometry');
+      if(errors.length)throw new Error(errors.join('\n'));
+      await page.close();continue;
+    }
     if(process.argv.includes('--stride')) {
       const speed=Number(process.argv.find(a=>a.startsWith('--speed='))?.split('=')[1]??6);
       const roll=Number(process.argv.find(a=>a.startsWith('--roll='))?.split('=')[1]??0);

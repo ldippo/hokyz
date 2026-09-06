@@ -39,6 +39,28 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest offline study changes next action to ASSET GEOMETRY. models.mjs --puck
+--reach-study samples1533 yaw/tilt candidates per pose, conservative torso AABB
+from actual core vertices, shoulder reach, hands ahead of full torso and shaft
+centerline clearance. .gaming/models/1788726018971-e3Vf8G initial; expanded final
+1788726176981-twHSr9 measures actual shaft centerline from material stick vertices
+in stick-bone local coordinates (Y extent0..1.25164m). Left hand anchor distance
+.04921m, RIGHT .42578m, invariant across poses. Cached hand-anchor gates therefore
+do not prove glove-to-shaft contact! Generator assets/src/build_skater.py sets
+grip_low=(.5,.3,.6) but mirrors right target.y to negative in arm loop, while shaft
+top/heel remain positiveY. Reach clamping also moves hand from intended target.
+Normal search437 reachable/15 in-front+clear, chosen shaft vertical; charge/left/
+right0 under conservative front bound, not a mathematical infeasibility proof.
+No renderer/game changes. Updated harness docs distinguish anchors from shaft.
+Next precise action: correct non-goalie asset grip targets to reachable points on
+the actual shaft (do not mirror them away), derive shaft/grip geometry together,
+regenerate skater GLB and inspect all poses. Preserve goalie unless separately
+validated; retain rounded detail/21-bone rig. Revalidate actual shaft distances,
+cached anchors, ice clearance, character silhouette and carried-puck alignment.
+Then revisit reach animation using corrected anchors. Full goal remains active.
+Final gates .gaming/runs/1788726270711-v2cF5F pass build/214 tests/bots; final
+study with geometry validity assertion .gaming/models/1788726277864-vCKARO passes.
+
 Latest blade-first experiment rejected on visual review, all code reverted. Cached
 both hand offsets/arm lengths; candidate stick transform places blade center at
 stickPoint minus.25m forward, raises lowest corner to.003, scans17 yaw rotations

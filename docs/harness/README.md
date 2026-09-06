@@ -266,13 +266,19 @@ fall seed are prepared; this does not measure hardware FPS or all animation path
 vertices against the ice and retaining four side captures. Optional `--speed=12`
 and `--roll=0.35` exercise turbo/turn lean; default6m/s and zero roll. Assertions
 check support height and ring anchoring, not natural human skating or stick contact.
-Add `--stick` to assert stick clearance and opposite-hand grip error below2cm.
+Add `--stick` to assert stick clearance and opposite-hand cached-anchor error
+below2cm. Cached anchors are not proof of actual glove-to-shaft contact.
 `--action=charge`, `--action=dragL` and `--action=dragR` prepare additional poses
 through the same12 stride phases. These are pose fixtures, not actual shot input.
 Add `--puck` to show a carried puck placed by production stickPoint and measure
 nearest blade-vertex distance in the ice plane. It also asserts deke blade lateral
 motion follows the puck's side; it does not assert full blade/puck contact. Viewer
 support is opt-in via `?rigview=1&puck=1`, with a diagnostic placePuck hook.
+`--puck --reach-study` instead evaluates1533 yaw/tilt transforms per skating,
+charge and drag pose, reporting shoulder reach, hands ahead of torso bounds and
+shaft centerline/AABB clearance. Also measures hand anchors against the actual
+shaft centerline. Offline facing0 diagnostics, not a runtime pose or exact mesh
+collision/contact proof; PASS means valid geometry was sampled, not feasible poses.
 `--arena --low --crowd-motion` explicitly enables only crowd animation on the
 low-tier fixture, records idle/wave/settled images and uniforms, and checks three
 animated meshes plus wave activity 0/1/0. This override is a shader exercise, not

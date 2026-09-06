@@ -102,6 +102,16 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed offline reach study: .gaming/models/1788726176981-twHSr9 reports1533
+yaw/tilt candidates per pose. Normal has437 reachable,15 in-front/clear, selected
+shaft vertical; charge/left/right have0 meeting conservative full-torso front bound.
+More importantly, actual shaft centerline distance is.0492m from left hand anchor
+and.4258m from right anchor. Generator mirrors right hand target.y negative while
+shaft stays positive, then clamps arm reach. Existing cached-anchor grip gates do
+not detect this geometric separation. No runtime pose change. Next correct asset
+hand targets to reachable points on the actual shaft, then regenerate and rerun
+all poses/physical-shaft distances before resuming carrier reach work.
+
 Rejected blade-first two-hand pose; all renderer and diagnostic edits reverted.
 Flat yaw-only search found no feasible normal grip targets (best~.77/.79m versus
 ~.57m arm reach), so initial normal1788725583430-z9JvFZ was unchanged. Diagnostic
