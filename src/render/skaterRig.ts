@@ -92,6 +92,7 @@ export class SkaterRig {
   /** IK: hand grip offsets in the stick bone's rest local frame + arm segment lengths */
   private grips: { side: 'L' | 'R'; offset: THREE.Vector3; upper: number; fore: number }[] = [];
   private bladeContacts: { bone: THREE.Bone; points: THREE.Vector3[] }[] = [];
+  private stickContacts: THREE.Vector3[] = [];
   ikEnabled = true;
   private punchT = 0;
   private punchHigh = true;
@@ -160,6 +161,19 @@ export class SkaterRig {
     });
     const stick = this.bones.get('stick')?.bone;
     if (stick) {
+      const bounds = new THREE.Box3();
+      this.model.traverse(o => {
+        const mesh = o as THREE.SkinnedMesh;
+        if (!mesh.isSkinnedMesh || Array.isArray(mesh.material) || mesh.material.name !== 'tape') return;
+        const skin = mesh.geometry.attributes.skinIndex;
+        for (let i = 0; i < skin.count; i++) {
+          if (mesh.skeleton.bones[skin.getX(i)] !== stick) continue;
+          bounds.expandByPoint(mesh.localToWorld(mesh.getVertexPosition(i, new THREE.Vector3())));
+        }
+      });
+      if (!bounds.isEmpty()) for (const x of [bounds.min.x, bounds.max.x]) for (const y of [bounds.min.y, bounds.max.y]) for (const z of [bounds.min.z, bounds.max.z]) {
+        this.stickContacts.push(stick.worldToLocal(new THREE.Vector3(x, y, z)));
+      }
       for (const side of ['L'] as const) {
         const ua = this.bones.get(`upperArm${side}`)?.bone;
         const fa = this.bones.get(`foreArm${side}`)?.bone;
@@ -437,14 +451,17 @@ export class SkaterRig {
     }
     // wind-up while charging and toe-drag sweeps move the bottom hand (the stick follows it)
     if (sk.charging) {
-      this.rot('upperArm.R', AX_Y, -0.22 * sk.shotCharge);
+      this.rot('upperArm.R', AX_Y, -0.11 * sk.shotCharge);
       this.rot('upperArm.R', AX_Z, 0.12 * sk.shotCharge);
     }
     if (sk.deke > 0 && sk.dekeKind !== 'spin') {
       const k = Math.sin(Math.min(1, sk.deke / 0.45) * Math.PI);
       const side = sk.dekeKind === 'dragL' ? 1 : -1;
-      this.rot('upperArm.R', AX_Y, side * 0.8 * k);
-      this.rot('foreArm.R', AX_Y, side * 0.3 * k);
+      // The far-side drag is carried mostly by the torso. A full mirrored arm
+      // sweep puts the top grip beyond the opposite arm's physical reach.
+      const armSweep = side < 0 ? 0.15 : 1;
+      this.rot('upperArm.R', AX_Y, side * 0.8 * k * armSweep);
+      this.rot('foreArm.R', AX_Y, side * 0.3 * k * armSweep);
       this.rot('chest', AX_Y, side * 0.35 * k);
       this.rot('chest', AX_X, -side * 0.25 * k);
     }
@@ -462,7 +479,10 @@ export class SkaterRig {
 
     // stick-hand IK: keep both hands on the stick unless the arms are busy
     const armsFree = this.ikEnabled && !this.fightStance && this.celebrateT <= 0 && this.fall < 0.3 && sk.lunge <= 0 && !(sk.specialTimer > 0 && sk.specialKind === 'shockwave');
-    if (armsFree && this.grips.length) this.solveArms();
+    if (armsFree && this.grips.length) {
+      if (!sk.isGoalie && this.fall < 0.02) this.clearStickFromIce();
+      this.solveArms();
+    }
     // indicators
     this.ring.visible = sk.controlled;
     this.arrow.visible = sk.controlled;
@@ -479,6 +499,38 @@ export class SkaterRig {
     });
     this.shadow.scale.setScalar(1 + this.fall * 0.9);
     if (this.jerseyMat) this.jerseyMat.emissive.setHex(sk.hp < 30 ? 0x330000 : onFire ? 0x552200 : 0x000000);
+  }
+
+  /** Lift the stick through its carrying arm, preserving the right-hand parent
+   * grip. The left-hand IK follows afterward. Only correct penetration, leaving
+   * intentionally lifted charge/deke poses alone.
+   */
+  private clearStickFromIce(): void {
+    const arm = this.bones.get('upperArmR')?.bone, stick = this.bones.get('stick')?.bone;
+    if (!arm || !stick || !this.stickContacts.length) return;
+    this.group.updateMatrixWorld(true);
+    const height = () => {
+      let low = Infinity;
+      for (const point of this.stickContacts) low = Math.min(low, stick.localToWorld(tmpV.copy(point)).y);
+      return low;
+    };
+    if (height() >= 0.003) return;
+    const base = arm.quaternion.clone();
+    const pose = (angle: number) => {
+      arm.quaternion.copy(base);
+      this.rot('upperArm.R', AX_Z, angle);
+      arm.updateMatrixWorld(true);
+    };
+    let low = 0, high = 1.2;
+    pose(high);
+    if (height() < 0.003) { pose(0); return; }
+    for (let i = 0; i < 8; i++) {
+      const mid = (low + high) / 2;
+      pose(mid);
+      if (height() < 0.003) low = mid;
+      else high = mid;
+    }
+    pose(high);
   }
 
   /** Two-bone IK: rotate upper/fore arm so the hand lands on its grip point of the stick. */

@@ -102,6 +102,17 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed stick clearance: cache8 blade bounds points, bounded carrying-arm lift
+before opposite-hand IK; no simulation edits. Baseline normal1788720664863-tURVfJ
+minimum-.471m, turbo1788720666137-9MQZHg -.303m. Candidate normal
+1788720758929-TndQ0f minimum+.0045m, turbo1788720760256-WhxdjD +.016m, grip
+errors<5e-8m; captures inspected. Focused repair reduced charge/far-side arm yaw
+after grip failures; final charge1788721069813-PVfEnQ and dragR1788721071093-7m9lfy
+pass clearance/grip (<.001m), poses inspected; dragL1788720814161-lZTCm3 passes.
+Gates1788721085368-w2qoQb build/197 tests/bot and human1788721086877-6e5QxQ pass.
+Self-review prefers visible, connected sticks. Impeccable informed grip/contact
+review. Next return to natural sustained match/run progression evidence.
+
 Completed grounded skating blades: counter torso lean at ankles, align visual
 pivot using8 cached blade underside points. Baseline1788720390151-qlhGjb support
 height-4.1cm; candidate1788720473834-UCqlfm all12 phases+.003m. Low side images

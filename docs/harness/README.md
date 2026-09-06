@@ -226,6 +226,9 @@ fall seed are prepared; this does not measure hardware FPS or all animation path
 vertices against the ice and retaining four side captures. Optional `--speed=12`
 and `--roll=0.35` exercise turbo/turn lean; default6m/s and zero roll. Assertions
 check support height and ring anchoring, not natural human skating or stick contact.
+Add `--stick` to assert stick clearance and opposite-hand grip error below2cm.
+`--action=charge`, `--action=dragL` and `--action=dragR` prepare additional poses
+through the same12 stride phases. These are pose fixtures, not actual shot input.
 `--arena --low --crowd-motion` explicitly enables only crowd animation on the
 low-tier fixture, records idle/wave/settled images and uniforms, and checks three
 animated meshes plus wave activity 0/1/0. This override is a shader exercise, not

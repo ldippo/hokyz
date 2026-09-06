@@ -20,20 +20,27 @@ try {
     if(process.argv.includes('--stride')) {
       const speed=Number(process.argv.find(a=>a.startsWith('--speed='))?.split('=')[1]??6);
       const roll=Number(process.argv.find(a=>a.startsWith('--roll='))?.split('=')[1]??0);
+      const action=process.argv.find(a=>a.startsWith('--action='))?.split('=')[1]??'skate';
       const samples=[];
       for(let phase=0;phase<12;phase++) {
-        const sample=await page.evaluate(({phase,speed,roll})=>{
+        const sample=await page.evaluate(({phase,speed,roll,action})=>{
           const app=window.__hokyz,{entries,grig}=window.__rigview,{rig,st}=entries[0];
           entries.forEach(e=>e.rig.group.visible=e.rig===rig);grig.group.visible=false;
           Object.assign(rig,{fall:0,spin:0,lean:Math.min(.4,speed*.035),roll,turnRate:0,stride:phase*Math.PI/6});
           Object.assign(st,{vel:{x:speed,y:0},turboActive:speed>9,knockdown:0,controlled:true});
+          st.charging=action==='charge';st.shotCharge=st.charging?.75:0;
+          st.deke=action.startsWith('drag')?.3:0;st.dekeKind=action;
           rig.update(st,1,0,0);rig.group.updateMatrixWorld(true);
           const feet={footL:[],footR:[]};
+          const stickHeights=[];
           rig.model.traverse(mesh=>{
             if(!mesh.isSkinnedMesh)return;
             const p=mesh.geometry.attributes.position,indices=mesh.geometry.attributes.skinIndex;
             for(let i=0;i<p.count;i++) {
               const name=mesh.skeleton.bones[indices.getX(i)]?.name;
+              if(name==='stick') {
+                const v=rig.group.position.clone();mesh.getVertexPosition(i,v);mesh.localToWorld(v);stickHeights.push(v.y);
+              }
               if(!(name in feet)||p.getY(i)>.027)continue;
               const v=rig.group.position.clone();mesh.getVertexPosition(i,v);mesh.localToWorld(v);
               feet[name].push(v.y);
@@ -44,8 +51,11 @@ try {
           document.querySelectorAll('#ui, .hud').forEach(el=>el.style.display='none');
           app.rig.render(0);
           const ring=rig.ring.getWorldPosition(rig.group.position.clone());
-          return {phase,speed,roll,heights,ringError:Math.hypot(ring.x-st.pos.x,ring.z-st.pos.y),contactPoints:rig.bladeContacts?.reduce((n,c)=>n+c.points.length,0)};
-        },{phase,speed,roll});
+          const stick=rig.bones.get('stick').bone;
+          const gripErrors=rig.grips.map(g=>rig.bones.get(`hand${g.side}`).bone.getWorldPosition(rig.group.position.clone()).distanceTo(stick.localToWorld(g.offset.clone())));
+          const gripReach=rig.grips.map(g=>{const s=rig.bones.get(`upperArm${g.side}`).bone.getWorldPosition(rig.group.position.clone());return {max:g.upper+g.fore-.01,start:s.distanceTo(stick.localToWorld(g.offset.clone())),end:s.distanceTo(rig.bones.get('handR').bone.getWorldPosition(rig.group.position.clone()))};});
+          return {phase,speed,roll,action,heights,stickMin:Math.min(...stickHeights),gripErrors,gripReach,ringError:Math.hypot(ring.x-st.pos.x,ring.z-st.pos.y),contactPoints:rig.bladeContacts?.reduce((n,c)=>n+c.points.length,0)};
+        },{phase,speed,roll,action});
         samples.push(sample);
         if(phase%3===0)await page.screenshot({path:join(out,`${version}-stride-${phase}.png`)});
       }
@@ -56,6 +66,10 @@ try {
         if(!process.argv.includes('--baseline')) {
           const support=Math.min(...Object.values(sample.heights).map(f=>f.min));
           assert.ok(support>=-.015&&support<=.025,`Stride ${sample.phase} support blade height ${support}`);
+          if(process.argv.includes('--stick')) {
+            assert.ok(sample.stickMin>=-.015,`Stride ${sample.phase} stick buried: ${sample.stickMin}`);
+            assert.ok(sample.gripErrors.every(e=>e<.02),'Hand left stick grip');
+          }
         }
       }
       if(errors.length)throw new Error(errors.join('\n'));

@@ -39,6 +39,34 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest stick-pose fix: SkaterRig caches8 tape-blade bounds corners; when the stick
+is buried, bounded8-step search lifts the carrying upper arm, then existing left
+arm IK follows. Right-hand parent grip preserved. Goalies/falls/lunges/fights/
+celebrations remain outside this normal skating correction. No simulation edits.
+Baseline models/1788720664863-tURVfJ normal minimum-.471m; turbo/turn
+1788720666137-9MQZHg -.303m. Initial candidate normal1788720758929-TndQ0f
+.0045m minimum, turbo1788720760256-WhxdjD +.016m, grip errors<5e-8m. Side
+captures inspected: full blade visible with both hands attached.
+Expanded charge1788720812847-ZMvasj and dragR1788720815401-p7oDfn failed grip
+gate (.021m/.331m). Disabling only lift confirmed baseline charge grip intact and
+existing dragR gap .266m in1788720856065-QNx9V1 /1788720857376-Of2Wwj.
+One focused repair halves charge carrying-arm yaw and reduces far-side drag arm
+sweep to15%, retaining torso twist. Final charge1788721069813-PVfEnQ and
+dragR1788721071093-7m9lfy pass clearance/grip, maximum gap<.001m; captures
+inspected. DragL1788720814161-lZTCm3 passes unchanged path. Temporary diagnostic
+overrides removed; models.mjs --stride --stick retains bounds/grip tests plus
+--action=charge|dragL|dragR fixtures. No claim of every transient pose/hardware FPS.
+Gates .gaming/runs/1788721085368-w2qoQb pass build/197 tests/bot, baseline
+1788720641443-edgZwf. Human browser .gaming/playtests/1788721086877-6e5QxQ passes.
+Self-review prefers visible connected stick; Impeccable informed contact/grip
+review. Next precise action: return to sustained natural match/run evidence with
+route.mjs --combat --act --seed=route-act-1 after building. Let matches finish
+without injected winners; check earned rewards, next-act routing or real loss
+settlement. Previous natural Act1 boss loss predates recent fight/roster fixes.
+Full goal active; unrelated README.md and docs/ROADMAP-v4.md untouched.
+Final model timing1788721146895-f0LbXA passes; actual keyboard charge/release
+and responsive charge HUD .gaming/playtests/1788721148204-AKMtm8 passes.
+
 Latest player contact fix: SkaterRig caches8 asset-derived blade-bottom points
 in foot-local coordinates at construction. Ankles counter forward body lean;
 normal skating adjusts only pivot height so lowest blade stays3mm above ice.
