@@ -39,6 +39,25 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest fix: shootout attempts leaked goals/assists into regulation player stats,
+and undoing only1 team point leaked goal-value perk bonuses. rules.checkGoal now
+emits goal feedback with value1/no assist in shootouts without modifying those
+stats or team score; stepShootout still awards one final deciding point, no undo.
+Expanded tests/sim/shootout.test.ts: natural shootout-only zero player G/A plus
+weighted-goal shootout preserving preexisting regulation G/A and tied2-2 score.
+Both failed before repair. Baseline .gaming/runs/1788712587650-7DVzVz/; final
+.gaming/runs/1788712642528-8fyRaM/ build/152 tests/bot pass, all eight bot match
+records identical. Route harness now retains boss shootout/player-goal evidence.
+Browser --act --seed=route-act-1 .gaming/route/1788712656883-116E1K/ passes:
+normal4-3, boss2-3 at same545.07s; shootout0-2 with regulation player totals2-2.
+Boss result screenshot inspected: away G0/0/2, no phantom goalie assists.
+Self-review prefers accurate regulation stats and perk-independent shootout
+settlement; abstains on broader human feel and hardware. No layout changes.
+Next precise action: show shootout resolution explicitly in match result copy;
+currently final2-3 lacks an SO label despite regulation player totals2-2. Inspect
+desktop/narrow/large-text evidence and preserve result/reward/reload routing.
+Unrelated README.md and docs/ROADMAP-v4.md remain unstaged.
+
 Latest P3 evidence: route.mjs --act extends natural combat through earned perk,
 three level-ups (stable first offers after reload), remaining rest/shop and boss.
 Optional --seed enters a named seed; post-combat-run.json/post-boss-run.json retain

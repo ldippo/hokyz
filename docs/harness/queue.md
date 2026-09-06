@@ -102,6 +102,18 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed shootout accounting fix: checkGoal no longer credits regulation goals,
+assists or perk-weighted team points during shootout attempts. Removed the old
+fixed-one-point undo; shootout settlement still awards exactly one deciding point.
+Two assertions failed before repair (inflated player goals; weighted final5 rather
+than3). Final .gaming/runs/1788712642528-8fyRaM/ passes build/152 tests/bot; all
+eight bot match reports exactly match baseline1788712587650-7DVzVz.
+Named-seed browser .gaming/route/1788712656883-116E1K/ preserves normal4-3 and
+boss2-3 at545.07s. Boss shootout0-2, regulation player totals2-2; result inspected.
+Self-review prefers accurate records; no visual redesign or human-feel claim.
+Next: make shootout resolution explicit on match results (currently 2-3 has no
+shootout label), with narrow/large-text browser evidence.
+
 Completed evidence iteration: route.mjs --act resolves earned level-ups with
 stable first-choice reload, visits remaining rest/shop, and plays the boss with
 production AI and unchanged difficulty/clocks. Optional --seed and full save

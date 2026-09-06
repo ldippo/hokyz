@@ -45,6 +45,26 @@ describe('shootout', () => {
     expect(s.st.teams[w].score).toBe(1);
     expect(s.st.teams[w === 0 ? 1 : 0].score).toBe(0);
     expect(s.st.winner).toBe(w);
+    expect(Object.values(s.st.skaters).every(sk => sk.goals === 0 && sk.assists === 0)).toBe(true);
+  });
+  it('shootout attempts ignore goal-value perks and preserve regulation goals and assists', () => {
+    const mods = defaultMatchMods();
+    mods.shootoutOnly = true;
+    mods.teams[0].goalValue = mods.teams[1].goalValue = 3;
+    mods.teams[0].longShotBonus = mods.teams[1].longShotBonus = 2;
+    const s = sim(mods, 7);
+    s.st.teams[0].score = s.st.teams[1].score = 2;
+    s.st.skaters.A1.goals = 2;
+    s.st.skaters.B1.goals = 2;
+    s.st.skaters.A2.assists = 1;
+    const before = Object.values(s.st.skaters).map(sk => [sk.goals, sk.assists]);
+    for (let i = 0; i < 60 * 240 && s.st.phase !== 'over'; i++) s.step();
+    expect(s.st.phase).toBe('over');
+    expect(s.st.shootout!.attempts.some(a => a.scored)).toBe(true);
+    const winner = s.st.winner!;
+    expect(s.st.teams[winner].score).toBe(3);
+    expect(s.st.teams[winner === 0 ? 1 : 0].score).toBe(2);
+    expect(Object.values(s.st.skaters).map(sk => [sk.goals, sk.assists])).toEqual(before);
   });
   it('a tied overtime goes to a shootout instead of another OT', () => {
     const mods = defaultMatchMods();

@@ -27,18 +27,23 @@ export function checkGoal(st: MatchState, prevX: number, events: MatchEvent[]): 
         }
       }
     }
-    const assist = p.prevTouch && p.prevTouch !== scorer && st.skaters[p.prevTouch]?.team === scoringTeam ? p.prevTouch : null;
+    const shootoutAttempt = st.phase === 'shootout';
+    const assist = !shootoutAttempt && p.prevTouch && p.prevTouch !== scorer && st.skaters[p.prevTouch]?.team === scoringTeam ? p.prevTouch : null;
     const m = st.mods.teams[scoringTeam];
-    let value = m.goalValue;
+    let value = shootoutAttempt ? 1 : m.goalValue;
     // long shot bonus: shot released from beyond the attacking blue line
-    if (m.longShotBonus > 0 && scorer) {
+    if (!shootoutAttempt && m.longShotBonus > 0 && scorer) {
       const s = st.skaters[scorer];
       const dist = Math.abs(s.pos.x - g.lineX);
       if (dist > RINK.goalLineX - RINK.blueLineX) value += m.longShotBonus;
     }
-    st.teams[scoringTeam].score += value;
-    if (scorer) st.skaters[scorer].goals++;
-    if (assist) st.skaters[assist].assists++;
+    // Attempts live in shootout.goals; only its winner earns a deciding team
+    // point. They must not inflate regulation stats or inherit scoring perks.
+    if (!shootoutAttempt) {
+      st.teams[scoringTeam].score += value;
+      if (scorer) st.skaters[scorer].goals++;
+      if (assist) st.skaters[assist].assists++;
+    }
     events.push({ type: 'goal', team: scoringTeam, scorer: scorer ?? '', assist, pos: { ...p.pos }, value, ownGoal: scorerId === null, high: p.z > 0.6 });
     st.shake = Math.max(st.shake, 0.6);
     st.phase = 'goal';

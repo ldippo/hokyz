@@ -192,8 +192,6 @@ export function stepShootout(st: MatchState, dt: number, rng: Rng, events: Match
         // undo the celebration phase the goal check set; we manage our own
         if (st.phase === 'goal') {
           st.phase = 'shootout';
-          // checkGoal already bumped the score; shootout goals count once at the end instead
-          st.teams[so.turn].score -= 1;
         }
         so.goals[so.turn] += scored ? 1 : 0;
         so.attempts.push({ team: so.turn, scored, shooter: so.shooterId ?? '' });

@@ -123,7 +123,7 @@ try {
       let over=false,bossTicks=0;
       while(!over&&bossTicks<90000){over=await page.evaluate(()=>{const app=window.__hokyz;for(let i=0;i<600;i++){app.simStep();if(app.view.sim.st.phase==='over')return true;}return false;});bossTicks+=600;}
       assert.ok(over,'Natural boss match did not end');
-      const boss=await page.evaluate(()=>{const app=window.__hokyz,st=app.view.sim.st;const data={time:st.t,score:st.teams.map(t=>t.score),winner:st.winner};for(let i=0;i<150;i++)app.simStep();return data;});
+      const boss=await page.evaluate(()=>{const app=window.__hokyz,st=app.view.sim.st;const data={time:st.t,score:st.teams.map(t=>t.score),winner:st.winner,shootout:st.shootout,playerGoals:st.teams.map(t=>Object.values(st.skaters).filter(sk=>sk.team===t.id).reduce((n,sk)=>n+sk.goals,0))};for(let i=0;i<150;i++)app.simStep();return data;});
       await page.keyboard.press('Enter');await page.evaluate(()=>window.__hokyz.simStep());
       assert.equal(await page.evaluate(()=>window.__hokyz.run.matchesPlayed),2);
       checkpoints.push({boss,run:await snapshot()});
