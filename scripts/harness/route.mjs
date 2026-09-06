@@ -8,7 +8,9 @@ mkdirSync('.gaming/route', { recursive:true });
 const out = mkdtempSync(resolve('.gaming/route', `${Date.now()}-`));
 const server = await preview({ preview:{ host:'127.0.0.1',port:0,open:false } });
 const checks=[], errors=[], checkpoints=[];
-const combat=process.argv.includes('--combat');
+const act=process.argv.includes('--act');
+const combat=act||process.argv.includes('--combat');
+const seed=process.argv.find(arg=>arg.startsWith('--seed='))?.slice(7);
 let browser,page;
 try {
   browser=await chromium.launch({args:['--enable-unsafe-swiftshader','--use-angle=swiftshader','--disable-dev-shm-usage']});
@@ -20,7 +22,9 @@ try {
   const reload=async()=>{await page.reload();await ready();await page.getByRole('button',{name:'Continue Run',exact:true}).click();};
   const enter=()=>page.locator('.node.available').first().click();
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/`);await ready();
-  await page.getByRole('button',{name:'New Run',exact:true}).click();await page.locator('.cards [data-nav]').first().click();
+  await page.getByRole('button',{name:'New Run',exact:true}).click();
+  if(seed)await page.getByPlaceholder('seed (optional)').fill(seed);
+  await page.locator('.cards [data-nav]').first().click();
   await page.evaluate(combat=>{
     const r=window.__hokyz.run;
     ['event','shop','rest'].forEach((type,row)=>r.maps[0].rows[row].forEach(node=>{node.type=type;if(type==='event')node.eventId='fan_favorite';}));
@@ -77,7 +81,8 @@ try {
       assert.ok(await page.evaluate(()=>window.__hokyz.run.pendingDraft));
       await reload();
       assert.equal(await page.locator('.screen-title').textContent(),'DRAFT A PERK');
-      await page.getByRole('button',{name:'Skip (+25 cash)',exact:true}).click();
+      if(act)await page.locator('.cards [data-nav]').first().click();
+      else await page.getByRole('button',{name:'Skip (+25 cash)',exact:true}).click();
       assert.ok(!await page.evaluate(()=>window.__hokyz.run.pendingDraft));
     }else{
       assert.ok(await page.evaluate(()=>window.__hokyz.run.over));
@@ -85,6 +90,58 @@ try {
       assert.equal(await page.evaluate(()=>localStorage.getItem('hokyz.run.v1')),null);
     }
     checks.push(`Natural AI-controlled match ${match.score.join('-')}: outcome counted once and ${match.winner===0?'reward resumed':'loss settled'} through reload`);
+    if(match.winner===0){
+      const saved=await page.evaluate(()=>localStorage.getItem('hokyz.run.v1'));
+      if(saved)writeFileSync(join(out,'post-combat-run.json'),saved);
+    }
+    if(act&&match.winner===0){
+      let levels=0;
+      while(await page.locator('.screen-title').filter({hasText:/^LEVEL UP$/}).count()){
+        assert.ok(levels<30,'Level-up choices did not terminate');
+        const pending=()=>page.evaluate(()=>[...window.__hokyz.run.roster,window.__hokyz.run.goalie].reduce((n,sk)=>n+(sk.pendingLevels??0),0));
+        const before=await pending();
+        if(levels===0){
+          const choices=await page.locator('.cards .cname').allTextContents();
+          await reload();assert.deepEqual(await page.locator('.cards .cname').allTextContents(),choices,'Reload changed earned level-up choices');
+        }
+        await page.locator('.cards [data-nav]').first().click();
+        assert.equal(await pending(),before-1);levels++;
+      }
+      checks.push(levels?`Resolved ${levels} earned level-ups; first offers survived reload`:'No level-ups earned in this run; choice flow not exercised');
+      const rest=page.locator('.node.available.rest');
+      if(await rest.count()){
+        await rest.first().click();await page.locator('.map-scroll .cards .card').first().click();
+      }else{
+        await page.locator('.node.available.shop').first().click();
+        const doctor=page.locator('.card:not(.disabled)').filter({hasText:'Team Doctor'});
+        if(await doctor.count())await doctor.click();
+        await page.getByRole('button',{name:'Leave Shop',exact:true}).click();
+      }
+      await page.locator('.node.available.boss').click();
+      await page.getByRole('button',{name:'Drop the Puck',exact:true}).click();
+      await page.evaluate(()=>{const app=window.__hokyz;app.view.sim.st.teams[0].isHuman=false;app.humanPlaying=false;});
+      let over=false,bossTicks=0;
+      while(!over&&bossTicks<90000){over=await page.evaluate(()=>{const app=window.__hokyz;for(let i=0;i<600;i++){app.simStep();if(app.view.sim.st.phase==='over')return true;}return false;});bossTicks+=600;}
+      assert.ok(over,'Natural boss match did not end');
+      const boss=await page.evaluate(()=>{const app=window.__hokyz,st=app.view.sim.st;const data={time:st.t,score:st.teams.map(t=>t.score),winner:st.winner};for(let i=0;i<150;i++)app.simStep();return data;});
+      await page.keyboard.press('Enter');await page.evaluate(()=>window.__hokyz.simStep());
+      assert.equal(await page.evaluate(()=>window.__hokyz.run.matchesPlayed),2);
+      checkpoints.push({boss,run:await snapshot()});
+      const saved=await page.evaluate(()=>localStorage.getItem('hokyz.run.v1'));
+      if(saved)writeFileSync(join(out,'post-boss-run.json'),saved);
+      await page.screenshot({path:join(out,'natural-boss-result.png')});
+      if(boss.winner===0){
+        assert.equal(await page.evaluate(()=>window.__hokyz.run.act),2);
+        assert.equal(await page.evaluate(()=>window.__hokyz.run.row),0);
+        await reload();assert.equal(await page.locator('.screen-title').textContent(),'DRAFT A PERK');
+        assert.equal(await page.locator('.cards [data-nav]').count(),4);
+        checks.push(`Natural boss win ${boss.score.join('-')}: Act2 row0, four earned offers survive reload`);
+      }else{
+        assert.ok(await page.evaluate(()=>window.__hokyz.run.over));
+        await reload();assert.equal(await page.evaluate(()=>localStorage.getItem('hokyz.run.v1')),null);
+        checks.push(`Natural boss loss ${boss.score.join('-')}: ended run settled through reload; act advancement not demonstrated`);
+      }
+    }
   }
   assert.deepEqual(errors,[]);
 }catch(error){errors.push(String(error));process.exitCode=1;await page?.screenshot({path:join(out,'failure.png')}).catch(()=>{});}

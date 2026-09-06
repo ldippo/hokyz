@@ -39,6 +39,23 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest P3 evidence: route.mjs --act extends natural combat through earned perk,
+three level-ups (stable first offers after reload), remaining rest/shop and boss.
+Optional --seed enters a named seed; post-combat-run.json/post-boss-run.json retain
+complete saves. First .gaming/route/1788712073614-OXZPW9/ normal4-0/boss loss1-4
+used draft skip; final .gaming/route/1788712222197-Echhmd/ --seed=route-act-1 took
+Nitrous, normal4-3/boss loss2-3. Both pass natural loss/reload settlement. Act2 win
+branch exists but remains unexercised: do not claim natural act advancement.
+Build/151 tests/bot gates .gaming/runs/1788712074632-iou44F/ pass. Both boss result
+images inspected. Self-review prefers recovery evidence, abstains on human feel,
+hardware and full-run victory. No game-code changes. Changed route script plus
+harness README/queue/handoff; unrelated README.md/ROADMAP-v4.md remain unstaged.
+Next precise action: investigate apparent scoreboard/stat mismatch in named-seed
+natural-boss-result.png: away player G totals4 while team score3. Check own-goal
+attribution and retained match/report evidence before deciding whether a fix is
+needed. Preserve natural outcomes; do not seed-search to imply representative
+balance. Then resume broader progression/accessibility evidence.
+
 Latest evidence: route.mjs --combat extends event/shop/rest into a normal match
 on row3 (types prepared, original links and actual roster/modifiers preserved).
 Home team is switched to production AI for the test; simulation runs full-length

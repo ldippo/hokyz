@@ -85,6 +85,11 @@ Add `--combat` to prepare a normal match on the next row and let both teams use
 production AI through a natural full-length outcome. Verifies match counters and
 reward reload or loss settlement. No score/winner/clock edits; AI control is not
 human gameplay evidence and this does not certify a complete run.
+Add `--act` to take an earned perk, resolve earned level-ups (including a reload
+check), visit the remaining rest/shop, and play the Act 1 boss naturally. A loss
+checks settlement; only a win checks Act 2 and its four-offer draft. Use
+`--seed=route-act-1` to enter a named seed. Post-combat and post-boss save JSON
+checkpoints are retained when reached. Neither flag guarantees a victory.
 
 `node scripts/harness/hit-parade-full.mjs` runs idle and scripted pursuit through
 all 60 simulated seconds, using DOM movement/check keys and natural timer expiry.

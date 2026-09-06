@@ -102,6 +102,18 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed evidence iteration: route.mjs --act resolves earned level-ups with
+stable first-choice reload, visits remaining rest/shop, and plays the boss with
+production AI and unchanged difficulty/clocks. Optional --seed and full save
+checkpoints added. .gaming/route/1788712073614-OXZPW9/ won normal4-0, lost boss1-4;
+.gaming/route/1788712222197-Echhmd/ (--seed=route-act-1, earned Nitrous) won normal4-3,
+lost boss2-3. Both resolved three level-ups and recovered ended runs on reload.
+Gates .gaming/runs/1788712074632-iou44F/ pass build/151 tests/bot. Boss result
+captures inspected. Self-review prefers recovery evidence; abstain on human feel
+and Act2/full-run victory. No game-code changes or balance tuning.
+Next: investigate the named-seed boss result's apparent goal-stat discrepancy
+(away player G totals4 versus team score3) before extending progression coverage.
+
 Completed connected natural-combat evidence: route.mjs --combat prepares the
 fourth row as a normal match, keeps actual run roster/modifiers and lets both
 teams use production AI. No score/winner/clock changes. Final
