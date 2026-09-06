@@ -39,6 +39,22 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest P2 gameplay iteration: AI now checks `laneBlocked` and `pickPassTarget`
+before pressured/outlet passes, skips knocked-down recipients, and keeps skating
+when no lane is available. Changes: src/sim/ai/skaterAI.ts and two new cases in
+tests/sim/support.test.ts. Each case samples 100 seeds: old logic made 14 blocked
+outlet passes / 34 pressured passes; new logic makes none, but passes when an
+outlet opens. Baseline .gaming/runs/1788705854469-WsImZH/; candidate
+.gaming/runs/1788705904359-XYPt7T/ passes build, 128 tests and eight bot gates.
+Completion 33.5% -> 35.6%, interceptions 55.7% -> 53.7%, attempts 1381 -> 1059,
+goals 7.625 -> 6.25. Extended 40-match diagnostic is extended-balance.log in that
+candidate directory (difficulty means 4.7/7.3/6.4/7.8 goals; max duration below
+tick cap). Browser playtest .gaming/playtests/1788705916742-yAcgQ0/ passed.
+Self-review prefers lane-aware choices; modest aggregate improvement, not proof
+of fantastic game feel. No visual or human input changes. Next: inspect whether
+intended pass receivers abandon their receiving lane while the puck is in flight;
+add sustained human pass/receive evidence before further tuning.
+
 Latest P2 evidence iteration: added `scripts/harness/possession.ts`, integrated
 in botplay, and seven tests in `tests/sim/possessionMetrics.test.ts`. Read-only
 end-of-tick ownership plus immediate pass/shot events; distinguishes intended

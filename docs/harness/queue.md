@@ -30,6 +30,20 @@ frame-rate and gamepad play are not established by these software-renderer check
 
 ## P2: On-ice responsiveness and decision-making (in-progress, depends on P0)
 
+Completed iteration: AI pass-lane awareness. Two fixtures reproduced unsafe
+passes with/without pressure over 100 decision seeds each. AI now checks the lane
+and actual pass resolver, chooses an available outlet, or keeps skating. Both
+fixtures require passing to resume when an outlet opens. No human input changes.
+Baseline `.gaming/runs/1788705854469-WsImZH/`; candidate
+`.gaming/runs/1788705904359-XYPt7T/`: 128 tests and all hockey gates pass.
+Completion 33.5% -> 35.6%, interception 55.7% -> 53.7%, attempts 1381 -> 1059;
+mean goals 7.625 -> 6.25. Forty extra matches produced difficulty means
+4.7/7.3/6.4/7.8 goals, with no numerical failure or match reaching the tick cap.
+Browser flow `.gaming/playtests/1788705916742-yAcgQ0/` passes.
+Self-review: prefer-after for avoiding demonstrably covered lanes; improvement
+is modest and does not prove satisfying human passing. Next inspect pass-target
+AI behavior during flight, then sustained human pass/receive interaction.
+
 Completed iteration: sustained passing/possession evidence. Read-only bot metrics
 and seven accounting tests added; baseline match outcomes exactly unchanged and
 repeat metrics deterministic. `.gaming/runs/1788705761716-bDK6Sz/` passes build,

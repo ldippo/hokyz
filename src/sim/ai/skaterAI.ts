@@ -4,6 +4,7 @@ import type { Input, MatchState, Skater, Vec2 } from '../types';
 import { angleDiff, angleOf, clamp, dist, len, norm, sub } from '../vec';
 import { arrive, predict, seek } from './steering';
 import type { Rng } from '../../core/rng';
+import { laneBlocked, pickPassTarget } from '../puck';
 
 export type Role = 'carrier' | 'supportHigh' | 'supportLow' | 'chase' | 'pressure' | 'mark' | 'back';
 
@@ -134,19 +135,29 @@ export function thinkSkater(st: MatchState, sk: Skater, brain: Brain, dt: number
         // charge longer from farther out, shorter if pressured
         brain.shootHold = pressured ? 0.15 : clamp(0.25 + dGoal / 25, 0.2, 0.9);
       } else if (pressured && rng.next() < rateP(diff(st, sk, 'passSmarts') * 4)) {
-        // pass to best option
-        input.pass = true;
-        return input;
+        // Aim at an available outlet, checking the same target resolver used by
+        // stepCarrier. With no safe lane, keep skating instead of donating possession.
+        for (const id of team.skaters) {
+          const target = st.skaters[id];
+          if (target.id === sk.id || target.knockdown > 0) continue;
+          const aim = norm(sub(target.pos, sk.pos));
+          if (pickPassTarget(st, sk, aim)?.id !== target.id || laneBlocked(st, sk, target)) continue;
+          input.pass = true;
+          input.move = aim;
+          return input;
+        }
       } else if (pressured && incomingCheck(st, sk) && rng.next() < 0.6) {
         input.deke = true;
       } else if (!pressured && rng.next() < rateP((sk.pos.x * dir < -RINK.blueLineX ? 1.3 : 0.35) * diff(st, sk, 'passSmarts')) && dGoal > 12) {
         // outlet / up-ice pass to an open teammate ahead (much likelier on the breakout)
         for (const id of team.skaters) {
           const t = st.skaters[id];
-          if (t.id === sk.id) continue;
-          if ((t.pos.x - sk.pos.x) * dir > 5 && nearestOpponent(st, t).d > 3.5) {
+          if (t.id === sk.id || t.knockdown > 0) continue;
+          const aim = norm(sub(t.pos, sk.pos));
+          if ((t.pos.x - sk.pos.x) * dir > 5 && nearestOpponent(st, t).d > 3.5 &&
+              !laneBlocked(st, sk, t) && pickPassTarget(st, sk, aim)?.id === t.id) {
             input.pass = true;
-            input.move = norm(sub(t.pos, sk.pos));
+            input.move = aim;
             return input;
           }
         }
