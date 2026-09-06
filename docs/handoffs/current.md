@@ -39,6 +39,22 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest charge HUD fix: charge-wrap now lives inside turbo-wrap, anchored above
+its actual dimensions with8px gap, matching width and labeled SHOT POWER. Dark
+backing/track replaces floating skewed unlabeled bar. Impeccable guided grouping
+and clarity. No simulation/input changes. playtest --charge-layout prepares
+possession, holds actual Shoot18ticks (charge1/3), captures1280/390/390150%, then
+releases and asserts shot event and indicator cleared. Baseline
+.gaming/playtests/1788716668975-VPRHIi shows desktop turbo overlap and narrow
+bar extending across panels. Final1788716756350-ZVADBv passes all bounds/no
+overlap and existing control/save/passing flow; desktop/narrow150% inspected.
+Gates baseline .gaming/runs/1788716670003-s2mKxo, final1788716735616-mJy8X0
+build/157 tests/bot pass. Self-review prefers readable charge feedback; abstains
+on sustained human timing/fun. Next precise action: inspect fight challenge
+prompts and shootout tracker at narrow/large-text sizes; they remain independent
+absolute HUD layouts. Broader natural-run victory and hardware performance still
+unverified. Preserve unrelated README/ROADMAP; full goal active.
+
 Latest narrow HUD fix: <=700px scoreboard uses three columns with explicit
 name/badge/score grid cells; compact bottom panels preserve player/health/turbo/
 special information without overlap. Desktop unchanged. Impeccable guided

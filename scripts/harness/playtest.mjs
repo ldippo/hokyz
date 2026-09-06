@@ -167,6 +167,48 @@ try {
   assert.ok(movedX > movement.x + 0.1, 'Human movement did not move the skater');
   checks.push('Match input moves the human skater in a fixed-step match');
   await page.screenshot({ path: join(out, 'human-match.png') });
+  if(process.argv.includes('--charge-layout')) {
+    await page.evaluate(()=>{
+      const st=window.__hokyz.view.sim.st,sk=st.skaters[st.teams[0].controlledId];
+      for(const id of st.order)st.skaters[id].hasPuck=false;
+      sk.hasPuck=true;sk.vel={x:0,y:0};sk.charging=false;sk.shotCharge=0;
+      st.puck.owner=sk.id;st.puck.pos={...sk.pos};st.puck.vel={x:0,y:0};
+    });
+    await control(shotKey,true);
+    const charged=await page.evaluate(()=>{
+      const app=window.__hokyz;app.input.poll();
+      for(let i=0;i<18;i++)app.view.afterStep(app.view.sim.step({0:app.input.simInput()}));
+      const st=app.view.sim.st,sk=st.skaters[st.teams[0].controlledId];
+      return {charging:sk.charging,charge:sk.shotCharge};
+    });
+    assert.ok(charged.charging&&charged.charge>0,'Held Shoot did not charge');
+    for(const [width,height,scale] of [[1280,720,1],[390,844,1],[390,844,1.5]]) {
+      await page.setViewportSize({width,height});
+      await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+      const boxes=await page.evaluate(scale=>{
+        const app=window.__hokyz;app.meta.textScale=scale;app.applyAccessPrefs();app.view.render(1,0);
+        return ['.charge-wrap','.turbo','.special-label','.special','.player-tag','.turbo-wrap'].map(selector=>{
+          const el=document.querySelector(selector),r=el.getBoundingClientRect();
+          return {selector,left:r.left,right:r.right,top:r.top,bottom:r.bottom,on:el.classList.contains('on')};
+        });
+      },scale);
+      await page.screenshot({path:join(out,`charge-${width}-${scale}.png`)});
+      const charge=boxes[0],overlap=boxes.slice(1).filter(b=>charge.left<b.right&&charge.right>b.left&&charge.top<b.bottom&&charge.bottom>b.top);
+      checks.push({chargeLayout:{width,height,scale,charged,boxes,overlap}});
+      assert.ok(charge.on);
+      if(!process.argv.includes('--baseline'))assert.ok(!overlap.length&&charge.left>=0&&charge.right<=width&&charge.top>=0&&charge.bottom<=height,JSON.stringify(boxes));
+    }
+    await control(shotKey,false);
+    const release=await page.evaluate(()=>{
+      const app=window.__hokyz;app.input.poll();
+      const events=app.view.sim.step({0:app.input.simInput()});app.view.afterStep(events);app.view.render(1,0);
+      return {shot:events.some(e=>e.type==='shot'),indicatorOn:document.querySelector('.charge-wrap').classList.contains('on')};
+    });
+    assert.ok(release.shot&&!release.indicatorOn,'Released shot did not fire and clear charge indicator');
+    checks.push({chargeRelease:release});
+    await page.setViewportSize({width:1280,height:720});
+    await page.evaluate(()=>{const app=window.__hokyz;app.meta.textScale=1;app.applyAccessPrefs();});
+  }
   // Prepared open-ice start only; pass flight, AI receiving, possession and
   // control transfer below all use the production simulation and keyboard input.
   const passing = await page.evaluate(() => {

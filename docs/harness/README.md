@@ -169,6 +169,10 @@ and narrow 150% text: labels, keys, actions, horizontal overflow and Reset/Back.
 It also checks keyboard remapping/focus/cancel/reset/navigation and synthetic
 standard-gamepad D-pad/A/B routing, including cancellation during capture.
 Synthetic input does not certify physical controller compatibility or latency.
+`node scripts/harness/playtest.mjs --charge-layout` prepares open-ice possession,
+holds actual Shoot input, captures desktop/narrow/150%-text charge HUD, checks
+separation from ability/player panels, then releases and checks shot/indicator
+clearance. `--baseline` records geometry without enforcing separation.
 Use `--baseline` to record without asserting. Evidence: `.gaming/controls-layout/`.
 
 After building, `pnpm harness:capture` starts its own Vite preview server on an

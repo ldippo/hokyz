@@ -102,6 +102,15 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed shot-power HUD: labeled panel anchored above actual turbo panel,
+matching width/no overlap. Impeccable guided clarity. Baseline playtest
+1788716668975-VPRHIi desktop overlap/narrow floating bar; final
+.gaming/playtests/1788716756350-ZVADBv --charge-layout passes3layouts, actual
+held Shoot charge/release event/indicator clear and existing browser controls.
+Desktop/narrow150% images inspected. Gates1788716735616-mJy8X0 build/157 tests/
+bot pass. Self-review prefers visible shot power, not human-feel approval. Next:
+fight prompts and shootout tracker layout; broader run/hardware evidence open.
+
 Completed narrow core HUD: compact three-column scoreboard, explicit score/name
 cells, separate bottom panels at<=700px. Baseline .gaming/map-focus/
 1788716405754-BP8Kfj clips/overlaps; final1788716559085-79CNKL passes desktop,

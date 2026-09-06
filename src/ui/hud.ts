@@ -17,8 +17,7 @@ export class Hud {
         <div class="sb-team t1"><span class="badge" data-el="badge1"></span><span class="name" data-el="name1"></span><span class="score" data-el="score1">0</span></div>
       </div>
       <div class="perks-mini" data-el="perks"></div>
-      <div class="charge-wrap" data-el="chargeWrap"><div class="charge-fill" data-el="charge"></div></div>
-      <div class="turbo-wrap"><div class="turbo-label">TURBO</div><div class="turbo" data-el="turbo"><div class="turbo-fill" data-el="turboFill"></div></div><div class="special-label" data-el="specialLabel">SPECIAL</div><div class="special" data-el="special"><div class="special-fill" data-el="specialFill"></div></div></div>
+      <div class="turbo-wrap"><div class="charge-wrap" data-el="chargeWrap"><div class="charge-label">SHOT POWER</div><div class="charge-track"><div class="charge-fill" data-el="charge"></div></div></div><div class="turbo-label">TURBO</div><div class="turbo" data-el="turbo"><div class="turbo-fill" data-el="turboFill"></div></div><div class="special-label" data-el="specialLabel">SPECIAL</div><div class="special" data-el="special"><div class="special-fill" data-el="specialFill"></div></div></div>
       <div class="fight" data-el="fight"><div class="fighter f0"><div class="fname" data-el="fname0"></div><div class="fhp"><div class="fhp-fill" data-el="fhp0"></div></div></div><div class="fcue" data-el="fcue"></div><div class="fighter f1"><div class="fname" data-el="fname1"></div><div class="fhp"><div class="fhp-fill" data-el="fhp1"></div></div></div></div>
       <div class="player-tag"><div class="pname" data-el="pname"></div><div class="ptype" data-el="ptype"></div><div class="hp"><div class="hp-fill" data-el="hp"></div></div></div>
       <div class="fire-streak" data-el="streak"><span></span><span></span><span></span></div>
