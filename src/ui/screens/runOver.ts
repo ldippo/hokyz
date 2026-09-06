@@ -5,34 +5,44 @@ import { titleScreen } from './title';
 import { captainScreen } from './captain';
 import { PERK_BY_ID } from '../../run/perks';
 import { awardFeats } from '../../run/feats';
+import { saveMeta } from '../../core/save';
 
 export function runOverScreen(app: App): void {
   const run = app.run!;
   const leagueActs = Math.max(0, run.act - 3);
   const earned = Math.floor(run.cash * 0.5) + run.matchesWon * 25 + (run.won ? 500 : 0) + run.ascension * 50 + leagueActs * 150;
-  app.meta.cash += earned;
-  if (run.won) app.meta.wins++;
-  if (run.act > app.meta.bestAct || (run.act === app.meta.bestAct && run.row > app.meta.bestRow)) {
-    app.meta.bestAct = run.act;
-    app.meta.bestRow = run.row;
-  }
-  if (run.won) app.meta.bestAscWon = Math.max(app.meta.bestAscWon ?? 0, run.ascension);
-  if (run.act >= 4) app.meta.leagueBestAct = Math.max(app.meta.leagueBestAct ?? 0, run.act);
+  // Roster IDs are unique per new run and persisted, including in legacy saves.
+  const settlementKey = `${run.seed}:${run.goalie.id}:${run.roster[0]?.id}`;
   const m = app.meta;
-  m.telemetry ??= { perkOffered: {}, perkPicked: {}, nodePicked: {}, runEndAct: {} };
-  m.telemetry.runEndAct[String(run.won ? 'won' : run.act)] = (m.telemetry.runEndAct[String(run.won ? 'won' : run.act)] ?? 0) + 1;
-  if (run.weekly) {
-    const w = m.weekly && m.weekly.week === run.weekly ? m.weekly : { week: run.weekly, bestAct: 0, bestRow: 0, won: false, runs: 0 };
-    w.runs++;
-    if (run.won || run.act > w.bestAct || (run.act === w.bestAct && run.row > w.bestRow)) {
-      w.bestAct = run.act;
-      w.bestRow = run.row;
+  const settled = m.settledRuns?.[settlementKey] === true;
+  if (!settled) {
+    m.cash += earned;
+    if (run.won) m.wins++;
+    if (run.act > m.bestAct || (run.act === m.bestAct && run.row > m.bestRow)) {
+      m.bestAct = run.act;
+      m.bestRow = run.row;
     }
-    if (run.won) w.won = true;
-    m.weekly = w;
+    if (run.won) m.bestAscWon = Math.max(m.bestAscWon ?? 0, run.ascension);
+    if (run.act >= 4) m.leagueBestAct = Math.max(m.leagueBestAct ?? 0, run.act);
+    m.telemetry ??= { perkOffered: {}, perkPicked: {}, nodePicked: {}, runEndAct: {} };
+    m.telemetry.runEndAct[String(run.won ? 'won' : run.act)] = (m.telemetry.runEndAct[String(run.won ? 'won' : run.act)] ?? 0) + 1;
+    if (run.weekly) {
+      const w = m.weekly && m.weekly.week === run.weekly ? m.weekly : { week: run.weekly, bestAct: 0, bestRow: 0, won: false, runs: 0 };
+      w.runs++;
+      if (run.won || run.act > w.bestAct || (run.act === w.bestAct && run.row > w.bestRow)) {
+        w.bestAct = run.act;
+        w.bestRow = run.row;
+      }
+      if (run.won) w.won = true;
+      m.weekly = w;
+    }
   }
-  const feats = awardFeats(m, { run, runOver: true });
-  app.saveMeta();
+  const feats = settled ? [] : awardFeats(m, { run, runOver: true });
+  (m.settledRuns ??= {})[settlementKey] = true;
+  if (!saveMeta(m)) {
+    app.toast('Could not save your payout. Free browser storage, then retry or reload. Your run is retained.');
+    return;
+  }
   app.clearSavedRun();
   app.run = null;
   if (feats.length) app.toast(`FEAT: ${feats.map((f) => `${f.icon} ${f.name} +${f.reward.cash ?? 0}`).join('  ·  ')}`);

@@ -60,6 +60,8 @@ export const RINK_THEMES: Record<string, RinkTheme> = {
 
 export interface MetaProfile {
   version: 1;
+  /** Settlement receipts prevent an uncleared finished save paying out twice. */
+  settledRuns?: Record<string, true>;
   cash: number;
   unlocked: string[]; // captain ids + unlockable ids
   runs: number;

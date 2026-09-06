@@ -102,6 +102,19 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed iteration: retain ended runs until settlement. App previously deleted the
+save at the loss result screen, before runOver credited meta cash. Preserve ended
+save/Continue routing, record settlement receipts with meta, and clear the save
+only after successful payout persistence. Acceptance: browser reload before summary,
+failed meta write/retry, and stale ended-save recovery without duplicate cash,
+feats or records. Preserve existing payout formulas and normal run behavior.
+Baseline `.gaming/runs/1788707033327-V2Q2Fn/`; final
+`.gaming/runs/1788707264175-muMw5D/` passes build, 137 tests and bot gates.
+`.gaming/endings/1788707276471-IdZKa0/` passes loss reload, failed meta write/retry
+and stale-save idempotency. Summary payout capture inspected in first candidate
+`.gaming/endings/1788707165189-kIsV9P/`. Self-review prefers retained earnings;
+full-run play and banking/league branches still require evidence.
+
 Completed iteration: skills-node rewards share durable pending drafts and once-only
 claims. Preserve the existing zero-cash skills skip policy after reload. Verify
 Shootout/Hit Parade unit cases and real shootout result/reload/claim UI using a

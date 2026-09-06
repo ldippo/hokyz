@@ -76,11 +76,12 @@ export function loadMeta(): MetaProfile {
     return defaultMeta();
   }
 }
-export function saveMeta(m: MetaProfile): void {
+export function saveMeta(m: MetaProfile): boolean {
   try {
     localStorage.setItem(META_KEY, JSON.stringify({ ...m, schema: META_SCHEMA }));
+    return true;
   } catch {
-    /* ignore */
+    return false;
   }
 }
 export function loadRunRaw(): string | null {

@@ -49,6 +49,12 @@ Add `--skills` to exercise the shootout reward path with a prepared reachable
 shootout node and terminal win. Skills skips must preserve cash (no +25 match
 bonus). Unit tests cover both Shootout and Hit Parade draft persistence.
 
+`node scripts/harness/endings.mjs` (after building) prepares a terminal loss and
+checks that the saved ended run survives the result screen, Continue settles it,
+a failed meta write leaves the run recoverable, and a stale ended save cannot
+duplicate payout/records. Evidence is under `.gaming/endings/`. This is settlement
+recovery coverage, not proof of playing through an entire run.
+
 After building, `pnpm harness:capture` starts its own Vite preview server on an
 ephemeral loopback port, uses Playwright Chromium, and writes title/rink screenshots
 and telemetry under `.gaming/captures/`. Install Chromium once with

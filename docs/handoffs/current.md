@@ -39,6 +39,24 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest P3 fix: App saves/loads ended runs until summary settlement instead of
+deleting them at the loss result screen. runOver records a receipt keyed by saved
+seed/goalie/captain roster IDs in meta, skips already-settled rewards/records/feats,
+and clears the ended save only after saveMeta succeeds. saveMeta now returns a
+success boolean (existing callers may ignore it); a failed summary save leaves
+the run intact and prompts retry/reload. No payout formula changes.
+Baseline .gaming/runs/1788707033327-V2Q2Fn/; final
+.gaming/runs/1788707264175-muMw5D/ passes build, 137 tests, bot gates.
+New command node scripts/harness/endings.mjs uses terminal loss fixture and real
+UI: loss-result reload, Continue settlement, injected quota failure/retry, stale
+ended save after payout. Final .gaming/endings/1788707276471-IdZKa0/ passes all.
+First candidate recovered summary screenshot inspected:
+.gaming/endings/1788707165189-kIsV9P/recovered-run-over.png (payout visible).
+Self-review prefers retained rewards/idempotency; this is not full-run evidence.
+Next precise action: exercise act-3 pending draft -> league offer -> bank versus
+extend -> save/reload -> league loss, verifying champion/act/settlement state;
+then full progression and larger-text/remapping accessibility.
+
 Latest P3 fix: skills finishSkills now prepares/saves pending draft before showing
 inline result cards, and claim/skip uses once-only resolution. Shared draftSkipCash
 preserves skills' zero-cash skip policy on both inline and reload screens; match

@@ -313,14 +313,14 @@ export class App {
     saveMeta(this.meta);
   }
   saveRun(): void {
-    if (this.run && !this.run.over) saveRunRaw(serializeRun(this.run));
+    if (this.run) saveRunRaw(serializeRun(this.run));
     else saveRunRaw(null);
   }
   loadSavedRun(): RunState | null {
     const raw = loadRunRaw();
     if (!raw) return null;
     const r = deserializeRun(raw);
-    if (!r || r.over) return null;
+    if (!r) return null;
     return r;
   }
   clearSavedRun(): void {
