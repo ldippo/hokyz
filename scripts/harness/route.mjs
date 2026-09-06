@@ -146,5 +146,5 @@ try {
   assert.deepEqual(errors,[]);
 }catch(error){errors.push(String(error));process.exitCode=1;await page?.screenshot({path:join(out,'failure.png')}).catch(()=>{});}
 finally{await browser?.close();await new Promise(resolve=>server.httpServer.close(resolve));}
-writeFileSync(join(out,'report.json'),JSON.stringify({pass:!errors.length,checks,checkpoints,errors,scope:`Generated links preserved; encounter types and injuries prepared. Real choices/reload${combat?'; home team AI-controlled, full-length natural match outcome':''}. Not human or complete-run victory evidence.`},null,2));
+writeFileSync(join(out,'report.json'),JSON.stringify({pass:!errors.length,seed:seed??null,checks,checkpoints,errors,scope:`Generated links preserved; encounter types and injuries prepared. Real choices/reload${combat?'; home team AI-controlled, full-length natural match outcome':''}. Not human or complete-run victory evidence.`},null,2));
 console.log(out,errors.length?errors:'PASS connected route');

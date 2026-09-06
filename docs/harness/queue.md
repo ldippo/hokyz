@@ -102,6 +102,17 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed current-code route sample: route-act-1 loses normal1-2 at409.917simsec,
+36-22 shots; exact repeat includes time/all stats. Additional seeds route-act-2
+win normal2-1 then lose boss1-5, route-act-3 win8-1 then lose boss2-3. Earned
+perks/3 and5 level-ups persist, all losses settle on reload. Artifacts
+1788721249864-7UxYuf,1788721344796-TCbdZ7,1788721403290-xqIl9C,
+1788721404561-fEPCno under .gaming/route. Two result images inspected. Gates
+1788721242367-jqE85S pass build/197 tests/bot. Report now stores explicit seed.
+No balance edits: first3 encounters/injuries are prepared by this harness, not
+an untouched generated run. Next: unmodified-map natural Act1 traversal, retaining
+earned roster/perks and all outcomes. Current sample does not prove Act2 or fun.
+
 Completed stick clearance: cache8 blade bounds points, bounded carrying-arm lift
 before opposite-hand IK; no simulation edits. Baseline normal1788720664863-tURVfJ
 minimum-.471m, turbo1788720666137-9MQZHg -.303m. Candidate normal

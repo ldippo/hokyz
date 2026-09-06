@@ -39,6 +39,29 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest sustained progression evidence (no game edits): route-act-1 current code
+loses normal1-2,409.9167simseconds,36-22 shots,66-28 hits/2-19 big hits. Exact
+repeat matches every collected match field despite cosmetic IDs/team name changes.
+Artifacts .gaming/route/1788721249864-7UxYuf and1788721344796-TCbdZ7.
+route-act-2 in1788721403290-xqIl9C wins normal2-1, claims Trainer, resolves3
+earned level-ups, loses boss1-5. route-act-3 in1788721404561-fEPCno wins8-1,
+claims Turbo Junkie, resolves5 level-ups, loses boss2-3. All connected-route,
+reward/reload and loss-settlement gates pass. First normal loss and seed2 boss
+result captures inspected; complete table/action visible. No Act2 advancement.
+Baseline .gaming/runs/1788721242367-jqE85S passes build/197 tests/bot. Added
+explicit requested seed to route report; syntax/diff checks pass. No balance edits.
+Self-review supports reward/loss integrity and reproducible current outcomes,
+abstains on human difficulty/fun. IMPORTANT: route harness prepares first3 nodes
+as event/shop/rest plus injuries. These are natural match outcomes on a prepared
+route, NOT an untouched generated run; prior rewards/roster strength may differ.
+Next precise action: add unmodified-map natural Act1 traversal in a separate
+harness mode/script, using actual connected choices and earned upgrades, no node
+type/injury/winner injections. Prefer available match/rest/shop/event routes;
+support encountered skills honestly or report unsupported route explicitly. Use
+production AI for hockey and retain every result, not just winning seeds. Do not
+reduce boss difficulty merely to make current fixture win. Full goal active;
+unrelated README.md and docs/ROADMAP-v4.md edits remain untouched.
+
 Latest stick-pose fix: SkaterRig caches8 tape-blade bounds corners; when the stick
 is buried, bounded8-step search lifts the carrying upper arm, then existing left
 arm IK follows. Right-hand parent grip preserved. Goalies/falls/lunges/fights/
