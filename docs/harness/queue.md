@@ -102,6 +102,15 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed reduced-motion locator: live/replay MatchView passes preference into
+PuckMesh; reduced mode uses steady scale1. New unit and production-startView
+browser fixture verify normal/reduced/restored scales1,1.15,.85 ->1,1,1 ->normal.
+Baseline .gaming/puck-motion/1788724648909-ZTNPwk reproduced pulse despite reduced
+preference; final1788724698592-Pr9xrl passes. Airborne z1 puck retains floor cue;
+captures inspected (same puck/viewport, incidental attract rivals differ).
+Gates1788724681789-NiQOOv pass build/214 tests/bots; baseline1788724577712-FKt6DV.
+Self-review prefers steady accessible cue; no OS-preference or natural-pass claim.
+
 Completed loose-puck locator: first-hit crop confirmed occlusion at screen821.97,
 496.67 (z0, mesh/glow flags true). Baseline .gaming/captures/1788724222451-5PWakD;
 after1788724359951-CWUBoo inspected full/crop shows clear gold ring with dark edge

@@ -686,7 +686,7 @@ export class MatchView {
         r.update(rp.skaters[id], 1, dt, this.time);
       }
       this.puck.snap(rp.puck);
-      this.puck.update(rp.puck, 1, this.time);
+      this.puck.update(rp.puck, 1, this.time, this.access.reducedMotion);
       if (rp.pos >= rp.frames.length - 1 || !this.director.active) {
         if (this.reel) {
           this.reel.idx++;
@@ -707,7 +707,7 @@ export class MatchView {
         }
         r.update(st.skaters[id], alpha, dt, this.time);
       }
-      this.puck.update(st.puck, alpha, this.time);
+      this.puck.update(st.puck, alpha, this.time, this.access.reducedMotion);
     }
     // turbo trails
     for (const id of st.order) {

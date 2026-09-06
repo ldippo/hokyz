@@ -250,6 +250,13 @@ Unlike arena-fixed, this advances camera/pose time. The first frame still inheri
 the unsmoothed fixed-camera setup; inspect later frames for settled framing.
 This is sampled AI attract play, not live human motion or target-GPU performance.
 
+`node scripts/harness/puck-motion.mjs` checks a prepared airborne loose puck with
+normal/reduced/restored app preferences through production startView and fixed
+render times. Asserts steady reduced-motion locator, normal pulse restoration,
+visible floor cue and elevated physical puck. Evidence: `.gaming/puck-motion/`;
+`--baseline` records pulse without motion assertions. Not OS preference coverage,
+natural passes or live replay evidence; incidental attract rosters are not pinned.
+
 `node scripts/harness/models.mjs --timing` compares the real skater rig after
 100ms knockdown and200ms recovery at fixed30/60/120Hz updates. It asserts matching
 fall/lean values and control-ring anchoring, retaining JSON and close captures.

@@ -4,6 +4,18 @@ import { PuckMesh } from '../../src/render/puckMesh';
 import { makePuck } from '../../src/sim/puck';
 
 describe('loose puck locator', () => {
+  it('keeps a steady reduced-motion locator and restores its normal pulse', () => {
+    const view = new PuckMesh(), puck = makePuck();
+    for (const time of [0, Math.PI / 16, 3 * Math.PI / 16]) {
+      view.update(puck, 1, time, true);
+      expect(view.glow.scale.x).toBe(1);
+      expect(view.glow.visible).toBe(true);
+    }
+    view.update(puck, 1, Math.PI / 16, false);
+    expect(view.glow.scale.x).toBe(1.15);
+    view.update(puck, 1, 3 * Math.PI / 16, false);
+    expect(view.glow.scale.x).toBe(0.85);
+  });
   it('layers a contrast outline and ring without making the physical puck see-through', () => {
     const view = new PuckMesh();
     const outline = view.glow.children[0] as Mesh;

@@ -39,6 +39,24 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest completed reduced-motion locator: PuckMesh.update optional reducedMotion
+flag holds scale1; MatchView supplies access preference in live AND replay paths.
+New unit test and scripts/harness/puck-motion.mjs cover normal/reduced/restored
+behavior. Baseline .gaming/puck-motion/1788724648909-ZTNPwk pulses1,1.15,.85 even
+when reduced; final1788724698592-Pr9xrl holds1,1,1 and restores normal. Prepared
+airborne puck z1 keeps cue at.012 and physical center1.03; screenshots inspected.
+Puck/viewport fixture same, incidental attract teams differ. This tests production
+startView preferences, not Settings clicks, OS preference or natural airborne pass.
+Gates .gaming/runs/1788724681789-NiQOOv pass build/214 tests/bots; baseline
+1788724577712-FKt6DV. Self-review prefers steady locator for accessibility.
+Next precise action: inspect carried-puck alignment against detailed stick blade
+in normal skating, charge and toe-drag. Simulation stickPoint is.85m forward with
+deke offsets; renderer has separate rig pose. Measure actual blade/puck positions
+before judging mismatch or changing either; preserve deterministic simulation.
+Full goal active; unrelated README/roadmap modifications untouched.
+Keyboard regression .gaming/playtests/1788724717591-376CB9 passes movement,
+pass/reception/follow-up shot, run navigation and pause/resume.
+
 Latest completed puck locator: src/render/puckMesh.ts gives the loose-puck ring
 a dark outline and depth-independent render order above hit spray/skates. Physical
 puck remains depth-tested; ownership hides the cue as before. Two tests in

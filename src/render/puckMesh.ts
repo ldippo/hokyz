@@ -34,7 +34,7 @@ export class PuckMesh {
     this.cur = { x: p.pos.x, y: p.pos.y, z: p.z };
     this.prev = { ...this.cur };
   }
-  update(p: Puck, alpha: number, time: number): void {
+  update(p: Puck, alpha: number, time: number, reducedMotion = false): void {
     const x = this.prev.x + (this.cur.x - this.prev.x) * alpha;
     const y = this.prev.y + (this.cur.y - this.prev.y) * alpha;
     const z = this.prev.z + (this.cur.z - this.prev.z) * alpha;
@@ -43,7 +43,7 @@ export class PuckMesh {
     this.shadow.scale.setScalar(Math.max(0.5, 1 - z * 0.4));
     this.glow.position.set(x, 0.012, y);
     this.glow.visible = !p.owner;
-    this.glow.scale.setScalar(1 + Math.sin(time * 8) * 0.15);
+    this.glow.scale.setScalar(reducedMotion ? 1 : 1 + Math.sin(time * 8) * 0.15);
     const speed = Math.hypot(p.vel.x, p.vel.y);
     this.mesh.rotation.y += speed * 0.01;
   }
