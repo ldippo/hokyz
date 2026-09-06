@@ -19,10 +19,9 @@ export class Hud {
       </div>
       <div class="perks-mini" data-el="perks"></div>
       <div class="turbo-wrap"><div class="charge-wrap" data-el="chargeWrap"><div class="charge-label">SHOT POWER</div><div class="charge-track"><div class="charge-fill" data-el="charge"></div></div></div><div class="turbo-label">TURBO</div><div class="turbo" data-el="turbo"><div class="turbo-fill" data-el="turboFill"></div></div><div class="special-label" data-el="specialLabel">SPECIAL</div><div class="special" data-el="special"><div class="special-fill" data-el="specialFill"></div></div></div>
-      <div class="fight" data-el="fight"><div class="fighter f0"><div class="fname" data-el="fname0"></div><div class="fhp"><div class="fhp-fill" data-el="fhp0"></div></div></div><div class="fcue" data-el="fcue"></div><div class="fighter f1"><div class="fname" data-el="fname1"></div><div class="fhp"><div class="fhp-fill" data-el="fhp1"></div></div></div></div>
       <div class="player-tag"><div class="pname" data-el="pname"></div><div class="ptype" data-el="ptype"></div><div class="hp"><div class="hp-fill" data-el="hp"></div></div></div>
       <div class="fire-streak" data-el="streak"><span></span><span></span><span></span></div>
-      <div class="hud-feedback"><div class="so" data-el="so"><div class="so-row" data-el="so0"></div><div class="so-mid">SHOOTOUT</div><div class="so-row" data-el="so1"></div></div><div class="announce" data-el="announce"></div><div class="countdown" data-el="countdown"></div></div>
+      <div class="hud-feedback"><div class="so" data-el="so"><div class="so-row" data-el="so0"></div><div class="so-mid">SHOOTOUT</div><div class="so-row" data-el="so1"></div></div><div class="fight" data-el="fight"><div class="fighter f0"><div class="fname" data-el="fname0"></div><div class="fhp"><div class="fhp-fill" data-el="fhp0"></div></div></div><div class="fcue" data-el="fcue"></div><div class="fighter f1"><div class="fname" data-el="fname1"></div><div class="fhp"><div class="fhp-fill" data-el="fhp1"></div></div></div></div><div class="announce" data-el="announce"></div><div class="countdown" data-el="countdown"></div></div>
       <div class="cine-tag" data-el="tag"></div>
       <div class="prompt" data-el="prompt"></div>
       <div class="flash" data-el="flash"></div>

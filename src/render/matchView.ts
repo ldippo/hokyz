@@ -768,7 +768,7 @@ export class MatchView {
       let cue = '',
         cls = '';
       if (f.stage === 'offer') {
-        cue = 'DROP THE GLOVES?';
+        cue = this.access.fill('FIGHT {shoot} · WALK AWAY {pass}');
       } else if (f.stage === 'duel' && f.cue && !f.cue.done) {
         const mine = st.teams[(f.cue.target === 0 ? A : B).team].isHuman;
         cls = f.cue.kind;

@@ -178,8 +178,9 @@ separation from ability/player panels, then releases and checks shot/indicator
 clearance. `--baseline` records geometry without enforcing separation.
 `--fight` prepares an offer with opponent consent, then checks real keyboard
 decline/overlay removal, accept, and high/low/block cue responses. Cue states are
-prepared, not naturally earned. Add `--fight-layout --baseline` to record desktop
-and narrow150% offer/feint geometry; current narrow fight layout fails bounds.
+prepared, not naturally earned. Add `--fight-layout` to check desktop and
+narrow150% offer/feint geometry; `--baseline` records without bounds assertions.
+Combine with `--remap` to verify offer glyphs and reactions after key swaps.
 Use `--baseline` to record without asserting. Evidence: `.gaming/controls-layout/`.
 
 After building, `pnpm harness:capture` starts its own Vite preview server on an

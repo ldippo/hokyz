@@ -39,6 +39,23 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest fight HUD: fight moved into shared feedback stack, two equal fighter
+name/HP columns and full-width cue underneath, bounded to viewport. Dark backing,
+16px names/20px cues, explicit grid placement and wrapping. Offer persists actual
+FIGHT/WALK AWAY keys via access.fill. Impeccable guided readable hierarchy and
+non-color cue preservation. Baseline .gaming/playtests/1788717254119-l6mhCs
+clipped names/HP; final1788717400910-igOg1b default and1788717402229-z0fzzn
+remapped pass fight layout, glyphs, decline/hide/accept/high/low/block and existing
+browser flow. Narrow offer/feint screenshots inspected: both names/HP visible,
+cue inside panel. Prepared offers/cues, not natural fights or camera evidence.
+Gates .gaming/runs/1788717378596-UxAglq build/157 tests/bot pass; baseline
+1788717326705-MDBm07. Self-review prefers readable fight controls, abstains on
+human difficulty or natural framing. Next precise action: reproduce AI fight
+responses being discarded in src/sim/fight.ts. AI sets c.done=true before shared
+`if(pressed&&!c.done)` damage branch; test deterministic AI high/low/feint
+responses and once-only damage before changing. Full goal active; unrelated
+README/ROADMAP modifications remain unstaged.
+
 Latest fight evidence (no game changes): playtest --fight prepares offer/opponent
 consent and cue states, but actual keyboard release/press drives decline/accept
 and high/low/block responses. First probe1788717163981-oiN2S1 used keydown for

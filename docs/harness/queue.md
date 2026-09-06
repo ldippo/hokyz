@@ -102,6 +102,14 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed fight HUD: bounded shared feedback flow, paired names/HP, separate
+reaction cue and persistent remapped offer keys. Impeccable guided hierarchy.
+Default .gaming/playtests/1788717400910-igOg1b and remapped1788717402229-z0fzzn
+pass desktop/narrow150% bounds and fight/input flow; narrow captures inspected.
+Baseline1788717254119-l6mhCs clipped names/HP. Gates1788717378596-UxAglq build/
+157 tests/bot pass. Self-review prefers readable controls, not natural difficulty.
+Next: reproduce AI c.done-before-response omission in fight.ts with seeded tests.
+
 Completed fight input evidence: --fight keyboard decline/overlay hide, accept,
 high/low/block all pass .gaming/playtests/1788717211731-wFrCzf. Initial invalid
 Pass-keydown probe1788717163981-oiN2S1 corrected to production release contract.

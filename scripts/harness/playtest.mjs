@@ -173,7 +173,7 @@ try {
       for(const [width,height,scale] of [[1280,720,1],[390,844,1.5]]) {
         await page.setViewportSize({width,height});
         await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
-        const boxes=await page.evaluate(scale=>{const app=window.__hokyz;app.meta.textScale=scale;app.applyAccessPrefs();app.view.render(1,0);return [...document.querySelectorAll('.fight,.fighter,.fname,.fcue')].map(el=>{const r=el.getBoundingClientRect();return {text:el.textContent,left:r.left,right:r.right,top:r.top,bottom:r.bottom};});},scale);
+        const boxes=await page.evaluate(scale=>{const app=window.__hokyz;app.meta.textScale=scale;app.applyAccessPrefs();app.view.render(1,0);return [...document.querySelectorAll('.fight,.fighter,.fname,.fhp,.fcue')].map(el=>{const r=el.getBoundingClientRect();return {text:el.textContent,left:r.left,right:r.right,top:r.top,bottom:r.bottom};});},scale);
         checks.push({fightLayout:{stage,width,height,scale,boxes}});
         await page.screenshot({path:join(out,`fight-${stage}-${width}.png`)});
         if(!process.argv.includes('--baseline'))assert.ok(boxes.every(b=>b.left>=0&&b.right<=width&&b.top>=0&&b.bottom<=height),JSON.stringify(boxes));
@@ -195,6 +195,7 @@ try {
       await control(key,false);await page.evaluate(()=>window.__hokyz.input.poll());return result;
     };
     await offer();
+    if(!process.argv.includes('--baseline'))assert.equal(await page.locator('.fcue').textContent(),`FIGHT ${shotKey.toUpperCase()} · WALK AWAY ${passKey.toUpperCase()}`);
     await captureFight('offer');
     const declined=await fightKey(passKey);checks.push({fightDecline:declined});
     assert.equal(declined.phase,'play');assert.equal(declined.fight,null);
