@@ -176,7 +176,7 @@ export interface FightState {
   t: number; // stage time
   hp: [number, number];
   accepted: [boolean | null, boolean | null];
-  cue: { kind: FightCue; target: 0 | 1; t: number; window: number; done: boolean; mash: number } | null;
+  cue: { kind: FightCue; target: 0 | 1; t: number; window: number; done: boolean; mash: number; aiReacted?: boolean } | null;
   nextCue: number;
   winner: 0 | 1 | null;
   lastHit: { by: 0 | 1; t: number } | null;

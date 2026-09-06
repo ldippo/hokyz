@@ -139,14 +139,16 @@ export function stepFight(st: MatchState, dt: number, inputs: Partial<Record<0 |
       const inp = humanFor(tgt);
       let pressed: ReturnType<typeof cueButton> = null;
       if (inp) pressed = cueButton(c.kind, inp);
-      else if (!c.done && c.t > 0.12 + rng.next() * 0.25) {
+      else if (!c.done && !c.aiReacted && c.t > 0.12 + rng.next() * 0.25) {
         // AI reaction: right answer with probability from hit stat + difficulty
         const team = st.teams[tgtSk.team];
         const p = 0.4 + tgtSk.stats.hit / 30 + team.difficulty * 0.1;
         if (c.kind === 'mash') pressed = 'mash';
         else if (rng.next() < p) pressed = c.kind === 'high' ? 'high' : c.kind === 'low' ? 'low' : 'block';
         else pressed = rng.next() < 0.5 ? null : rng.next() < 0.5 ? 'high' : 'low';
-        if (c.kind !== 'mash') c.done = true;
+        // Choice and resolution are different: damage below (or a missed-window
+        // jab) must still run. Do not reroll a deliberate no-response choice.
+        if (c.kind !== 'mash') c.aiReacted = true;
       }
       const m = st.mods.teams[tgtSk.team];
       const dmgMul = m.fightPowerMul * (tgtSk.onFire > 0 ? 1.25 : 1);

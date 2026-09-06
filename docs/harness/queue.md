@@ -102,6 +102,15 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed AI fight response repair: separate aiReacted decision from done cue;
+damage/wrong/missed penalties now resolve once, no rerolling silence.8 targeted
+red-before cases and12 repeatable full AI duel seeds added. Final
+.gaming/runs/1788717615521-BeEy6C build/177 tests/bot pass; mean goals6.375->6.5
+within existing gates. Human fight browser1788717616901-0odMj6 passes.16-match
+diagnostic means5.75/6/7.75/8, max7.4min, one own goal atdiff3. Self-review
+prefers functioning AI combat, not broad difficulty approval. Next: full human
+fight outcome/ejection/faceoff/period restoration flow evidence.
+
 Completed fight HUD: bounded shared feedback flow, paired names/HP, separate
 reaction cue and persistent remapped offer keys. Impeccable guided hierarchy.
 Default .gaming/playtests/1788717400910-igOg1b and remapped1788717402229-z0fzzn

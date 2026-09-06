@@ -39,6 +39,23 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest gameplay fix: AI fight choice no longer marks cue done before shared
+damage branch. Optional cue.aiReacted tracks one non-mash decision separately;
+right/wrong responses resolve once, no-response waits for missed-window jab
+without rerolls; mash remains repeated. tests/sim/fight.test.ts adds8 targeted
+cases (all failed before) and12 seeded complete AI duels, each repeated exactly.
+Gates baseline .gaming/runs/1788717498038-JdHICS; final1788717615521-BeEy6C
+build/177 tests/bot pass. Eight-match mean goals6.375->6.5 within unchanged gates,
+reports not identical. Browser .gaming/playtests/1788717616901-0odMj6 --fight
+passes human accept/decline/high/low/block plus existing flow. Additional
+pnpm sim:batch4 (16 matches,4perdifficulty) means5.75/6/7.75/8 goals, own goals
+0/0/0/0.25, max durations7.4/7.2/7.3/7.4min; console evidence only, not a new
+balance gate. Self-review prefers consequential AI reactions, abstains on human
+fight difficulty. No rendering edits. Next precise action: exercise complete
+fight lifecycle in browser (prepared offer, actual human inputs, natural duel
+outcome), verify loser sits/faceoff return and period-break restoration rather
+than only individual cue fixtures. Full goal active; unrelated edits preserved.
+
 Latest fight HUD: fight moved into shared feedback stack, two equal fighter
 name/HP columns and full-width cue underneath, bounded to viewport. Dark backing,
 16px names/20px cues, explicit grid placement and wrapping. Offer persists actual
