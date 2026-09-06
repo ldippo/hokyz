@@ -102,6 +102,17 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Rejected blade-first two-hand pose; all renderer and diagnostic edits reverted.
+Flat yaw-only search found no feasible normal grip targets (best~.77/.79m versus
+~.57m arm reach), so initial normal1788725583430-z9JvFZ was unchanged. Diagnostic
+1788725670126-IIwZB6 retains target/shoulder arrays. Focused repair tilted shaft
+toward vertical: normal1788725767946-gpYIt6 gap.0804m, grip<5e-8m, clearance
+>.008m; other pose gates pass too. Visual self-review rejects hands behind torso
+and shaft crossing body despite numeric success. Evidence under .gaming/models/.
+Next feasibility work must constrain hands in front of torso and shaft/body
+clearance, plus blade contact near puck radius rather than merely minimizing gap.
+Do not ship a solver from grip/ice gates alone. No gameplay change accepted.
+
 Rejected carrier-only CCD reach experiment; renderer edits fully reverted. Eight
 passes over right wrist/forearm/upper arm aimed cached blade center at stickPoint
 minus.22m forward, y.07, before clearance/left IK. Normal1788725243078-l8gS26

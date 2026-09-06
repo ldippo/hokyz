@@ -39,6 +39,29 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest blade-first experiment rejected on visual review, all code reverted. Cached
+both hand offsets/arm lengths; candidate stick transform places blade center at
+stickPoint minus.25m forward, raises lowest corner to.003, scans17 yaw rotations
+(-pi/2..pi/2), rejects targets outside arm reach, solves both arms independently,
+then sets right wrist orientation to desired stick world quaternion. Flat-only
+normal1788725583430-z9JvFZ unchanged because no feasible targets; diagnostic
+1788725670126-IIwZB6 stores all distances/targets/shoulders in carryReach arrays.
+Best flat distances~.77/.79m versus~.57m reaches. One focused repair added shaft
+tilt fractions0,.15,.3,.45,.6,.75 toward vertical, score yaw²+2tilt². Numeric gates
+pass: normal1788725767946-gpYIt6 gap.0804m/grip<5e-8m/clearance>.008m;
+left1788725780298-fxsdEv,right1788725792649-3TsAKX,charge1788725804199-aPGZWB,
+turbo1788725816384-euPN8Y pass. All paths under .gaming/models/. Normal image
+inspected: hands behind torso, shaft through body. Rejected despite numeric pass.
+Reverted exact source diff via apply_patch; no game changes or threshold weakening.
+Next precise action: offline stick-transform feasibility with hands-in-front and
+shaft/torso clearance constraints before another runtime solver. Blade contact
+should be near puck radius.16m, not simply minimal center-to-vertex gap (candidate
+.08m may intersect puck). Retain both facing/transition/performance checks as
+requirements. Do not repeat unconstrained pose searches or claim full contact.
+Full goal active; unrelated README/roadmap edits untouched.
+Restored build/214 tests/bots pass .gaming/runs/1788725850976-q1LxZU;
+restored normal grip/ice/ring fixture passes .gaming/models/1788725857845-sRSe0k.
+
 Latest iteration rejected/reverted: carrier blade reach via8 CCD passes over right
 wrist/forearm/upper arm, target cached blade center at production stickPoint minus
 .22m forward/y.07, then existing ice clearance/left IK. Normal candidate
