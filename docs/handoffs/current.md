@@ -39,6 +39,19 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest harness-only fix: blank opening image was pending viewport resize clearing
+canvas after render. map-focus now waits two animation frames after desktop
+resize, before stopped-loop drawing. .gaming/map-focus/1788715848516-EQLNDe/
+and final1788715904975-5Tl4vr/ show rink; both inspected. Screenshot bright-ice
+region check added (880x160 at200,400; >15% pixels RGB>150), old blank image0,
+corrected89.7%. Numerical opening checks still3v4/min1.8m. No game/render edits.
+Gates .gaming/runs/1788715855028-AKH0RA/ build/157 tests/bot pass. Self-review
+prefers trustworthy visual evidence, not a broad graphics-quality endorsement.
+Next precise action: reduce oversized HUD announcements/countdown obscuring
+center ice; PERIOD1 and countdown currently overlap players at opening. Read
+Impeccable before UI edits, inspect same live event before/after, preserve timed
+feedback, reduced-motion and scoreboard visibility. Full goal remains active.
+
 Latest: fixed overlapping extra skaters at faceoffs in src/sim/rules.ts. Existing
 center/two wings unchanged; additional pair uses rear row3m deeper, y±2.25.
 tests/sim/faceoff.test.ts checks3/4/5 players both directions/all five dots,

@@ -102,6 +102,17 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed opening capture repair: viewport resize cleared the stopped-loop
+canvas after rendering. Two animation frames before drawing flush resize;
+no renderer/game changes. .gaming/map-focus/1788715848516-EQLNDe and final
+1788715904975-5Tl4vr now show rink (inspected), same opening3v4/min1.8m.
+Screenshot-region regression measures bright ice: old blank capture0, corrected
+0.897, threshold0.15. Gates .gaming/runs/1788715855028-AKH0RA build/157 tests/bot
+pass. Self-review: trustworthy capture restored, not improved art or hardware
+performance. Next: reduce live announcement/countdown occlusion at center ice;
+current PERIOD1 text covers players and overlaps countdown. Preserve feedback
+reading time, reduced motion and arcade identity; compare live event captures.
+
 Completed extra-skater faceoff spacing: preserve standard center/wings, place
 reinforcements in a second row. Tests cover3/4/5 skaters on both teams at all
 five dots, rink clearance and unchanged standard positions. Initial fixture

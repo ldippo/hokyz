@@ -104,6 +104,8 @@ try {
     checks.push({introNavigation:'Keyboard back/re-entry and controller Drop the Puck'});
     if(process.argv.includes('--outnumbered')) {
       await page.setViewportSize({width:1280,height:720});
+      // Flush the viewport's resize event before drawing a stopped-loop frame.
+      await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
       await page.evaluate(()=>{window.__hokyz.meta.textScale=1;window.__hokyz.applyAccessPrefs();});
       const roster=await page.evaluate(()=>{
         const app=window.__hokyz;for(let i=0;i<300&&app.view.sim.st.phase!=='faceoff';i++)app.simStep();
@@ -113,7 +115,20 @@ try {
         return {phase:st.phase,positions,minSeparation,period:st.period,home:st.teams[0].skaters.length,away:st.teams[1].skaters.length,extraId:st.mods.extraSkater?.id,extraPresent:!!st.skaters[st.mods.extraSkater?.id],phases:st.mods.bossPhases};
       });
       assert.equal(roster.period,1);assert.equal(roster.home,3);assert.equal(roster.away,4);assert.ok(roster.extraPresent);
-      checks.push({outnumbered:roster});await page.screenshot({path:join(out,'outnumbered-match.png')});
+      checks.push({outnumbered:roster});
+      const capture=await page.screenshot({path:join(out,'outnumbered-match.png')});
+      // Check the captured image, not just the renderer's state: a late resize
+      // can clear the canvas after a valid render while the DOM HUD stays visible.
+      const iceFraction=await page.evaluate(async url=>{
+        const img=new Image();img.src=url;await img.decode();
+        const canvas=document.createElement('canvas');canvas.width=img.width;canvas.height=img.height;
+        const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);
+        const pixels=ctx.getImageData(200,400,880,160).data;let bright=0;
+        for(let i=0;i<pixels.length;i+=4)if(pixels[i]>150&&pixels[i+1]>150&&pixels[i+2]>150)bright++;
+        return bright/(pixels.length/4);
+      },`data:image/png;base64,${capture.toString('base64')}`);
+      checks.push({openingCaptureIceFraction:iceFraction});
+      assert.ok(iceFraction>0.15,'Opening capture lost the rink behind the HUD');
       assert.equal(roster.phase,'faceoff');
       if(!process.argv.includes('--baseline'))assert.ok(roster.minSeparation>1.1,JSON.stringify(roster));
     }

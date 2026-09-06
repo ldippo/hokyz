@@ -115,8 +115,8 @@ modifier and phase text too; this is UI/setup coverage, not natural progression.
 Add `--outnumbered` to either variant to use that mutator, start the match, and
 verify three home/four away skaters during period1 with the extra roster entry.
 It records the opening faceoff positions and checks no skater overlap (minimum
-separation >1.1m); no winner or clock is injected. Current stopped-loop opening
-captures show HUD but blank ice and are not visual-quality evidence.
+separation >1.1m); no winner or clock is injected. It flushes pending viewport
+resize before rendering and checks the captured ice region is not blank.
 
 `node scripts/harness/route.mjs` exercises event -> shop -> rest in one run,
 reloading between encounters. It preserves generated links while preparing the
