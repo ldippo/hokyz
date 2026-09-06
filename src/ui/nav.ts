@@ -28,6 +28,12 @@ export class Nav {
     this.setFocus(primary >= 0 ? primary : 0, false);
   }
   update(input: InputManager): void {
+    // Keyboard events belong to the binding capture. A controller can cancel,
+    // but must not move focus or activate another action while capture is open.
+    if (input.capture) {
+      if (input.justPressed('back') || input.justPressed('shoot')) this.onBack?.();
+      return;
+    }
     const items = this.items();
     if (!items.length) return;
     if (this.idx < 0 || this.idx >= items.length) this.idx = 0;

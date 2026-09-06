@@ -19,6 +19,50 @@ try {
   await page.evaluate(() => window.__hokyz.loop.stop());
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await page.getByRole('button', { name: 'Controls…', exact: true }).click();
+  if (!baseline) {
+    const tick = () => page.evaluate(() => { const app = window.__hokyz; app.input.poll(); app.nav?.update(app.input); });
+    const key = async code => { await page.keyboard.press(code); await tick(); await tick(); };
+    const focusedRow = () => page.locator('.settings-row').filter({ has: page.locator('.focus') });
+    await key('s');
+    assert.match(await focusedRow().textContent(), /Move down/);
+    await key('Enter');
+    assert.ok(await page.evaluate(() => !!window.__hokyz.input.capture));
+    await key('q');
+    assert.equal(await focusedRow().locator('kbd').textContent(), 'Q');
+    await key('Enter'); await key('Escape');
+    assert.equal(await focusedRow().locator('kbd').textContent(), 'Q');
+    assert.equal(await page.locator('.screen-title').textContent(), 'CONTROLS');
+    // Down is now Q, so keyboard navigation must follow the new binding.
+    for (let i = 0; i < 11; i++) await key('q');
+    assert.equal(await page.locator('.controls-screen .focus').textContent(), 'Reset to defaults');
+    await key('Enter');
+    assert.equal(await page.evaluate(() => window.__hokyz.input.keymap.KeyS), 'down');
+    await key('Escape');
+    assert.equal(await page.locator('.screen-title').textContent(), 'SETTINGS');
+    await page.getByRole('button', { name: 'Controls…', exact: true }).click();
+    // Synthetic standard gamepad exercises production polling and menu routing.
+    await page.evaluate(() => {
+      window.__testPad = { connected: true, axes: [0,0,0,0], buttons: Array.from({ length: 16 }, () => ({ pressed: false, value: 0 })) };
+      navigator.getGamepads = () => [window.__testPad];
+    });
+    const pad = async index => {
+      await page.evaluate(index => { window.__testPad.buttons[index] = { pressed: true, value: 1 }; }, index);
+      await tick();
+      await page.evaluate(index => { window.__testPad.buttons[index] = { pressed: false, value: 0 }; }, index);
+      await tick();
+    };
+    await pad(13); await pad(0);
+    assert.ok(await page.evaluate(() => !!window.__hokyz.input.capture));
+    await pad(13);
+    assert.match(await focusedRow().textContent(), /Move down/);
+    await pad(1);
+    assert.equal(await page.evaluate(() => !!window.__hokyz.input.capture), false);
+    assert.equal(await page.locator('.screen-title').textContent(), 'CONTROLS');
+    await pad(1);
+    assert.equal(await page.locator('.screen-title').textContent(), 'SETTINGS');
+    await page.getByRole('button', { name: 'Controls…', exact: true }).click();
+    findings.push({ interaction: 'Keyboard rebind, retained focus, cancel, remapped navigation, reset/back; synthetic gamepad navigate/capture/cancel/back', clipped: [] });
+  }
   for (const [width, height, scale] of [[1280,720,1], [390,844,1], [390,844,1.5]]) {
     await page.setViewportSize({ width, height });
     await page.evaluate(scale => {

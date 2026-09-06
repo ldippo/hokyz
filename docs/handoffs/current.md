@@ -39,6 +39,22 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest P3 functional fix: Controls now enables Nav, stores selected row across
+render/capture, resets focus to Reset after reset, and handles back as cancel
+while capturing versus exit while idle. Nav.update ignores navigation during
+capture but permits controller B/back cancellation. Keyboard capture owns keys.
+Expanded controls-layout.mjs proves keyboard down->rebind Q->retained focus->
+Escape cancel->new Q down navigation->reset->Escape back; synthetic standard
+gamepad D-pad/A capture, ignored D-pad during capture, B cancel and B exit.
+Evidence .gaming/controls-layout/1788708779263-OFpAwU/ passes these plus all
+layout cases. Gates .gaming/runs/1788708741933-urIPCz/ pass build/141 tests/bot.
+Self-review prefers mouse-free accessibility; no physical controller claim.
+Remapped real-keyboard match regression passes:
+.gaming/playtests/1788708792247-9OQQGq/ (reload, pass/receive/switch/shot).
+Next: explicit narrow/large-text match and skills result variants; then broader
+gamepad on-ice behavior and sustained full-run gameplay evidence. Do not equate
+terminal fixtures or software-renderer automation with human game feel.
+
 Latest P3 visual pass: Controls uses scoped controls-screen/bindings-list styles,
 640px maximum width, body labels/buttons, dark backdrop, 44px minimum actions,
 stacked rows at narrow widths and full-width Reset/Back. No simulation changes.

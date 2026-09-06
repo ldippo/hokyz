@@ -71,6 +71,9 @@ records clipping without asserting. Evidence: `.gaming/result-layout/`.
 
 `node scripts/harness/controls-layout.mjs` checks Controls at desktop, narrow,
 and narrow 150% text: labels, keys, actions, horizontal overflow and Reset/Back.
+It also checks keyboard remapping/focus/cancel/reset/navigation and synthetic
+standard-gamepad D-pad/A/B routing, including cancellation during capture.
+Synthetic input does not certify physical controller compatibility or latency.
 Use `--baseline` to record without asserting. Evidence: `.gaming/controls-layout/`.
 
 After building, `pnpm harness:capture` starts its own Vite preview server on an

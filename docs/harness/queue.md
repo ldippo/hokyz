@@ -102,6 +102,15 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed Controls navigation fix: enable Nav outside capture; retain selected
+row through rebind/cancel, reset focus, and allow controller B to cancel capture
+without leaving Controls. During capture other menu inputs are ignored.
+`.gaming/controls-layout/1788708779263-OFpAwU/` passes keyboard rebind/cancel,
+navigation using newly assigned down key, reset/back, synthetic D-pad/A/B capture
+and cancel/back, plus prior layout gates. Build/141 tests/bot gates pass:
+`.gaming/runs/1788708741933-urIPCz/`. Self-review prefers mouse-free access;
+real gamepad compatibility/latency and full-run play remain unproven.
+
 Completed Controls layout iteration: bounded 640px list, readable body labels,
 compact unskewed actions, stacked narrow rows and restrained dark backdrop.
 Baseline `.gaming/controls-layout/1788708545165-I5BgRw/` clips reset at narrow
