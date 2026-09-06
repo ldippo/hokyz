@@ -102,6 +102,19 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed shootout RNG fix: draw matchSeed before commitRng in skills.ts. Browser
+regression .gaming/shootout-full/1788713289828-VW3mDc/ showed next run draw
+398546513 reused consumed match seed. Corrected state records that draw and next
+636625330. Final .gaming/shootout-full/1788713319800-Ep7GIr/ passes both full
+shootouts with exact prior scores/times/attempt outcomes and loss reload. Result
+inspected. Initial probe1788713235013-1NFbi8 used nonexistent run.rng and is invalid
+evidence; repaired to run.rngState before baseline repro. Gates
+.gaming/runs/1788713311188-MOkzcV/ pass build/152 tests/bot. Self-review prefers
+correct stream advancement; no human-feel or natural-win claim.
+Next: inspect run-map/shop/rest layout at narrow and150% text, preserving tested
+persistence and keyboard/controller navigation. These run-shell variants have not
+received the focused accessibility evidence that results and Controls have.
+
 Completed natural shootout browser coverage: shootout-full.mjs prepares reachable
 node/rival, then idle and production AI complete unshortened attempts. Final
 .gaming/shootout-full/1788713109620-Rx67eH/ passes: idle0-1 loss/5 attempts/54.85s,

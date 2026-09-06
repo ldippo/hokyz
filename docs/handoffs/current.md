@@ -39,6 +39,25 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest fix: skills.startShootout now consumes matchSeed before commitRng. Browser
+shootout-full checks final committed draw against actual MatchSim seed using its
+production RNG constructor and one mulberry32 draw rewind. Initial probe
+.gaming/shootout-full/1788713235013-1NFbi8/ mistakenly read run.rng (undefined),
+so its failure is invalid. Corrected to rngState and temporarily restored original
+source for valid repro .gaming/shootout-full/1788713289828-VW3mDc/: committed last
+draw290275201, next398546513 equals already-consumed seed398546513. Final
+.gaming/shootout-full/1788713319800-Ep7GIr/ passes last398546513/next636625330;
+idle0-1 andAI3-4 losses, durations and every attempt's team/scored outcome exactly
+match prior natural evidence. No penalty/reward and reload retained; image inspected.
+Final .gaming/runs/1788713311188-MOkzcV/ build/152 tests/bot pass. Initial baseline
+.gaming/runs/1788713236034-8H95Kk/ passes too. No balance/visual changes; later run
+choices intentionally advance past consumed seed. Self-review prefers RNG integrity,
+abstains on full human play/natural wins/hardware. Changed skills.ts, shootout-full
+and harness docs. Unrelated README.md/ROADMAP-v4.md remain unstaged.
+Next precise action: inspect run-map/shop/rest at390x844 and150% text with browser
+captures and all-action reachability, then fix demonstrated layout/navigation
+problems. Keep persistence tests and actual keyboard/controller flows intact.
+
 Latest evidence: new scripts/harness/shootout-full.mjs checks real skills screen,
 idle/production AI, natural unshortened attempts/outcome, alternating turns,
 exactly one shootoutEnd/deciding point, displayed attempt totals, unchanged roster,

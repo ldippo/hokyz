@@ -36,6 +36,7 @@ function startShootout(app: App, node: MapNode, reward: number): void {
   const rng = runRng(run);
   const rival = RIVAL_BY_ID[node.rivalId ?? 'bruisers'];
   const opp = buildRivalRoster(rng, rival, nodeTier(run, node));
+  const matchSeed = rng.int(1, 1e9);
   commitRng(run, rng);
   const mods = defaultMatchMods();
   mods.shootoutOnly = true;
@@ -47,7 +48,7 @@ function startShootout(app: App, node: MapNode, reward: number): void {
       { name: rival.name, short: rival.short, color: rival.color, skaters: opp.skaters, goalie: opp.goalie, isHuman: false, difficulty: Math.min(3, run.act) },
     ],
     mods,
-    rng.int(1, 1e9),
+    matchSeed,
   );
   playMatch(app, sim, [], (outcome) => {
     const g = sim.st.shootout?.goals;

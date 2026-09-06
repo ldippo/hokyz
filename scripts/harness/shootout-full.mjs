@@ -32,6 +32,17 @@ try {
     });
     await page.locator('.node.available').first().click();
     await page.getByRole('button', { name: 'Take the Shot', exact: true }).click();
+    const rngEvidence = await page.evaluate(() => {
+      const app = window.__hokyz, sim = app.view.sim;
+      const Rng = sim.rng.constructor;
+      // Rewind one mulberry32 draw: the committed final setup draw must be
+      // the match seed, not an earlier opponent-generation draw.
+      const previous = new Rng((app.run.rngState - 0x6d2b79f5) >>> 0);
+      const next = new Rng(app.run.rngState);
+      return { runRng: app.run.rngState, lastSetupDraw: previous.int(1, 1e9), nextRunDraw: next.int(1, 1e9), matchSeed: sim.rng.state };
+    });
+    writeFileSync(join(out, `${control}-rng.json`), JSON.stringify(rngEvidence, null, 2));
+    assert.equal(rngEvidence.lastSetupDraw, rngEvidence.matchSeed, 'Run RNG did not commit the consumed shootout seed');
     if (control === 'ai') await page.evaluate(() => {
       const app = window.__hokyz;
       app.view.sim.st.teams[0].isHuman = false; app.humanPlaying = false;
@@ -79,7 +90,7 @@ try {
     }
     const after = await page.evaluate(() => JSON.parse(localStorage.getItem('hokyz.run.v1')));
     assert.equal(after.cash, saved.cash); assert.equal(after.row, 1); assert.ok(!after.pendingDraft);
-    matches.push({ control, ...result, events });
+    matches.push({ control, ...result, rngEvidence, events });
     checks.push(`${control}: natural ${result.shootout.goals.join('-')} ${won ? 'win, +70 cash, draft reload and zero-cash skip' : 'loss, no penalty or reward, reload to map'}`);
     await page.close();
   }

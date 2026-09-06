@@ -66,6 +66,8 @@ the reachable node/rival; checks alternating attempts, one deciding point, resul
 totals, unchanged roster, cash and reload. Wins additionally check earned draft
 and zero-cash skip. Reports actual outcomes, not guaranteed wins. Evidence:
 `.gaming/shootout-full/`. Not human difficulty or hardware timing evidence.
+It also checks the committed final setup RNG draw equals the consumed match seed,
+using the production RNG constructor and one-draw rewind, with JSON evidence.
 
 `node scripts/harness/endings.mjs` (after building) prepares a terminal loss and
 checks that the saved ended run survives the result screen, Continue settles it,
