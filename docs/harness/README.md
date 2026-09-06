@@ -153,6 +153,15 @@ checks settlement; only a win checks Act 2 and its four-offer draft. Use
 `--seed=route-act-1` to enter a named seed. Post-combat and post-boss save JSON
 checkpoints are retained when reached. Neither flag guarantees a victory.
 
+`node scripts/harness/natural-route.mjs --seed=route-act-2` traverses an untouched
+generated Act1 map, retaining original rosters/injuries and earning every upgrade.
+It chooses connected nodes, favors healing when hurt, picks first offered upgrades,
+and uses production AI to pilot hockey. Checks map immutability, encounter advance,
+match counters, draft/level-up reloads, and earned Act2 or natural loss settlement.
+Evidence goes to `.gaming/natural-route/`. A forced Hit Parade is explicitly
+unsupported, never rewritten. Shootout handling exists but is not covered by the
+initial three seeds. This is not human difficulty or complete-run victory evidence.
+
 `node scripts/harness/hit-parade-full.mjs` runs idle and scripted pursuit through
 all 60 simulated seconds, using DOM movement/check keys and natural timer expiry.
 Requires idle loss/no reward and pursuit victory/cash/draft/zero-cash skip.

@@ -39,6 +39,31 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest natural Act1 evidence: new scripts/harness/natural-route.mjs starts via
+New Run/captain and never edits map nodes, rosters, injuries, scores or winners.
+Only hockey pilot switches to production AI. Chooses connected nodes, prioritizes
+healing when hurt, first offered upgrades; checks generated map content/topology
+(excluding done flags), counters, draft/level-up/encounter reload persistence.
+route-act-1 loses first match2-3 and settles correctly:
+.gaming/natural-route/1788721863994-U0adUy. route-act-2 in1788721865300-hyJxKk
+wins normal10-1, visits rest/shop, wins elite3-2, rests, wins boss3-0;14 upgrade
+choices, earned Act2 row0 after reloads. route-act-3 in1788721866589-tO58vr wins
+2-0,7-1,4-2, takes generated event/shop, wins boss4-1;16 upgrade choices, Act2.
+Loss result, seed2 boss result and earned Act2 map captures inspected. Initial
+attempts1788721766189-c14M6J /1788721780963-WfGN3P /1788721782204-AFJGih failed
+new harness checks: reading maps after settlement clears app.run and legitimate
+first-draft offeredLogged receipt. Corrected null-run order; compare all draft
+fields except that receipt. Removed unnecessary30s heading waits on map screens.
+Final .gaming/runs/1788721918041-AfL2TQ build/197 tests/bot pass; baseline
+1788721645976-uOwwdH. No game edits or balance changes. Self-review supports earned
+Act1 progression, not human fun/difficulty or complete-run victory. Forced Hit
+Parade explicitly unsupported; Shootout branch not exercised in these seeds.
+Next precise action: extend natural-route through generated Act2 (configurable
+target act), retain full run/meta save checkpoints for earned continuation, and
+verify all maps unchanged except completion flags. Start with route-act-2 or3,
+report any natural loss honestly. Do not claim all acts or human feel complete.
+Full goal active; unrelated README.md and docs/ROADMAP-v4.md edits untouched.
+
 Latest sustained progression evidence (no game edits): route-act-1 current code
 loses normal1-2,409.9167simseconds,36-22 shots,66-28 hits/2-19 big hits. Exact
 repeat matches every collected match field despite cosmetic IDs/team name changes.

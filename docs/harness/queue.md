@@ -102,6 +102,18 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed untouched-map Act1 traversal: natural-route.mjs preserves generated
+maps/rosters/injuries, uses connected real choices and AI pilots, checks upgrades/
+reloads/map immutability. route-act-1 loses2-3 first match; route-act-2 wins10-1,
+elite3-2,boss3-0 then earns Act2; route-act-3 wins2-0,7-1,4-2,boss4-1 then Act2.
+Artifacts1788721863994-U0adUy,1788721865300-hyJxKk,1788721866589-tO58vr under
+.gaming/natural-route. Loss/boss/Act2 images inspected. Gates1788721918041-AfL2TQ
+build/197 tests/bot pass. Initial harness failures corrected: null run after
+settlement and draft offeredLogged receipt. No game edits or injected wins.
+Self-review supports earned progression, not human difficulty/full-run victory.
+Next extend unchanged-map traversal through Act2; skills beyond sampled paths
+remain unverified, forced Hit Parade explicitly unsupported.
+
 Completed current-code route sample: route-act-1 loses normal1-2 at409.917simsec,
 36-22 shots; exact repeat includes time/all stats. Additional seeds route-act-2
 win normal2-1 then lose boss1-5, route-act-3 win8-1 then lose boss2-3. Earned
