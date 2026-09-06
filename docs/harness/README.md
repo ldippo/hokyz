@@ -189,6 +189,9 @@ Only offer/consent and initial RNG are prepared; no health, clock or outcome edi
 pull/extra-attacker/empty-net status, then releases and holds again to return the
 goalie and clear the status. Combine with `--gamepad` for synthetic-pad polling.
 Checks existing model presence; not sustained extra-attacker movement or hardware.
+Add `--goalie-sustain` to continue each hold for90 sim ticks, assert no duplicate
+toggle and model/position agreement, then verify return movement and recovery
+within the goal area after90 more ticks. This remains fixed-step keyboard evidence.
 Use `--baseline` to record without asserting. Evidence: `.gaming/controls-layout/`.
 
 After building, `pnpm harness:capture` starts its own Vite preview server on an

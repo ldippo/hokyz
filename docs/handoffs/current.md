@@ -39,6 +39,23 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest sustained goalie evidence (no game changes): --goalie-pull --goalie-sustain
+holds Pass90 additional sim ticks after each toggle, checks zero repeat toggles,
+attacker movement>0.5m and rendered x/z agreement, return movement toward crease,
+then90 further ticks recovery within2.4m x/y of goal(-22,0). Initial
+.gaming/playtests/1788718211310-C4A1Wr showed x-21.12->-11.32 then-18.20;
+final1788718271831-MVhjOJ passes full flow and recovery(-21.17,0.36), status clear.
+Pulled and recovered screenshots inspected (recovered goalie outside gameplay
+camera; authoritative recovery is sim position, not a visible-net claim).
+Gates .gaming/runs/1788718212314-JgNfmC build/184 tests/bot pass. Self-review
+supports sustained movement/latch/return, not physical timing or tactical balance.
+Next precise action: verify returning a human-controlled pulled goalie who owns
+puck clears ownership and transfers control to an active skater; check invalid
+bench/ejection interactions with deterministic simulation tests. Ask user feedback
+when available: asynchronous appearance/feel/difficulty question sent this turn.
+Broad goal still active; no full natural-run victory or hardware proof. Preserve
+unrelated README/ROADMAP edits.
+
 Latest goalie-pull evidence (no game edits): playtest --goalie-pull holds actual
 Pass until production passHoldTime>=1.05s, steps real input, releases, holds again.
 Keyboard .gaming/playtests/1788718075396-iqy9oF and synthetic-pad

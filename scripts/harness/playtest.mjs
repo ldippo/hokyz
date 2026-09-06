@@ -178,6 +178,20 @@ try {
         const st=app.view.sim.st,t=st.teams[0],g=st.skaters[t.pulledGoalieId??t.goalie];
         return {events,pulled:t.pulled,goalie:t.goalie,count:t.skaters.length,isGoalie:g.isGoalie,inLineup:t.skaters.includes(g.id),manpower:document.querySelector('.manpower').textContent,model:!!app.view.skaters.get(g.id)};
       });
+      if(process.argv.includes('--goalie-sustain')) {
+        const held=await page.evaluate(()=>{
+          const app=window.__hokyz,sim=app.view.sim,st=sim.st,t=st.teams[0],id=t.pulledGoalieId??t.goalie,start={...st.skaters[id].pos},events=[];
+          for(let i=0;i<90;i++){app.input.poll();const ev=sim.step({0:app.input.simInput()});app.view.afterStep(ev);events.push(...ev);}
+          app.view.render(1,0);const sk=st.skaters[id],mesh=app.view.skaters.get(id);
+          return {start,end:{...sk.pos},pulled:t.pulled,phase:st.phase,toggles:events.filter(e=>e.type==='goaliePulled'&&e.team===0),mesh:mesh.group.position.toArray(),controlled:t.controlledId};
+        });
+        checks.push({goalieHeld:{expectedPulled:changed.pulled,...held}});
+        assert.equal(held.toggles.length,0,'Continued hold toggles goalie repeatedly');
+        assert.equal(held.pulled,changed.pulled);
+        if(changed.pulled)assert.ok(Math.hypot(held.end.x-held.start.x,held.end.y-held.start.y)>0.5,'Pulled goalie did not skate');
+        else assert.ok(Math.abs(held.end.x-original.pos.x)<Math.abs(held.start.x-original.pos.x),'Returned goalie did not head back toward crease');
+        assert.ok(Math.abs(held.mesh[0]-held.end.x)<0.01&&Math.abs(held.mesh[2]-held.end.y)<0.01,'Model does not follow goalie movement');
+      }
       await control(passKey,false);
       await page.evaluate(()=>{const app=window.__hokyz;app.input.poll();app.view.afterStep(app.view.sim.step({0:app.input.simInput()}));});
       return changed;
@@ -190,6 +204,18 @@ try {
     assert.ok(!returned.pulled&&returned.isGoalie&&!returned.inLineup&&returned.model);assert.equal(returned.goalie,original.id);assert.equal(returned.count,original.count);assert.equal(returned.manpower,'');
     assert.ok(returned.events.some(e=>e.type==='goaliePulled'&&!e.pulled));
     await page.screenshot({path:join(out,'goalie-returned.png')});
+    if(process.argv.includes('--goalie-sustain')) {
+      const recovered=await page.evaluate(id=>{
+        const app=window.__hokyz,sim=app.view.sim;
+        for(let i=0;i<90;i++){app.input.poll();app.view.afterStep(sim.step({0:app.input.simInput()}));}
+        app.view.render(1,0);const st=sim.st,g=st.skaters[id];
+        return {phase:st.phase,position:{...g.pos},goalie:st.teams[0].goalie,pulled:st.teams[0].pulled,manpower:document.querySelector('.manpower').textContent};
+      },original.id);
+      checks.push({goalieRecovered:recovered});
+      assert.equal(recovered.goalie,original.id);assert.equal(recovered.pulled,false);
+      assert.ok(Math.abs(recovered.position.x+22)<2.4&&Math.abs(recovered.position.y)<2.4,'Goalie did not recover to goal area');
+      await page.screenshot({path:join(out,'goalie-recovered.png')});
+    }
   }
   if(process.argv.includes('--fight')) {
     const captureFight=async stage=>{

@@ -102,6 +102,15 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed sustained pull evidence: --goalie-sustain90tick continued hold each
+direction, no repeat toggles, actual attacker movement/render position, return
+toward crease and additional90tick recovery. Final .gaming/playtests/
+1788718271831-MVhjOJ passes recovery(-21.17,0.36), statusclear, existing flow.
+Gates1788718212314-JgNfmC build/184 tests/bot pass. Captures inspected; goalie
+recovery itself offscreen, position evidence only. Self-review supports behavior,
+not hardware/tactical balance. Next: controlled goalie possession on return and
+bench/ejection edge contracts; user appearance/feel/difficulty feedback requested.
+
 Completed pull/return input evidence: --goalie-pull keyboard1788718075396-iqy9oF
 and synthetic-pad1788718098837-NWPwrD under .gaming/playtests pass real1.05s
 Pass hold,4attackers/empty-net/model presence, second hold3/original goalie/status
