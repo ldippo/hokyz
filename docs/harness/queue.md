@@ -102,6 +102,24 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed neutral carrier pose: cache both grips, independently solve both arms
+to a blade transform at production possession offset+.33m, ice height.003m.
+Possession blend uses frame-rate damping; charge/deke/release return to authored
+poses. One visual repair fades the pose out during deep lean/banking because the
+initial turbo image crowded the chest. Normal blade/puck-center distance is now
+.1704m (rendered puck radius.16m), versus prior.268-.299m. Model detail unchanged.
+Normal/PI-facing images1788727557685-Uwiv0a/1788727569379-7HnklT inspected; final
+normal1788727875250-SfvHq7 passes; PI/PI2 gates1788727733555-17tMmf and
+1788727789741-PO5ekV pass. Repaired turbo1788727845870-4KrNIp inspected/pass.
+Transition1788727857724-jdv2Kp passes150 frames grip/ice/blend settling. Existing
+shot-release snap is1.577m baseline versus1.576m candidate; excluded from new
+continuity bound, retained in JSON. Other frames<=.115m. Final gates
+.gaming/runs/1788727838688-7vQONX build/214 tests/bots and keyboard
+.gaming/playtests/1788727887247-V8ihqF pass. All model paths under .gaming/models/.
+Self-review prefers readable neutral puck contact; no full action/contact or
+hardware-feel claim. Next: inspect this in moving match play and assess remaining
+deep-lean/deke separation without regressing silhouette or action readability.
+
 Completed shorter skater shaft: top(.17,.015,1.18),heel(.68,.12,.02), grip
 fractions.04/.20. Rounded92452-triangle/21-bone asset retained; goalie/sim unchanged.
 Normal before .gaming/models/1788727234119-XZpqAS/ versus after

@@ -39,6 +39,41 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest accepted runtime neutral carrier pose in src/render/skaterRig.ts: cache
+both L/R grips; ordinary solveArms still only solves L (R parents stick). New
+poseCarrier blends current stick world transform to model rest orientation rotated
+by rendered group yaw, blade center at SKATER.possessionOffset+.33m forward, lowest
+cached blade point.003m. Solve both arms independently, then set right wrist world
+rotation to stick target times inverse stick-local quaternion. Reject unreachable
+targets without stretching. carryBlend uses poseBlend18 on possession, fades out
+for charge/deke/shot snap and excludes goalie/fight/lunge/special/fall contexts.
+One visual repair: initial turbo1788727622643-o7kr3Q crowded chest. pose weight
+now fades out over lean.24–.32 and |roll|.15–.25, preserving authored extended arms.
+Final turbo1788727845870-4KrNIp inspected/pass; full turbo puck alignment is NOT
+solved. Normal baseline prior1788727277380-9V5xk9 gap.268-.299m; candidate
+1788727557685-Uwiv0a and final1788727875250-SfvHq7 gap.1704m (render radius.16m),
+hand errors<2e-8m, blade y.003m across12 phases. Initial normal and opposite-facing
+1788727569379-7HnklT inspected. FacingPI final1788727733555-17tMmf, facingPI/2
+1788727789741-PO5ekV pass. All model paths under .gaming/models/.
+models.mjs adds --carry (settled blend in stride), --facing=<radians>, and
+--puck --carry-motion (150 frames acquire/charge/release/left drag/loss). Motion
+initial1788727623976-fxbQqu flagged1.576m shot-release jump; baseline with only
+poseCarrier disabled1788727663792-IDYyYt has1.577m, so existing authored snap is
+explicitly excluded from continuity bound but retained in JSON. Other frames
+max.1143m, no new jump there. Final1788727857724-jdv2Kp passes: grip<4.4e-8m,
+ice>=.00161m, blend settles.99997 then.00000264. Authored left1788727753007-ppIzx3,
+right1788727766083-X7jrpB and timing1788727750705-tjgXzK pass before lean-only repair.
+Final build/214 tests/bots .gaming/runs/1788727838688-7vQONX; keyboard
+.gaming/playtests/1788727887247-V8ihqF passes after repair. Prior published baseline
+gates1788727265561-zsU3T0; first in-turn gates1788727514740-aCxdlv overlapped editing
+and should not be cited as a clean before-build. No sim or asset change this turn.
+Self-review prefers neutral contact readability; abstain full action alignment,
+exact continuous mesh collision, hardware performance and human game feel.
+Next precise action: inspect moving match play with this runtime carrier pose;
+then address deep-lean/deke separation using torso-safe poses. Do not trade
+silhouette for numeric contact. Full goal remains active; unrelated README and
+docs/ROADMAP-v4.md edits preserved.
+
 Latest accepted proportion change: assets/src/build_skater.py non-goalie shaft
 top(.17,.015,1.18),heel(.68,.12,.02), grip fractions.04/.20. Regenerated ONLY
 public/models/skater.glb,92452tris/21bones. Public/dist sha256

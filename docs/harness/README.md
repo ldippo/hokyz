@@ -274,6 +274,16 @@ Add `--puck` to show a carried puck placed by production stickPoint and measure
 nearest blade-vertex distance in the ice plane. It also asserts deke blade lateral
 motion follows the puck's side; it does not assert full blade/puck contact. Viewer
 support is opt-in via `?rigview=1&puck=1`, with a diagnostic placePuck hook.
+Add `--carry` to the stride fixture to prepare settled carrier blending; normal
+6m/s/zero-roll skating asserts nearest blade vertex is15–19cm from the puck center
+(rendered puck radius16cm). `--facing=<radians>` rotates the fixture and velocity;
+use with normal skating, since the deke direction assertion is facing0-specific.
+`--puck --carry-motion` samples150 frames of possession acquisition, charge,
+release, left drag and possession loss at60Hz, checking grip/ice, blend settling
+and per-frame blade displacement. It excludes the existing authored shot-release
+snap from the continuity bound; that frame remains in JSON. `--baseline` disables
+only the new carrier solver for comparison and skips the displacement assertion.
+These are prepared animation sequences, not hardware timing or full collision tests.
 `--puck --reach-study` instead evaluates6132 yaw/tilt/placement transforms per
 skating, charge and drag pose, using four cardinal blade-center offsets around
 the puck. Reports shoulder reach, hands ahead of torso bounds, hand height no

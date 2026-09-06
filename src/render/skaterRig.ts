@@ -2,6 +2,7 @@ import * as THREE from 'three/webgpu';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as skeletonClone } from 'three/addons/utils/SkeletonUtils.js';
 import type { Skater } from '../sim/types';
+import { SKATER } from '../sim/constants';
 import { poseBlend } from './poseDamping';
 import { jerseyTexture, teamPalette, type JerseySpec, type LogoShape, type StripePattern } from './jerseyTexture';
 
@@ -93,6 +94,7 @@ export class SkaterRig {
   private grips: { side: 'L' | 'R'; offset: THREE.Vector3; upper: number; fore: number }[] = [];
   private bladeContacts: { bone: THREE.Bone; points: THREE.Vector3[] }[] = [];
   private stickContacts: THREE.Vector3[] = [];
+  private carryBlend = 0;
   ikEnabled = true;
   private punchT = 0;
   private punchHigh = true;
@@ -174,7 +176,7 @@ export class SkaterRig {
       if (!bounds.isEmpty()) for (const x of [bounds.min.x, bounds.max.x]) for (const y of [bounds.min.y, bounds.max.y]) for (const z of [bounds.min.z, bounds.max.z]) {
         this.stickContacts.push(stick.worldToLocal(new THREE.Vector3(x, y, z)));
       }
-      for (const side of ['L'] as const) {
+      for (const side of ['L', 'R'] as const) {
         const ua = this.bones.get(`upperArm${side}`)?.bone;
         const fa = this.bones.get(`foreArm${side}`)?.bone;
         const hand = this.bones.get(`hand${side}`)?.bone;
@@ -485,6 +487,9 @@ export class SkaterRig {
       if (!sk.isGoalie && this.fall < 0.02) this.clearStickFromIce();
       this.solveArms();
     }
+    const carryTarget = armsFree && !sk.isGoalie && this.fall < .02 && sk.hasPuck && !sk.charging && sk.deke <= 0 && this.snapT <= 0 ? 1 : 0;
+    this.carryBlend += (carryTarget - this.carryBlend) * poseBlend(18, dt);
+    if (armsFree && !sk.isGoalie && this.carryBlend > .001) this.poseCarrier(this.carryBlend);
     // indicators
     this.ring.visible = sk.controlled;
     this.arrow.visible = sk.controlled;
@@ -541,6 +546,7 @@ export class SkaterRig {
     if (!stick) return;
     this.model.updateMatrixWorld(true);
     for (const g of this.grips) {
+      if (g.side === 'R') continue; // The right hand parents the stick in authored poses.
       const ua = this.bones.get(`upperArm${g.side}`);
       const fa = this.bones.get(`foreArm${g.side}`);
       const hand = this.bones.get(`hand${g.side}`)?.bone;
@@ -574,6 +580,52 @@ export class SkaterRig {
         this.aimBone(fa.bone, hand, ikT);
       }
     }
+  }
+  /** Neutral possession pose; authored charge/deke/release poses blend back in. */
+  private poseCarrier(weight: number): void {
+    // Keep the authored extended arms during deep forward/banked leans; a fixed
+    // neutral grip otherwise crowds the chest. Fade before that limit is reached.
+    weight *= THREE.MathUtils.clamp((.32 - this.lean) / .08, 0, 1)
+      * THREE.MathUtils.clamp((.25 - Math.abs(this.roll)) / .1, 0, 1);
+    if (weight < .001) return;
+    const ref = this.bones.get('stick'), wrist = this.bones.get('handR')?.bone;
+    if (!ref || !wrist || this.grips.length !== 2 || !this.stickContacts.length) return;
+    const stick = ref.bone;
+    const center = new THREE.Vector3();
+    for (const p of this.stickContacts) center.add(p);
+    center.multiplyScalar(1 / this.stickContacts.length);
+    const yaw = this.group.getWorldQuaternion(new THREE.Quaternion());
+    const desiredRotation = yaw.clone().multiply(ref.invRestWorld.clone().invert());
+    // Blade heel meets the forward edge of the .16m puck, not its center.
+    const blade = new THREE.Vector3(SKATER.possessionOffset + .33, 0, 0).applyQuaternion(yaw).add(this.group.position);
+    const desiredPosition = blade.sub(center.clone().applyQuaternion(desiredRotation));
+    let low = Infinity;
+    for (const p of this.stickContacts) low = Math.min(low, p.clone().applyQuaternion(desiredRotation).y + desiredPosition.y);
+    desiredPosition.y += .003 - low;
+    const position = stick.getWorldPosition(new THREE.Vector3()).lerp(desiredPosition, weight);
+    const rotation = stick.getWorldQuaternion(new THREE.Quaternion()).slerp(desiredRotation, weight);
+    const targets = this.grips.map(g => g.offset.clone().applyQuaternion(rotation).add(position));
+    // Leave extreme/unreachable poses authored rather than stretching an arm.
+    if (targets.some((t, i) => {
+      const g = this.grips[i], shoulder = this.bones.get(`upperArm${g.side}`)!.bone.getWorldPosition(new THREE.Vector3());
+      const d = t.distanceTo(shoulder);
+      return d > g.upper + g.fore - .015 || d < Math.abs(g.upper - g.fore) + .01;
+    })) return;
+    for (const [i, g] of this.grips.entries()) {
+      const upper = this.bones.get(`upperArm${g.side}`)!.bone;
+      const fore = this.bones.get(`foreArm${g.side}`)!.bone;
+      const hand = this.bones.get(`hand${g.side}`)!.bone;
+      const shoulder = upper.getWorldPosition(new THREE.Vector3()), target = targets[i];
+      const d = shoulder.distanceTo(target), dir = target.clone().sub(shoulder).normalize();
+      const pole = new THREE.Vector3(-.5, -.35, g.side === 'L' ? .7 : -.7).applyQuaternion(yaw);
+      pole.addScaledVector(dir, -pole.dot(dir)).normalize();
+      const cos = THREE.MathUtils.clamp((g.upper * g.upper + d * d - g.fore * g.fore) / (2 * g.upper * d), -1, 1);
+      const elbow = shoulder.clone().addScaledVector(dir, g.upper * cos).addScaledVector(pole, g.upper * Math.sqrt(1 - cos * cos));
+      for (let pass = 0; pass < 2; pass++) { this.aimBone(upper, fore, elbow); this.aimBone(fore, hand, target); }
+    }
+    const parent = wrist.parent!.getWorldQuaternion(new THREE.Quaternion());
+    wrist.quaternion.copy(parent.invert().multiply(rotation).multiply(stick.quaternion.clone().invert()));
+    wrist.updateMatrixWorld(true);
   }
   /** Rotate `bone` (in place, minimal twist) so that `child`'s world position points at `target`. */
   private aimBone(bone: THREE.Bone, child: THREE.Bone, target: THREE.Vector3): void {

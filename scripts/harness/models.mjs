@@ -122,17 +122,51 @@ try {
       if(errors.length)throw new Error(errors.join('\n'));
       await page.close();continue;
     }
+    if(process.argv.includes('--carry-motion')) {
+      const samples=await page.evaluate(baseline=>{
+        const {rig,st}=window.__rigview.entries[0];
+        if(baseline)rig.poseCarrier=()=>{};
+        st.facing=0;st.vel={x:6,y:0};st.knockdown=0;rig.snap(st);rig.carryBlend=0;
+        const samples=[];
+        for(let i=0;i<150;i++) {
+          const t=i/60;
+          st.hasPuck=t>=.2&&t<1.9;
+          st.charging=t>=.7&&t<1;st.shotCharge=st.charging?(t-.7)/.3:0;
+          st.deke=t>=1.2&&t<1.65?1.65-t:0;st.dekeKind='dragL';
+          rig.update(st,1,1/60,t);rig.group.updateMatrixWorld(true);
+          const stick=rig.bones.get('stick').bone,points=rig.stickContacts.map(p=>stick.localToWorld(p.clone()));
+          const center=points.reduce((sum,p)=>sum.add(p),rig.group.position.clone().set(0,0,0)).multiplyScalar(1/points.length);
+          const grips=rig.grips.map(g=>rig.bones.get(`hand${g.side}`).bone.getWorldPosition(center.clone()).distanceTo(stick.localToWorld(g.offset.clone())));
+          samples.push({t,shotRelease:i===60,blend:rig.carryBlend,center:center.toArray(),low:Math.min(...points.map(p=>p.y)),grips});
+        }
+        return samples;
+      },process.argv.includes('--baseline'));
+      writeFileSync(join(out,'carry-motion.json'),JSON.stringify(samples,null,2));
+      assert.ok(samples.every(s=>s.low>=-.015),'Carrier transition buried blade');
+      assert.ok(samples.every(s=>s.grips.every(g=>g<.02)),'Carrier transition broke grip');
+      assert.ok(samples[40].blend>.99&&samples.at(-1).blend<.001,'Possession blend did not settle in/out');
+      let maxStep=0;
+      // The existing authored shot-release snap moves ~1.58m in this fixture.
+      // Preserve that action; this continuity gate covers the other transitions.
+      for(let i=1;i<samples.length;i++)if(!samples[i].shotRelease)maxStep=Math.max(maxStep,Math.hypot(...samples[i].center.map((v,j)=>v-samples[i-1].center[j])));
+      if(!process.argv.includes('--baseline'))assert.ok(maxStep<.2,`Carrier transition jumped ${maxStep}m per frame`);
+      if(errors.length)throw new Error(errors.join('\n'));
+      await page.close();continue;
+    }
     if(process.argv.includes('--stride')) {
       const speed=Number(process.argv.find(a=>a.startsWith('--speed='))?.split('=')[1]??6);
       const roll=Number(process.argv.find(a=>a.startsWith('--roll='))?.split('=')[1]??0);
       const action=process.argv.find(a=>a.startsWith('--action='))?.split('=')[1]??'skate';
+      const facing=Number(process.argv.find(a=>a.startsWith('--facing='))?.split('=')[1]??0);
+      const carry=process.argv.includes('--carry');
       const samples=[];
       for(let phase=0;phase<12;phase++) {
-        const sample=await page.evaluate(({phase,speed,roll,action})=>{
+        const sample=await page.evaluate(({phase,speed,roll,action,facing,carry})=>{
           const app=window.__hokyz,{entries,grig}=window.__rigview,{rig,st}=entries[0];
           entries.forEach(e=>e.rig.group.visible=e.rig===rig);grig.group.visible=false;
           Object.assign(rig,{fall:0,spin:0,lean:Math.min(.4,speed*.035),roll,turnRate:0,stride:phase*Math.PI/6});
-          Object.assign(st,{vel:{x:speed,y:0},turboActive:speed>9,knockdown:0,controlled:true});
+          Object.assign(st,{facing,vel:{x:speed*Math.cos(facing),y:speed*Math.sin(facing)},turboActive:speed>9,knockdown:0,controlled:true});
+          rig.snap(st);rig.carryBlend=carry?1:0;
           st.hasPuck=new URLSearchParams(location.search).has('puck');
           st.charging=action==='charge';st.shotCharge=st.charging?.75:0;
           st.deke=action.startsWith('drag')?.3:0;st.dekeKind=action;
@@ -170,8 +204,8 @@ try {
           const stick=rig.bones.get('stick').bone;
           const gripErrors=rig.grips.map(g=>rig.bones.get(`hand${g.side}`).bone.getWorldPosition(rig.group.position.clone()).distanceTo(stick.localToWorld(g.offset.clone())));
           const gripReach=rig.grips.map(g=>{const s=rig.bones.get(`upperArm${g.side}`).bone.getWorldPosition(rig.group.position.clone());return {max:g.upper+g.fore-.01,start:s.distanceTo(stick.localToWorld(g.offset.clone())),end:s.distanceTo(rig.bones.get('handR').bone.getWorldPosition(rig.group.position.clone()))};});
-          return {phase,speed,roll,action,heights,puck,dragLateral,bladePuckDistance:Math.min(...bladePoints.map(v=>Math.hypot(v.x-puck.x,v.z-puck.y))),bladePoints:bladePoints.length,stickMin:Math.min(...stickHeights),gripErrors,gripReach,ringError:Math.hypot(ring.x-st.pos.x,ring.z-st.pos.y),contactPoints:rig.bladeContacts?.reduce((n,c)=>n+c.points.length,0)};
-        },{phase,speed,roll,action});
+          return {phase,speed,roll,action,facing,carry,heights,puck,dragLateral,bladePuckDistance:Math.min(...bladePoints.map(v=>Math.hypot(v.x-puck.x,v.z-puck.y))),bladePoints:bladePoints.length,stickMin:Math.min(...stickHeights),gripErrors,gripReach,ringError:Math.hypot(ring.x-st.pos.x,ring.z-st.pos.y),contactPoints:rig.bladeContacts?.reduce((n,c)=>n+c.points.length,0)};
+        },{phase,speed,roll,action,facing,carry});
         samples.push(sample);
         if(phase%3===0)await page.screenshot({path:join(out,`${version}-stride-${phase}.png`)});
       }
@@ -186,6 +220,7 @@ try {
             assert.ok(sample.stickMin>=-.015,`Stride ${sample.phase} stick buried: ${sample.stickMin}`);
             assert.ok(sample.gripErrors.every(e=>e<.02),'Hand left stick grip');
           }
+          if(carry&&action==='skate'&&speed===6&&roll===0)assert.ok(sample.bladePuckDistance>=.15&&sample.bladePuckDistance<=.19,'Neutral carrier blade misses puck edge');
           if(process.argv.includes('--puck')&&sample.dragLateral!==null)assert.ok(sample.dragLateral*(action==='dragL'?1:-1)>0,'Blade sweeps opposite the puck drag');
         }
       }
