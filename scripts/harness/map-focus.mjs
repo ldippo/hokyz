@@ -173,6 +173,24 @@ try {
           await page.screenshot({path:join(out,`feedback-${width}.png`)});
         }
       }
+      if(process.argv.includes('--hud-layout')) {
+        for(const [width,height,scale] of [[1280,720,1],[390,844,1],[390,844,1.5]]) {
+          await page.setViewportSize({width,height});
+          await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+          const layout=await page.evaluate(scale=>{
+            const app=window.__hokyz;app.meta.textScale=scale;app.applyAccessPrefs();app.render(1,0);
+            const selectors=['.scoreboard','.sb-team.t0 .name','.sb-team.t1 .name','.sb-team.t0 .score','.sb-team.t1 .score','.clock','.period','.turbo-wrap','.turbo','.special-label','.player-tag','.pname','.ptype','.hp','.fire-streak'];
+            return selectors.map(selector=>{const el=document.querySelector(`.hud ${selector}`),r=el.getBoundingClientRect();return {selector,left:r.left,right:r.right,top:r.top,bottom:r.bottom,scroll:el.scrollWidth,width:el.clientWidth};});
+          },scale);
+          checks.push({hudLayout:{width,height,scale,boxes:layout}});
+          await page.screenshot({path:join(out,`hud-${width}-${scale}.png`)});
+          if(!process.argv.includes('--baseline')) {
+            assert.ok(layout.every(r=>r.left>=0&&r.right<=width&&r.top>=0&&r.bottom<=height&&(r.selector==='.fire-streak'||r.scroll<=r.width+1)),JSON.stringify(layout));
+            const a=layout.find(r=>r.selector==='.turbo-wrap'),b=layout.find(r=>r.selector==='.player-tag');
+            assert.ok(a.right<=b.left||b.right<=a.left||a.bottom<=b.top||b.bottom<=a.top,'Player panel overlaps meters');
+          }
+        }
+      }
     }
   }
   assert.deepEqual(errors,[]);

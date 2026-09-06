@@ -122,6 +122,9 @@ ice clearance. `--feedback-layout` additionally checks a long boss announcement
 through Hud.announce at desktop and narrow150% text (presentation fixture).
 Outnumbered also verifies model count matches simulation, reinforcement scene
 attachment/visibility/position, and model identity remains stable over ten ticks.
+`--hud-layout` captures desktop,390px and390px/150%-text match HUD, checks core
+score/name/clock/meter bounds and player-panel separation. Decorative fire-icon
+skew is excluded from text-overflow checks. This is not all fight/shootout HUD.
 
 `node scripts/harness/route.mjs` exercises event -> shop -> rest in one run,
 reloading between encounters. It preserves generated links while preparing the

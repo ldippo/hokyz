@@ -122,6 +122,28 @@ kbd { font-family: var(--font-display); background: #1c2033; border: 1px solid #
 .perks-mini { position: absolute; left: 24px; top: 20px; display: flex; flex-wrap: wrap; gap: 6px; max-width: 30vw; }
 .perks-mini span { font-size: 12px; letter-spacing: 0.1em; background: rgba(0,0,0,0.55); border: 1px solid #3a4260; padding: 2px 6px; color: #dbe9ff; }
 
+/* Compact broadcast layout: retain every core readout on narrow play surfaces. */
+@media (max-width: 700px) {
+  .scoreboard { top: 8px; width: calc(100% - 16px); display: grid; grid-template-columns: minmax(0, 1fr) 76px minmax(0, 1fr); border-width: 2px; }
+  .sb-team, .sb-team.t1 { min-width: 0; padding: 6px; display: grid; grid-template-columns: 6px minmax(0, 1fr); gap: 4px; align-content: center; }
+  .sb-team .name { grid-area: 1 / 1 / 2 / -1; font-family: var(--font-body); font-size: 12px; line-height: 1.2; letter-spacing: 0.02em; text-align: center; overflow-wrap: anywhere; }
+  .sb-team .score { grid-area: 2 / 2; font-size: 26px; min-width: 0; }
+  .sb-team .badge { grid-area: 2 / 1; width: 6px; height: 20px; }
+  .sb-mid { min-width: 0; padding: 4px; }
+  .sb-mid .clock { font-size: 24px; letter-spacing: 0; }
+  .sb-mid .period { font-size: 10px; letter-spacing: 0.08em; }
+  .turbo-wrap { left: 8px; bottom: 8px; width: calc(42% - 12px); padding: 8px; }
+  .turbo-label { font-size: 12px; letter-spacing: 0.08em; }
+  .turbo { height: 12px; border-width: 2px; transform: none; }
+  .turbo-wrap .special-label { font-size: 10px; letter-spacing: 0.02em; overflow-wrap: anywhere; }
+  .player-tag { right: 8px; bottom: 8px; width: calc(58% - 12px); padding: 8px; }
+  .player-tag .pname { font-family: var(--font-body); font-size: 16px; line-height: 1.15; letter-spacing: 0; overflow-wrap: anywhere; }
+  .player-tag .ptype { font-size: 10px; letter-spacing: 0.08em; overflow-wrap: anywhere; }
+  .player-tag .hp { width: 100%; }
+  .fire-streak { right: 12px; bottom: 120px; gap: 4px; }
+  .fire-streak span { width: 12px; height: 12px; }
+}
+
 /* Match result */
 .result { text-align: center; }
 .result h2 { font-family: var(--font-display); font-size: 84px; margin: 0; letter-spacing: 0.08em; }

@@ -39,6 +39,26 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest narrow HUD fix: <=700px scoreboard uses three columns with explicit
+name/badge/score grid cells; compact bottom panels preserve player/health/turbo/
+special information without overlap. Desktop unchanged. Impeccable guided
+structural layout and readable hierarchy. Baseline .gaming/map-focus/
+1788716405754-BP8Kfj hud-390-1.5.png clips scoreboard and overlaps bottom panels.
+Final1788716559085-79CNKL --hud-layout passes desktop/narrow/narrow150% bounds,
+text overflow and panel separation; both narrow captures inspected. First probe
+1788716457583-issCnW falsely flagged decorative fire skew as text overflow;
+corrected exclusion. Candidate1788716502318-ucqOYe exposed score auto-placement
+in6px badge column; focused explicit grid-area repair passes. Gates baseline
+.gaming/runs/1788716406783-bVmXub, final1788716547184-EK8FaO build/157 tests/bot
+pass. Browser controls .gaming/playtests/1788716471627-qMdR1e passed before final
+score-cell-only repair. Self-review prefers accessible score/meters; abstains on
+all HUD variants, touch input or hardware feel. Fire icons remain floating and
+charge/perks/fight/shootout prompts need targeted overlap evidence.
+Next precise action: test active shot-charge meter versus turbo/special panels
+at desktop and narrow150%; charge-wrap still absolute left24/bottom76/width200
+and may overlap both panels. Exercise real held Shoot and capture charge state;
+fix only evidenced overlap. Full goal active; unrelated README/ROADMAP retained.
+
 Latest render fix: MatchView.syncSkaterModels reuses constructor creation path
 after each sim step, adding only missing IDs before snapshots/events. Dynamic
 reinforcement now gets detailed rig, team jersey and name tag; existing models

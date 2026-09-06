@@ -102,6 +102,16 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed narrow core HUD: compact three-column scoreboard, explicit score/name
+cells, separate bottom panels at<=700px. Baseline .gaming/map-focus/
+1788716405754-BP8Kfj clips/overlaps; final1788716559085-79CNKL passes desktop,
+390px,150% bounds/text/panel checks; narrow captures inspected. Probe initially
+flagged decorative fire skew, corrected; genuine candidate score-in6px-column
+failure1788716502318-ucqOYe fixed with explicit grid areas. Gates
+1788716547184-EK8FaO build/157 tests/bot pass; controls1788716471627-qMdR1e pass
+before score-cell-only repair. Impeccable guided layout; self-review prefers
+readable core HUD, not all variants. Next: active shot-charge panel overlap.
+
 Completed missing reinforcement model: syncSkaterModels runs after sim steps,
 creates only missing IDs with existing detailed jersey/rig/name tag path. Browser
 baseline1788716182208-jVlsFM fails8 models/9 bodies; final1788716260796-TOfeC0
