@@ -39,6 +39,24 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest last-skater guard: Fight Night is reachable3fights/period, so three losses
+could empty a team. offerFight now refuses when either side has<=1 attacker.
+Also togglePull refuses recalling the sole active attacker (pulled goalie after
+three teammate ejections). Period restoration enables fights/recall again.
+Three added tests failed before: two actual offer/settlement sequences leave one
+skater yet allow another fight; one compounded bench fixture recalls sole goalie
+to empty list. Final .gaming/runs/1788718659940-r3mfmy build/191 tests/bot pass;
+baseline1788718595267-I3FK8J, eight bot reports unchanged. Human full fight
+.gaming/playtests/1788718674623-tHNw0O passes. Fight Night description now says
+up to3 while both teams have spare skaters. map-focus --intro-layout --elite-intro
+--fight-night .gaming/map-focus/1788718705731-vwyWTu passes3sizes/navigation,
+desktop intro inspected. Self-review prefers playable lineups and truthful rule;
+not human balance approval. No renderer/style changes. Next precise action:
+return to visual clarity: inspect on-ice name-tag overlap in faceoffs/player
+clusters using same camera/roster, preserve controlled-player identification and
+name-tag preference. User feedback about appearance/feel/difficulty remains
+unanswered; broader natural-run/hardware evidence still missing. Full goal active.
+
 Latest goalie ejection fix: togglePull return branch refuses g.ejected, preventing
 manual or automatic stoppage recall from bypassing a fight sit-out. New
 tests/sim/pulledGoalie.test.ts: two normal puck-owning/controlled goalie return

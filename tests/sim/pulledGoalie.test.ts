@@ -12,6 +12,19 @@ function match() {
   sim.st.phase = 'play'; return sim;
 }
 
+it('does not recall the only remaining attacker until benched teammates return', () => {
+  const sim = match(), st = sim.st, team = st.teams[0], id = team.goalie!;
+  sim.togglePull(0, []);
+  team.ejected = team.skaters.filter(s => s !== id);
+  for (const s of team.ejected) st.skaters[s].ejected = true;
+  team.skaters = [id];
+  sim.togglePull(0, []);
+  expect(team.skaters).toEqual([id]); expect(team.goalie).toBe(null);
+  st.phase = 'periodEnd'; st.phaseTimer = 0; sim.step();
+  sim.togglePull(0, []);
+  expect(team.skaters).toHaveLength(3); expect(team.goalie).toBe(id);
+});
+
 it.each([0, 1] as const)('team %i returns its controlled puck-carrying goalie without dangling possession', teamId => {
   const sim = match(), st = sim.st, team = st.teams[teamId], id = team.goalie!;
   sim.togglePull(teamId, []);

@@ -2,7 +2,8 @@ import { expect, it, vi } from 'vitest';
 import { MatchSim } from '../../src/sim/match';
 import { quickTeam } from '../../src/sim/fixtures';
 import { defaultMatchMods } from '../../src/sim/modifiers';
-import { stepFight } from '../../src/sim/fight';
+import { offerFight, stepFight } from '../../src/sim/fight';
+import { MUTATOR_BY_ID } from '../../src/run/mutators';
 import { FIGHT } from '../../src/sim/constants';
 import type { FightCue, MatchEvent } from '../../src/sim/types';
 
@@ -13,6 +14,30 @@ function duel(kind: FightCue, target: 0 | 1 = 1, seed = 17) {
   sim.st.fight = { a: 'A1', b: 'B1', stage: 'duel', t: 1, hp: [100, 100], accepted: [true, true], cue: { kind, target, t: 0.4, window: 0.8, done: false, mash: 0 }, nextCue: 20, winner: null, lastHit: null };
   return sim;
 }
+
+it.each([0, 1] as const)('Fight Night keeps team %i last skater available', teamId => {
+  const sim = duel('high'), st = sim.st, team = st.teams[teamId];
+  MUTATOR_BY_ID.fight_night.apply(st.mods);
+  st.fight = null; st.phase = 'play';
+  for (let loss = 0; loss < 2; loss++) {
+    offerFight(st, team.skaters[0], st.teams[1 - teamId].skaters[0], []);
+    const f = st.fight!;
+    expect(f).not.toBe(null);
+    f.accepted = [true, true]; stepFight(st, 1 / 60, {}, sim.rng, []);
+    f.hp = [0, 100]; stepFight(st, 1 / 60, {}, sim.rng, []);
+    stepFight(st, FIGHT.resultTime, {}, sim.rng, []);
+    for (let i = 0; i < 180 && st.phase !== 'play'; i++) sim.step();
+  }
+  expect(team.skaters).toHaveLength(1);
+  const events: MatchEvent[] = [];
+  offerFight(st, team.skaters[0], st.teams[1 - teamId].skaters[0], events);
+  expect(st.fight).toBe(null); expect(events).toEqual([]); expect(st.phase).toBe('play');
+  st.phase = 'periodEnd'; st.phaseTimer = 0; sim.step();
+  expect(team.skaters).toHaveLength(3);
+  expect(st.phase).toBe('faceoff');
+  offerFight(st, team.skaters[0], st.teams[1 - teamId].skaters[0], events);
+  expect(st.fight).not.toBe(null);
+});
 
 for (const target of [0, 1] as const) it.each(['high', 'low', 'feint'] as const)(`AI fighter ${target} resolves %s exactly once`, kind => {
   const sim = duel(kind, target), f = sim.st.fight!, events: MatchEvent[] = [];

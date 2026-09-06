@@ -102,6 +102,15 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed last-attacker safeguards: Fight Night3fights can bench entire roster;
+no offers with<=1 attacker on either team, no recall of sole pulled goalie.
+Three red-before tests cover both-team repeated settlement and compounded pull;
+period restoration restores eligibility. Gates1788718659940-r3mfmy build/191
+tests/bot pass, eight reports unchanged. Fullfight1788718674623-tHNw0O passes.
+Fight Night copy states restriction; intro1788718705731-vwyWTu passes3layouts/
+navigation, desktop inspected. Self-review prefers playable rules. Next: visual
+name-tag overlap/controlled-player clarity, then broader run/hardware evidence.
+
 Completed ejected-goalie recall guard: g.ejected blocks manual/stoppage return
 until period restoration.4 new tests include normal possession/control transfer
 and both-team fight ejection->blocked recall->period restore->valid recall; two

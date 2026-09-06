@@ -4,6 +4,8 @@ import type { Rng } from '../core/rng';
 
 /** Start the "drop the gloves" offer. Play freezes; both sides accept or decline. */
 export function offerFight(st: MatchState, a: string, b: string, events: MatchEvent[]): void {
+  // A fight must never be able to bench a team's last faceoff participant.
+  if (st.teams.some(team => team.skaters.length <= 1)) return;
   st.fight = { a, b, stage: 'offer', t: 0, hp: [100, 100], accepted: [null, null], cue: null, nextCue: 0.6, winner: null, lastHit: null };
   st.phase = 'fight';
   const sa = st.skaters[a],

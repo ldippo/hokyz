@@ -66,18 +66,18 @@ try {
   await page.evaluate(()=>{window.__hokyz.meta.textScale=1.5;window.__hokyz.applyAccessPrefs();});
   await press('s'); await capture('narrow-next');
   const expected=await page.locator('.node.focus').getAttribute('title');
-  if(variant) await page.evaluate(({variant,outnumbered})=>{
+  if(variant) await page.evaluate(({variant,outnumbered,fightNight})=>{
     const run=window.__hokyz.run;
-    run.maps[0].rows[0].forEach(node=>{node.type=variant;node.rivalId='boss_maidens';node.mutatorId=outnumbered?'outnumbered':'long_bombs';});
+    run.maps[0].rows[0].forEach(node=>{node.type=variant;node.rivalId='boss_maidens';node.mutatorId=outnumbered?'outnumbered':fightNight?'fight_night':'long_bombs';});
     run.grudges.boss_maidens={beaten:2,act:1};run.ascension=5;
-  },{variant,outnumbered:process.argv.includes('--outnumbered')});
+  },{variant,outnumbered:process.argv.includes('--outnumbered'),fightNight:process.argv.includes('--fight-night')});
   await press('Enter');
   const heading=variant==='boss'?'👑 BOSS FIGHT':variant==='elite'?'💀 ELITE MATCH':'NEXT MATCH';
   assert.equal(await page.locator('.screen-title').textContent(),heading);
   if(!variant) assert.ok((await page.locator('.matchup .tn').last().textContent()).includes(expected.split(' · ')[0]));
   else {
     assert.ok(await page.locator('.taunt').count());
-    assert.match(await page.locator('.match-intro-content').textContent(),process.argv.includes('--outnumbered')?/Outnumbered/:/Long Bomb Night/);
+    assert.match(await page.locator('.match-intro-content').textContent(),process.argv.includes('--outnumbered')?/Outnumbered/:process.argv.includes('--fight-night')?/both teams have spare skaters/:/Long Bomb Night/);
     if(variant==='boss') assert.ok(await page.locator('.match-intro .perk-chip').count()>=2);
   }
   checks.push({activation:'Enter opened selected rival'});

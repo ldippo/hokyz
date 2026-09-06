@@ -466,6 +466,8 @@ export class MatchSim {
       const g = st.skaters[id];
       // Pull/recall cannot bypass a fight's rest-of-period ejection.
       if (g.ejected) return;
+      // Fight Night can leave the pulled goalie as the only active attacker.
+      if (!team.skaters.some(skaterId => skaterId !== id)) return;
       team.skaters = team.skaters.filter((s) => s !== id);
       team.goalie = id;
       team.pulled = false;

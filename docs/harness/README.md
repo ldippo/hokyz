@@ -71,6 +71,8 @@ using the production RNG constructor and one-draw rewind, with JSON evidence.
 Add `--layout` for opening and extended natural-shootout tracker captures at
 desktop and390px/150% text, bounds checks and exact goal/attempt totals. The named
 AI fixture must reach extended history. `--baseline` skips layout assertions.
+For Fight Night intro text/layout use `map-focus.mjs --intro-layout --elite-intro
+--fight-night`; this prepares the mutator, not naturally earned fight outcomes.
 
 `node scripts/harness/endings.mjs` (after building) prepares a terminal loss and
 checks that the saved ended run survives the result screen, Continue settles it,
