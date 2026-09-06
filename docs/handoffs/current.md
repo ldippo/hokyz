@@ -39,6 +39,22 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest moving-label evidence (no game edits): map-focus --intro-layout --boss-intro
+--outnumbered --name-motion records90 frames/9sim seconds at10Hz, lane changes,
+overlap bounds and periodic/worst captures. Desktop .gaming/map-focus/
+1788719127694-55p1D4:2/90 frames overlap, max1pair,41 label lane changes. Narrow
+1788719151594-OhkCcc:1/90 overlap, max1pair,23 changes. Worst screenshots inspected:
+labels still touch in moving cluster after one reaches maximum3rd lane. Controlled
+labels never raised;76 play samples each. Diagnostic counts, not real-time jitter
+or GPU performance; PASS only means flow/capture completed. Gates
+.gaming/runs/1788719084329-PrKWBk build/191 tests/bot pass. Self-review: static
+faceoff gain remains, dense-cluster limitation confirmed, no universal approval.
+Next precise action: improve bounded label placement using remaining space within
+existing2.4m vertical cap (finer/adaptive offsets), not ever-taller stacking;
+compare same desktop/narrow traces and inspect label-to-player association. Keep
+controlled priority and all/controlled/off preferences. Full goal active;
+unrelated README/ROADMAP kept.
+
 Latest visual fix: SkaterRig exposes projected sprite bounds/vertical tag lanes;
 MatchView lays out visible gameplay tags after camera update, prioritizing
 controlled player then puck owner. Nearby overlaps get up to3 upward0.8m lanes;

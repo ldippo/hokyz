@@ -201,6 +201,28 @@ try {
           await page.screenshot({path:join(out,`feedback-${width}.png`)});
         }
       }
+      if(process.argv.includes('--name-motion')) {
+        const width=process.argv.includes('--narrow')?390:1280,height=width===390?844:720;
+        await page.setViewportSize({width,height});
+        await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+        const frames=[];let worst=-1;
+        for(let frame=0;frame<90;frame++) {
+          const sample=await page.evaluate(()=>{
+            const app=window.__hokyz,view=app.view;
+            for(let i=0;i<6;i++)app.simStep();view.render(1,0.1);
+            const st=view.sim.st,labels=st.order.map(id=>{const mesh=view.skaters.get(id);return {id,controlled:st.skaters[id].controlled,lane:mesh.tag?(mesh.tag.position.y-2.35)/0.8:null,bounds:mesh.tagBounds(view.rig.camera)};}).filter(l=>l.bounds&&l.bounds.right>=-1&&l.bounds.left<=1&&l.bounds.top>=-1&&l.bounds.bottom<=1);
+            const overlaps=[];
+            for(let i=0;i<labels.length;i++)for(let j=i+1;j<labels.length;j++){const a=labels[i].bounds,b=labels[j].bounds;if(a.left<b.right&&a.right>b.left&&a.bottom<b.top&&a.top>b.bottom)overlaps.push([labels[i].id,labels[j].id]);}
+            return {time:st.t,phase:st.phase,labels,overlaps};
+          });
+          frames.push(sample);
+          if(sample.overlaps.length>worst){worst=sample.overlaps.length;await page.screenshot({path:join(out,'name-motion-worst.png')});}
+          if(frame%30===0) {await page.screenshot({path:join(out,`name-motion-${frame}.png`)});console.log(`Name motion sample ${frame}/90`);}
+        }
+        const changes=frames.slice(1).reduce((n,f,i)=>n+f.labels.filter(l=>{const p=frames[i].labels.find(p=>p.id===l.id);return p&&p.lane!==l.lane;}).length,0);
+        writeFileSync(join(out,'name-motion.json'),JSON.stringify({width,height,frames,worst,changes,scope:'Nine simulated seconds sampled/rendered at10Hz, not real-time jitter or GPU performance evidence.'},null,2));
+        checks.push({nameMotion:{width,height,samples:frames.length,worst,changes}});
+      }
       if(process.argv.includes('--hud-layout')) {
         for(const [width,height,scale] of [[1280,720,1],[390,844,1],[390,844,1.5]]) {
           await page.setViewportSize({width,height});

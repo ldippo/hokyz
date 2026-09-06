@@ -102,6 +102,14 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed moving-label diagnostic: --name-motion captures90 frames/9sim seconds
+at10Hz; desktop1788719127694-55p1D4 has2 overlap frames/max1pair/41 lanechanges,
+narrow1788719151594-OhkCcc has1/max1/23. Worst images inspected, cap3 reached
+by overlapping tag; controlled label never raised. Gates1788719084329-PrKWBk
+build/191 tests/bot pass. No game edits; self-review identifies remaining cluster
+overlap, not real-time jitter/performance approval. Next: finer/adaptive placement
+within existing2.4m cap, compare traces and label association.
+
 Completed faceoff name-label separation: projected bounds, controlled/owner
 priority, bounded vertical lanes, no hidden names, unchanged models. Impeccable
 guided hierarchy. Baseline1788718876272-n9oblU one overlap; final
