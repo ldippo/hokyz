@@ -102,6 +102,18 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed natural shootout browser coverage: shootout-full.mjs prepares reachable
+node/rival, then idle and production AI complete unshortened attempts. Final
+.gaming/shootout-full/1788713109620-Rx67eH/ passes: idle0-1 loss/5 attempts/54.85s,
+AI3-4 loss/20 attempts/115.47s, including extended sudden death. One deciding point,
+unchanged roster/cash, row1 and reload to map verified. Result inspected. Win
+branch implemented but unexercised; terminal-win rewards remain separate evidence.
+Build/152 tests/bot .gaming/runs/1788713108191-JEbwRC/ pass. Self-review prefers
+full challenge lifecycle evidence, abstains on human difficulty/full-run victory.
+Next: inspect shootout RNG commitment: startShootout commits run RNG before
+consuming match seed, unlike corrected Hit Parade ordering. Reproduce and fix
+stream continuity if confirmed, preserving ordinary seeded outcome evidence.
+
 Completed result clarification: optional MatchOutcome.shootoutGoals carries only
 completed attempts; result shows both teams' shootout totals, deciding-point rule
 and exclusion from player G/A. Reuses result-description styles, no new motion.

@@ -39,6 +39,22 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest evidence: new scripts/harness/shootout-full.mjs checks real skills screen,
+idle/production AI, natural unshortened attempts/outcome, alternating turns,
+exactly one shootoutEnd/deciding point, displayed attempt totals, unchanged roster,
+cash and reload. Only reachable node/rival prepared; seed shootout-flow-1.
+.gaming/shootout-full/1788713109620-Rx67eH/ passes idle0-1/5 attempts/54.85s and
+AI3-4/20 attempts/115.47s (extended sudden death). Both lost naturally; result
+image inspected. Both return row1 with no penalty/reward and no pending draft.
+Natural-win branch exists but unexercised: no win/reward claim from these trials.
+Build/152 tests/bot .gaming/runs/1788713108191-JEbwRC/ pass. No game-code edits.
+Self-review prefers full challenge recovery evidence; abstains on human difficulty,
+hardware and complete runs. Next precise action: startShootout in skills.ts calls
+commitRng before rng.int(matchSeed), leaving saved RNG one draw behind. Hit Parade
+already consumes seed before commit. Reproduce the stream-continuity issue and
+fix if confirmed; verify repeat challenge setup and result/reward behavior.
+Keep unrelated README.md/ROADMAP-v4.md edits unstaged. No timed burst is active.
+
 Latest presentation: MatchOutcome optional shootoutGoals copies final successful
 attempts only when shootout.stage is done. matchResultScreen explains both teams'
 shootout totals, deciding point and player G/A exclusions beneath final score.

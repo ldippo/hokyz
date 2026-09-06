@@ -60,6 +60,13 @@ result fixture, explanation text, responsive reachability and reward recovery.
 `--baseline` skips explanation assertions for before captures. This prepares the
 terminal shootout state; natural shootout evidence remains a separate check.
 
+`node scripts/harness/shootout-full.mjs` runs idle and production-AI players
+through a full shootout skills node with natural attempts/outcome. Prepares only
+the reachable node/rival; checks alternating attempts, one deciding point, result
+totals, unchanged roster, cash and reload. Wins additionally check earned draft
+and zero-cash skip. Reports actual outcomes, not guaranteed wins. Evidence:
+`.gaming/shootout-full/`. Not human difficulty or hardware timing evidence.
+
 `node scripts/harness/endings.mjs` (after building) prepares a terminal loss and
 checks that the saved ended run survives the result screen, Continue settles it,
 a failed meta write leaves the run recoverable, and a stale ended save cannot
