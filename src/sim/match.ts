@@ -464,6 +464,8 @@ export class MatchSim {
       const id = team.pulledGoalieId;
       if (!id) return;
       const g = st.skaters[id];
+      // Pull/recall cannot bypass a fight's rest-of-period ejection.
+      if (g.ejected) return;
       team.skaters = team.skaters.filter((s) => s !== id);
       team.goalie = id;
       team.pulled = false;

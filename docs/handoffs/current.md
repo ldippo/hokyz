@@ -39,6 +39,23 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest goalie ejection fix: togglePull return branch refuses g.ejected, preventing
+manual or automatic stoppage recall from bypassing a fight sit-out. New
+tests/sim/pulledGoalie.test.ts: two normal puck-owning/controlled goalie return
+cases passed already; two ejection cases failed before fix (AG/BG recalled while
+ejected). Tests use production fight settlement from terminal duel fixture,
+automatic stoppage recall and period-break restoration; once restored goalie
+can be recalled without duplicate attacker. Gates baseline
+.gaming/runs/1788718356027-KGey66; final1788718420332-m2iLPz build/188 tests/bot
+pass, eight bot matches exactly unchanged. Browser normal sustained goalie path
+.gaming/playtests/1788718442559-c3iuVG passes. No visual changes. Self-review
+prefers rule consistency, not human difficulty/entire-run approval. Next precise
+action: inspect match play under compounded roster reductions (multiple ejections
+across repeated fights/periods or content modifiers), especially zero-skater
+faceoff/control paths; reproduce reachable failures before fixing. Otherwise
+return to broader full-run/visual/performance evidence, guided by user feedback.
+Full goal active; unrelated README/ROADMAP preserved.
+
 Latest sustained goalie evidence (no game changes): --goalie-pull --goalie-sustain
 holds Pass90 additional sim ticks after each toggle, checks zero repeat toggles,
 attacker movement>0.5m and rendered x/z agreement, return movement toward crease,

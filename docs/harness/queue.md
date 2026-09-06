@@ -102,6 +102,14 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed ejected-goalie recall guard: g.ejected blocks manual/stoppage return
+until period restoration.4 new tests include normal possession/control transfer
+and both-team fight ejection->blocked recall->period restore->valid recall; two
+ejection cases failed before. Gates1788718420332-m2iLPz build/188 tests/bot pass,
+eight match reports unchanged. Sustained browser1788718442559-c3iuVG passes.
+Self-review prefers consistent sit-out rule. Next: inspect reachable compounded
+roster reductions/faceoff safety, then broader run and visual/performance evidence.
+
 Completed sustained pull evidence: --goalie-sustain90tick continued hold each
 direction, no repeat toggles, actual attacker movement/render position, return
 toward crease and additional90tick recovery. Final .gaming/playtests/
