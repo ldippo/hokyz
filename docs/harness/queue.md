@@ -102,6 +102,18 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed diagnostic, runtime pose rejected: expanded corrected-grip search to
+6132 candidates per action (four blade offsets, yaw/tilt), capped hand height at
+shoulder+10cm, and added independent two-hand previews. Initial evidence
+.gaming/models/1788726824325-4f2cKw/ has9 normal/51 left-drag candidates, zero
+charge/right-drag candidates. Both images inspected: top glove crowds face;
+not accepted for runtime despite precise hand targeting. Final repeat with saved
+target errors: .gaming/models/1788727150018-B89aYc/ passes diagnostic checks.
+Gates .gaming/runs/1788727142811-XwkHD6/ pass build/214 tests/bots; baseline
+1788726755242-Q1BWM9. No game/asset changes. Next: assess lower hand placement
+and shaft proportions in an offline preview, then verify actual puck contact,
+both facing directions and transitions before implementing a carrier pose.
+
 Completed skater grip geometry: shared shaft endpoints, reachable collinear hand
 targets without right-side mirroring. Regenerated skater only (92452 triangles,
 21 bones,3274648 bytes); goalie unchanged. Physical shaft check1788726434751-A9qWko

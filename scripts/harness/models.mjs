@@ -60,23 +60,24 @@ try {
               lo=Math.max(lo,Math.min(t0,t1));hi=Math.min(hi,Math.max(t0,t1));if(lo>hi)return false;
             }return true;
           };
-          const counts={total:0,reachable:0,inFront:0,clear:0};let best=null;
-          for(let yi=-36;yi<=36;yi++)for(let ti=0;ti<=20;ti++) {
+          const counts={total:0,reachable:0,inFront:0,belowHeightLimit:0,clear:0};let best=null;
+          for(const [dx,dz] of [[-.33,0],[.33,0],[0,-.33],[0,.33]])for(let yi=-36;yi<=36;yi++)for(let ti=0;ti<=20;ti++) {
             counts.total++;const yaw=yi*Math.PI/36,tilt=ti/20;
             const flat=quat().setFromAxisAngle(vector(0,1,0),yaw).multiply(stick.invRestWorld.clone().invert());
             const shaft=grips[1].offset.clone().sub(center).applyQuaternion(flat).normalize();
             const upright=quat().setFromUnitVectors(shaft,vector(0,1,0));
             const rotation=quat().slerp(upright,tilt).multiply(flat);
-            const blade=vector(puck.x-.33,0,puck.y),position=blade.clone().sub(center.clone().applyQuaternion(rotation));
+            const blade=vector(puck.x+dx,0,puck.y+dz),position=blade.clone().sub(center.clone().applyQuaternion(rotation));
             let low=Infinity;for(const p of rig.stickContacts)low=Math.min(low,p.clone().applyQuaternion(rotation).y+position.y);
             position.y+=.003-low;
             const targets=grips.map(g=>g.offset.clone().applyQuaternion(rotation).add(position));
             if(targets.some((t,i)=>t.distanceTo(grips[i].shoulder)>grips[i].max))continue;counts.reachable++;
             if(targets.some(t=>rig.group.worldToLocal(t.clone()).x<body.max.x+.02))continue;counts.inFront++;
+            if(targets.some((t,i)=>t.y>grips[i].shoulder.y+.1))continue;counts.belowHeightLimit++;
             const bladeWorld=center.clone().applyQuaternion(rotation).add(position);
             if(intersects(position,bladeWorld))continue;counts.clear++;
             const score=yaw*yaw+tilt*tilt;
-            if(!best||score<best.score)best={yaw,tilt,score,targets:targets.map(t=>t.toArray()),blade:bladeWorld.toArray(),origin:position.toArray()};
+            if(!best||score<best.score)best={yaw,tilt,score,offset:[dx,dz],rotation:rotation.toArray(),targets:targets.map(t=>t.toArray()),blade:bladeWorld.toArray(),origin:position.toArray()};
           }
           const gripShaftDistance=grips.map(g=>({side:g.side,distance:g.offset.distanceTo(vector(0,Math.max(shaftRange.min,Math.min(shaftRange.max,g.offset.y)),0))}));
           results.push({action,shaftRange,gripShaftDistance,body:{min:body.min.toArray(),max:body.max.toArray()},counts,best});
@@ -84,9 +85,40 @@ try {
         return results;
       });
       writeFileSync(join(out,'reach-study.json'),JSON.stringify({study,scope:'Offline facing0 pose feasibility, conservative torso AABB and shaft centerline; not a runtime pose or exact collision/contact proof.'},null,2));
-      assert.ok(study.every(s=>s.counts.total===1533));
+      assert.ok(study.every(s=>s.counts.total===6132));
       assert.ok(study.every(s=>Number.isFinite(s.shaftRange.min)&&s.shaftRange.max>s.shaftRange.min&&s.gripShaftDistance.every(g=>Number.isFinite(g.distance))),'Missing shaft geometry');
       if(process.argv.includes('--shaft'))assert.ok(study.every(s=>s.gripShaftDistance.every(g=>g.distance<.03)),'Hand is not on the physical shaft');
+      if(process.argv.includes('--reach-preview'))for(const sample of study.filter(s=>s.best)) {
+        const check=await page.evaluate(({action,best})=>{
+          const app=window.__hokyz,{entries,grig}=window.__rigview,{rig,st}=entries[0];
+          entries.forEach(e=>e.rig.group.visible=e.rig===rig);grig.group.visible=false;
+          Object.assign(st,{hasPuck:true,vel:{x:6,y:0},charging:action==='charge',shotCharge:.75,deke:action.startsWith('drag')?.3:0,dekeKind:action});
+          Object.assign(rig,{fall:0,spin:0,lean:.21,roll:0,turnRate:0,stride:0});
+          rig.update(st,1,0,0);rig.group.updateMatrixWorld(true);
+          const vector=(x=0,y=0,z=0)=>rig.group.position.clone().set(x,y,z);
+          for(const [i,side] of ['L','R'].entries()) {
+            const upper=rig.bones.get(`upperArm${side}`).bone,fore=rig.bones.get(`foreArm${side}`).bone,hand=rig.bones.get(`hand${side}`).bone;
+            const shoulder=upper.getWorldPosition(vector()),elbow=fore.getWorldPosition(vector()),current=hand.getWorldPosition(vector());
+            const a=shoulder.distanceTo(elbow),b=elbow.distanceTo(current),target=vector().fromArray(best.targets[i]);
+            const d=target.distanceTo(shoulder),dir=target.clone().sub(shoulder).normalize(),pole=vector(-.5,-.35,side==='L'?.7:-.7).normalize();
+            pole.addScaledVector(dir,-pole.dot(dir)).normalize();
+            const angle=Math.acos(Math.max(-1,Math.min(1,(a*a+d*d-b*b)/(2*a*d))));
+            const desiredElbow=shoulder.clone().addScaledVector(dir,a*Math.cos(angle)).addScaledVector(pole,a*Math.sin(angle));
+            for(let pass=0;pass<2;pass++){rig.aimBone(upper,fore,desiredElbow);rig.aimBone(fore,hand,target);}
+          }
+          const stick=rig.bones.get('stick').bone,hand=rig.bones.get('handR').bone;
+          const rotation=hand.quaternion.clone().fromArray(best.rotation).multiply(stick.quaternion.clone().invert());
+          const parent=hand.quaternion.clone();hand.parent.getWorldQuaternion(parent);
+          hand.quaternion.copy(parent.invert().multiply(rotation));hand.updateMatrixWorld(true);
+          window.__rigview.placePuck(st);
+          app.rig.camera.position.set(.4,.85,.2);app.rig.camera.lookAt(.3,.7,-3.4);
+          document.querySelectorAll('#ui,.hud').forEach(el=>el.style.display='none');app.rig.render(0);
+          return ['L','R'].map((side,i)=>rig.bones.get(`hand${side}`).bone.getWorldPosition(vector()).distanceTo(vector().fromArray(best.targets[i])));
+        },sample);
+        writeFileSync(join(out,`reach-preview-${sample.action}.json`),JSON.stringify({action:sample.action,handTargetErrors:check,scope:'Independent offline arm solve; visual acceptance and blade/puck contact are not asserted.'},null,2));
+        assert.ok(check.every(d=>Number.isFinite(d)&&d<.02),'Offline preview hand target missed');
+        await page.screenshot({path:join(out,`reach-preview-${sample.action}.png`)});
+      }
       if(errors.length)throw new Error(errors.join('\n'));
       await page.close();continue;
     }

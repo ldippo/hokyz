@@ -39,6 +39,28 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest diagnostic (no runtime/asset changes): models.mjs --puck --reach-study
+--shaft --reach-preview samples6132 candidates/action using four cardinal .33m
+blade offsets, yaw/tilt, shoulder reach, full-torso front bound, hand height<=
+shoulder+.1m and conservative shaft/AABB clearance. Selected normal9/dragL51,
+charge0/dragR0; no candidate is not a geometric impossibility proof. Offline
+preview independently solves both arms and sets right wrist to selected stick
+orientation; records hand-target errors and images. Initial evidence
+.gaming/models/1788726824325-4f2cKw/ normal and dragL inspected: upper glove
+crowds face; posture rejected for live game. Final repeat
+.gaming/models/1788727150018-B89aYc/ passes, normal image inspected, target
+errors saved. PASS means diagnostic works, NOT accepted posture or puck contact.
+Baseline .gaming/runs/1788726755242-Q1BWM9/; final
+.gaming/runs/1788727142811-XwkHD6/ build/214 tests/bots pass. Changes only
+scripts/harness/models.mjs and harness documentation. Self-review abstains on
+player improvement; rejects awkward shoulder-height grip despite numeric pass.
+Next precise action: assess lower hand placement and shaft proportions offline
+using the corrected collinear grips; check exact blade/puck contact and natural
+posture before runtime changes. Full-torso AABB is conservative, not anatomical
+collision geometry. Preserve physics; eventually test both facing directions,
+stride/charge/deke transitions and actual input. Current playable asset fix is
+3a1bc3e; unrelated README.md and docs/ROADMAP-v4.md remain untouched.
+
 Latest accepted asset fix: assets/src/build_skater.py derives non-goalie grips from
 shaft top(.17,.015,1.27),heel(.85,.12,.02), lerp fractions.04/.22; no hand-target
 mirroring, assert reach<=.57m. --skater-only exports public/models/skater.glb,

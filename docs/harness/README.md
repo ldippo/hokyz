@@ -274,11 +274,17 @@ Add `--puck` to show a carried puck placed by production stickPoint and measure
 nearest blade-vertex distance in the ice plane. It also asserts deke blade lateral
 motion follows the puck's side; it does not assert full blade/puck contact. Viewer
 support is opt-in via `?rigview=1&puck=1`, with a diagnostic placePuck hook.
-`--puck --reach-study` instead evaluates1533 yaw/tilt transforms per skating,
-charge and drag pose, reporting shoulder reach, hands ahead of torso bounds and
-shaft centerline/AABB clearance. Also measures hand anchors against the actual
+`--puck --reach-study` instead evaluates6132 yaw/tilt/placement transforms per
+skating, charge and drag pose, using four cardinal blade-center offsets around
+the puck. Reports shoulder reach, hands ahead of torso bounds, hand height no
+more than10cm above shoulders and shaft centerline/AABB clearance. Also measures hand anchors against the actual
 shaft centerline. Offline facing0 diagnostics, not a runtime pose or exact mesh
 collision/contact proof; PASS means valid geometry was sampled, not feasible poses.
+Add `--reach-preview` to independently solve both arms for each selected candidate,
+record hand-target errors and capture the resulting pose. Missing candidates are
+retained as null in the study, not counted as successful poses. This is offline
+diagnostic code only; a numerical pass does not establish natural posture, actual
+blade/puck contact, transition continuity or other facing directions.
 Add `--shaft` to require both actual hand-bone origins within3cm of the physical
 shaft centerline in those poses. Asset generation supports `--skater-only`; skater
 grips are derived from shared shaft endpoints and assert rest-pose arm reach.
