@@ -2,6 +2,7 @@
 Builds the HOKYZ skater + goalie meshes with a rigid-part armature and exports GLB.
 Run headless (never inside a live session with unsaved work):
   blender -b -P assets/src/build_skater.py -- --out public/models
+Add --skater-only to preserve the existing goalie export.
 Conventions: Z-up in Blender, exported Y-up. Model faces +X (sim facing = 0).
 Bones point along their local +Y (Blender convention). Skinning is rigid per part,
 except the torso which blends hips->chest by height so the waist bends.
@@ -314,9 +315,18 @@ def build_skater(goalie=False):
         assign_mat(vz, visor); vgroup_all(vz, 'head'); parts.append(vz)
 
     # arms: pre-posed holding the stick in front
-    # stick grip points
-    grip_top = Vector((0.28, 0.06, 0.95))
-    grip_low = Vector((0.5, 0.3, 0.6)) if not goalie else Vector((0.45, 0.32, 0.62))
+    # Derive skater grips from the shaft itself, within both arms' reach.
+    # Mirroring a grip across the body detached the lower glove from the shaft.
+    if goalie:
+        grip_top = Vector((0.28, 0.06, 0.95))
+        grip_low = Vector((0.45, 0.32, 0.62))
+        top = grip_top + Vector((-0.06, 0.02, 0.08))
+        heel = Vector((0.75, 0.42, 0.02))
+    else:
+        top = Vector((0.17, 0.015, 1.27))
+        heel = Vector((0.85, 0.12, 0.02))
+        grip_top = top.lerp(heel, 0.04)
+        grip_low = top.lerp(heel, 0.22)
     hand_targets = {1: grip_top, -1: grip_low}   # +y = left side (top hand), -y = right (low hand)
     # left hand on top, right hand low  → left is +y in Blender for a +X facing model
     arm_len_u, arm_len_f = 0.3, 0.28
@@ -329,9 +339,12 @@ def build_skater(goalie=False):
     for s, side in ((1, 'L'), (-1, 'R')):
         sh = Vector((SHOULDER[0], s * SHOULDER[1], SHOULDER[2]))
         target = hand_targets[s].copy()
-        target.y = abs(target.y) * s if s > 0 else -abs(target.y)
+        if goalie:
+            target.y = abs(target.y) * s if s > 0 else -abs(target.y)
         # two-bone IK in the plane defined by shoulder, target and an outward/back pole
         d = target - sh
+        if not goalie:
+            assert d.length <= arm_len_u + arm_len_f - 0.01, 'Skater grip exceeds arm reach'
         L = min(d.length, arm_len_u + arm_len_f - 0.01)
         cos_a = (arm_len_u ** 2 + L ** 2 - arm_len_f ** 2) / (2 * arm_len_u * L)
         a = math.acos(max(-1, min(1, cos_a)))
@@ -401,8 +414,6 @@ def build_skater(goalie=False):
                   ('foot.' + side, tuple(ankle), (0.2, s * 0.16, 0.05), 'shin.' + side)]
 
     # stick
-    top = grip_top + Vector((-0.06, 0.02, 0.08))
-    heel = Vector((0.86, 0.45, 0.02)) if not goalie else Vector((0.75, 0.42, 0.02))
     shaft = limb('shaft', top, heel, 0.013, 0.013, verts=24)
     assign_mat(shaft, stick_m); vgroup_all(shaft, 'stick'); parts.append(shaft)
     bdir = Vector((1, 0.35, 0)).normalized()
@@ -431,4 +442,5 @@ def build_skater(goalie=False):
     print('EXPORTED', path, 'tris', tris, 'bones', len(bones))
 
 build_skater(goalie=False)
-build_skater(goalie=True)
+if '--skater-only' not in argv:
+    build_skater(goalie=True)

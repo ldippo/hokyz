@@ -102,6 +102,20 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed skater grip geometry: shared shaft endpoints, reachable collinear hand
+targets without right-side mirroring. Regenerated skater only (92452 triangles,
+21 bones,3274648 bytes); goalie unchanged. Physical shaft check1788726434751-A9qWko
+places both hand origins within2.1e-7m of shaft, versus right.4258m before. Normal
+1788726443799-eI34BG gap improves to.408-.436m, not full puck contact. Initial
+right-drag capture1788726441538-jKVi7W hid stick behind body; focused repair reduces
+arm sweep, keeps torso cue. Final right1788726547444-giSWA8 gap.480-.536m and
+left1788726559102-MzVYtP pass direction/grip/ice; right capture inspected, visible
+forward stick. Final shaft study1788726571862-5eUau6 passes. Charge/turbo, five-pose
+capture1788726503146-sSdXzl and timing1788726511884-zhJKC5 pass/inspected as relevant.
+Gates1788726540056-rEuGuM build/214 tests/bots; keyboard1788726579257-VOZSwA pass.
+Self-review prefers real glove/shaft contact and preserved smooth detail; carrier
+reach, full animation transitions and target-GPU performance remain open.
+
 Completed offline reach study: .gaming/models/1788726176981-twHSr9 reports1533
 yaw/tilt candidates per pose. Normal has437 reachable,15 in-front/clear, selected
 shaft vertical; charge/left/right have0 meeting conservative full-torso front bound.

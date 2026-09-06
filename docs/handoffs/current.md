@@ -39,6 +39,32 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest accepted asset fix: assets/src/build_skater.py derives non-goalie grips from
+shaft top(.17,.015,1.27),heel(.85,.12,.02), lerp fractions.04/.22; no hand-target
+mirroring, assert reach<=.57m. --skater-only exports public/models/skater.glb,
+92452tris/21bones/3274648bytes. Goalie untouched. Old GLB recoverable at
+.gaming/grip-asset-5opyXH/skater.glb. Public/dist sha256 both
+7fdeea136f2e32a7c4972e730edeedb2d76f554a182edca5289cbcdb0593baee.
+models --reach-study --shaft now measures ACTUAL left/right hand origins, requires
+<3cm shaft distance.1788726434751-A9qWko reports max2.1e-7m, versus right.4258m
+before. Normal1788726443799-eI34BG gap.408-.436m and grip<4e-8m; image inspected.
+Initial right drag1788726441538-jKVi7W hides stick behind body with old full arm
+sweep. One focused repair sets armSweep=.15 both sides, preserving torso/deke sign.
+Final right1788726547444-giSWA8 gap.480-.536m, left1788726559102-MzVYtP pass12
+direction/grip/ice phases. Right image inspected: forward visible stick. Final
+physical shaft study1788726571862-5eUau6 passes. Earlier new-asset charge
+1788726456213-2DE7fM and turbo1788726468715-iCy0Bk pass; all-pose image
+1788726503146-sSdXzl inspected; timing1788726511884-zhJKC5 passes. Model paths
+under .gaming/models/. Gates .gaming/runs/1788726540056-rEuGuM build/214 tests/bots,
+keyboard .gaming/playtests/1788726579257-VOZSwA pass. Baseline1788726333515-mXsXHZ.
+Self-review prefers actual glove/shaft contact and retained rounded detail; no
+full carrier-contact claim. Next precise action: revisit carrier stick placement
+using corrected grip geometry AND front-of-torso/shaft-clearance constraints.
+Offline new-asset normal now has224 feasible transforms, charge77, drags0 under
+conservative AABB bound. Inspect a feasible normal pose before runtime solver;
+preserve physics, both facing directions, transitions and grip/ice checks.
+Full goal active; unrelated README/roadmap edits untouched.
+
 Latest offline study changes next action to ASSET GEOMETRY. models.mjs --puck
 --reach-study samples1533 yaw/tilt candidates per pose, conservative torso AABB
 from actual core vertices, shoulder reach, hands ahead of full torso and shaft

@@ -279,6 +279,9 @@ charge and drag pose, reporting shoulder reach, hands ahead of torso bounds and
 shaft centerline/AABB clearance. Also measures hand anchors against the actual
 shaft centerline. Offline facing0 diagnostics, not a runtime pose or exact mesh
 collision/contact proof; PASS means valid geometry was sampled, not feasible poses.
+Add `--shaft` to require both actual hand-bone origins within3cm of the physical
+shaft centerline in those poses. Asset generation supports `--skater-only`; skater
+grips are derived from shared shaft endpoints and assert rest-pose arm reach.
 `--arena --low --crowd-motion` explicitly enables only crowd animation on the
 low-tier fixture, records idle/wave/settled images and uniforms, and checks three
 animated meshes plus wave activity 0/1/0. This override is a shader exercise, not

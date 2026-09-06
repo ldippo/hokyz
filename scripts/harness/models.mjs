@@ -34,7 +34,7 @@ try {
             const elbow=rig.bones.get(`foreArm${side}`).bone.getWorldPosition(vector());
             const hand=rig.bones.get(`hand${side}`).bone.getWorldPosition(vector());
             return {side,shoulder,max:shoulder.distanceTo(elbow)+elbow.distanceTo(hand)-.015,
-              offset:side==='L'?rig.grips[0].offset.clone():stick.bone.worldToLocal(hand.clone())};
+              offset:stick.bone.worldToLocal(hand.clone())};
           });
           const body={min:vector(Infinity,Infinity,Infinity),max:vector(-Infinity,-Infinity,-Infinity)};
           const shaftRange={min:Infinity,max:-Infinity};
@@ -86,6 +86,7 @@ try {
       writeFileSync(join(out,'reach-study.json'),JSON.stringify({study,scope:'Offline facing0 pose feasibility, conservative torso AABB and shaft centerline; not a runtime pose or exact collision/contact proof.'},null,2));
       assert.ok(study.every(s=>s.counts.total===1533));
       assert.ok(study.every(s=>Number.isFinite(s.shaftRange.min)&&s.shaftRange.max>s.shaftRange.min&&s.gripShaftDistance.every(g=>Number.isFinite(g.distance))),'Missing shaft geometry');
+      if(process.argv.includes('--shaft'))assert.ok(study.every(s=>s.gripShaftDistance.every(g=>g.distance<.03)),'Hand is not on the physical shaft');
       if(errors.length)throw new Error(errors.join('\n'));
       await page.close();continue;
     }
