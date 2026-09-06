@@ -34,9 +34,24 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 - Final gates: .gaming/runs/1788702644703-RmEU89/ passed build, 113 tests and botplay.
   .gaming/playtests/1788702650829-2GNXpz/ passed the expanded browser flow, including
   actual Settings-to-match reduced-motion navigation after fixing Settings overflow.
-- git diff --check passes. No commits or publishing.
+- git diff --check passes. Harness, UI/gameplay and character models were pushed
+  to main in 02842c4, 1379ac8 and 5181b69 with explicit user authorization.
 
 ## Next
+
+Latest resumed P2 iteration: fixed breakout outlets converging on the same wing.
+`src/sim/ai/skaterAI.ts` derives both support lanes from the carrier's side;
+`tests/sim/support.test.ts` covers six cases (both attack directions, three carrier
+positions), including teammates crossing the carrier without changing targets.
+All six failed before the fix, pass afterward. Baseline:
+.gaming/runs/1788705059826-yhxxwh/. Candidate:
+.gaming/runs/1788705129993-HN6e1o/ (build, 119 tests, eight bot matches).
+Mean goals 8.75 -> 7.625; total shots 451 -> 404; hits 853 -> 780; own goals
+unchanged at two. Existing bounds unchanged. Browser flow:
+.gaming/playtests/1788705136939-8MsoSl/ passed. No rendering/input changes.
+Self-review prefers distinct passing options; sustained human feel and broader
+balance remain unproven. Next precise action: add sustained pass completion /
+possession evidence before further AI tuning, then proceed to P3 checks.
 
 Latest explicit request: improve hockey players without a low-poly art style.
 Implemented rounded tailored jerseys/limbs, facial features, curved visors,

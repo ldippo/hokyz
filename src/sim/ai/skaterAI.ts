@@ -176,9 +176,13 @@ export function thinkSkater(st: MatchState, sk: Skater, brain: Brain, dt: number
       const mySide = Math.sign(sk.pos.y - ownerSk.pos.y) || (brain.role === 'supportHigh' ? 1 : -1);
       const breakout = ownerSk.pos.x * dir < -RINK.blueLineX;
       if (breakout) {
-        // breakout lanes: wingers fan to the boards ahead of the carrier, trailer offers a drop pass
-        if (brain.role === 'supportHigh') brain.target = keepInRink({ x: ownerSk.pos.x + dir * 9, y: mySide * 8.5 });
-        else brain.target = keepInRink({ x: ownerSk.pos.x + dir * 3.5, y: -mySide * 7 });
+        // Both roles use the carrier's side, not their individual positions:
+        // otherwise opposite-side teammates can choose the same wing and then
+        // reverse targets as they cross the carrier. Offer a far-side stretch
+        // outlet and a shorter near-side option for the breakout.
+        const carrierSide = Math.sign(ownerSk.pos.y) || 1;
+        if (brain.role === 'supportHigh') brain.target = keepInRink({ x: ownerSk.pos.x + dir * 9, y: -carrierSide * 8.5 });
+        else brain.target = keepInRink({ x: ownerSk.pos.x + dir * 3.5, y: carrierSide * 7 });
         brain.turbo = rng.next() < diff(st, sk, 'turboUse') * 0.5;
       } else if (brain.role === 'supportHigh') {
         // go to far post / slot for one-timer

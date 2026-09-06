@@ -30,6 +30,17 @@ frame-rate and gamepad play are not established by these software-renderer check
 
 ## P2: On-ice responsiveness and decision-making (in-progress, depends on P0)
 
+Completed bounded iteration: separate breakout support lanes. Six regression
+cases reproduced both outlets choosing the same wing; both attack directions
+now offer opposite-side targets stable as teammates cross the carrier.
+Baseline `.gaming/runs/1788705059826-yhxxwh/`; passing candidate
+`.gaming/runs/1788705129993-HN6e1o/` (119 tests, eight bot matches).
+Mean goals 8.75 -> 7.625 within unchanged bounds; own goals unchanged at two.
+Browser flow passed `.gaming/playtests/1788705136939-8MsoSl/`.
+Self-review: prefer-after for distinct passing options; abstain on real-time feel
+and broader balance from this small cohort. Next: sustained pass completion and
+possession evidence, then P3 progression/accessibility checks.
+
 Inspect and exercise human controls and AI play. Improve evidenced shortcomings in
 passing, possession, teammate support and action feedback. Add behavioral tests for
 changed mechanics; compare seeded hockey metrics and exercise human match flow.
