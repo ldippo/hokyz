@@ -102,6 +102,16 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Focus-navigation investigation (open, candidate reverted): run-probe --nav uses
+real keyboard/synthetic pad polling to cycle choices and Save/Continue at150%.
+Baseline .gaming/rest/1788713787826-LRJeS4/ selected map node x=-168.5,y8,w108,h108;
+shop1788713753455-TLguft also clips selected card. Center alignment then actual
+mousemove hover guard did not resolve failures: rest1788713903174-N6eEik and
+shop1788713904466-Z7mu1Y. Both navigation edits fully reverted. Retained opt-in
+diagnostic, not a passing default gate. Keyboard failures prevent pad/activation
+coverage. No root-cause claim: inspect input-edge/focus-index/scroll traces next,
+including harness timing and browser zoom, before another game-code proposal.
+
 Completed responsive run-shell: wrapped header, standard44px actions, bounded
 cards/menus/titles, roster text wrapping, minmax main column; <=900px stacks
 roster below scrollable choices/map. Baselines rest1788713469227-cQtMGQ and

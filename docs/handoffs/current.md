@@ -39,6 +39,29 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest investigation, NO navigation fix shipped: run-probe.mjs --nav adds full
+keyboard/synthetic-pad cycling at390x844/150%, focused-action bounds, and planned
+Save & Quit/Continue state checks. Baseline rest1788713751874-2LCq2c failed focus
+visibility; richer repro .gaming/rest/1788713787826-LRJeS4/ has selected WALLS node
+x=-168.5,y8,w108,h108 (focus-failure.png inspected). Shop baseline
+.gaming/shop/1788713753455-TLguft/ selected card clipped. Center alignment candidate
+rest1788713843832-gt3x7V visited1/4; shop1788713845105-Tr6M9O selected card y=-806.75.
+One focused repair changed mouseover to movement-only hover; still failed:
+.gaming/rest/1788713903174-N6eEik/ node x=-168.5 and
+.gaming/shop/1788713904466-Z7mu1Y/ visited1/7. Both edits to nav.ts fully reverted
+(git diff empty). Controls regression on candidate passed
+.gaming/controls-layout/1788713905765-WIT9Va/, not proof run navigation works.
+Retain optional --nav diagnostic and document expected failures; do not claim pad
+or Save/Continue coverage because keyboard failure aborts earlier. No root cause
+established. Next precise action: instrument Nav idx, input justPressed, element
+bounds and ancestor scroll offsets before/after keydown, simStep and keyup; compare
+real-time loop against fixed-step probe at150% zoom. Distinguish probe artifacts,
+input timing, hover and native scrolling before a fresh focused implementation.
+Reverted-state gates .gaming/runs/1788713958996-Hsfix5/ pass build/152 tests/bot.
+Self-review abstains on navigation quality; new evidence invalidates any broad
+keyboard-access claim based on geometry alone. Previous responsive UI remains
+intact. Preserve unrelated README/ROADMAP edits.
+
 Latest visual fix: styles.css/runMap.ts run shell wraps topbar summary/actions,
 uses minmax(0,1fr) main column,44px body-font unskewed buttons, bounded cards/menus,
 smaller wrapping titles, stacked roster text. At<=900px shell scrolls vertically,
