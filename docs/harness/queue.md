@@ -102,6 +102,18 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed extended intro evidence: map-focus --intro-layout plus --boss-intro or
+--elite-intro prepares Iron Maidens/grudge2/ascension5/Long Bomb Night. Boss
+.gaming/map-focus/1788715098167-WNvzuV/ and elite1788715097770-VECDF7 pass six
+desktop/narrow/150% cases, taunts/modifier/phases/actions, keyboard back/re-entry
+and pad start. Boss150% inspected. Initial fixtures used invalid maidens ID:
+1788715045223-OE2y9n/1788715046495-vi9jWI are fixture failures, corrected to
+boss_maidens. Build/152 tests/bot .gaming/runs/1788715047446-UyrwuE/ pass. No game
+edits needed. Self-review supports UI access, not natural victory/balance.
+Next: reproduce Outnumbered elite mutator not spawning promised fourth skater;
+buildMatch currently creates extraSkater only inside boss branch. Check actual
+setup->MatchSim seam, not manually supplied roster fixtures, before repair.
+
 Completed pre-match layout: scoped match-intro content bounds/scroll, readable
 actions and matchup type, narrow stacked teams. Baseline
 .gaming/map-focus/1788714840163-Af9nOw/ clips names/gimmick on narrow and actions

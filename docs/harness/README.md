@@ -109,6 +109,9 @@ and expiry without transform keyframes; fixtures do not establish live match fee
 Add `--intro-layout` for pre-match team/rival/action reachability at desktop,
 narrow and150% text, followed by keyboard Back/re-entry and controller match start.
 The default seeded case is a normal match, not every boss/grudge/modifier variant.
+Combine `--intro-layout` with `--boss-intro` or `--elite-intro` to prepare an
+Iron Maidens encounter with grudge2, ascension5 and Long Bomb Night. Checks taunt,
+modifier and phase text too; this is UI/setup coverage, not natural progression.
 
 `node scripts/harness/route.mjs` exercises event -> shop -> rest in one run,
 reloading between encounters. It preserves generated links while preparing the

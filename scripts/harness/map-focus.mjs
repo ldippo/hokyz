@@ -8,6 +8,7 @@ mkdirSync('.gaming/map-focus', { recursive:true });
 const out=mkdtempSync(resolve('.gaming/map-focus',`${Date.now()}-`));
 const server=await preview({preview:{host:'127.0.0.1',port:0,open:false}});
 const errors=[],checks=[]; let browser;
+const variant=process.argv.includes('--boss-intro')?'boss':process.argv.includes('--elite-intro')?'elite':null;
 try {
   browser=await chromium.launch({args:['--enable-unsafe-swiftshader','--use-angle=swiftshader','--disable-dev-shm-usage']});
   const page=await browser.newPage({viewport:{width:1280,height:900},reducedMotion:'reduce'});
@@ -65,9 +66,20 @@ try {
   await page.evaluate(()=>{window.__hokyz.meta.textScale=1.5;window.__hokyz.applyAccessPrefs();});
   await press('s'); await capture('narrow-next');
   const expected=await page.locator('.node.focus').getAttribute('title');
+  if(variant) await page.evaluate(variant=>{
+    const run=window.__hokyz.run;
+    run.maps[0].rows[0].forEach(node=>{node.type=variant;node.rivalId='boss_maidens';node.mutatorId='long_bombs';});
+    run.grudges.boss_maidens={beaten:2,act:1};run.ascension=5;
+  },variant);
   await press('Enter');
-  assert.equal(await page.locator('.screen-title').textContent(),'NEXT MATCH');
-  assert.ok((await page.locator('.matchup .tn').last().textContent()).includes(expected.split(' · ')[0]));
+  const heading=variant==='boss'?'👑 BOSS FIGHT':variant==='elite'?'💀 ELITE MATCH':'NEXT MATCH';
+  assert.equal(await page.locator('.screen-title').textContent(),heading);
+  if(!variant) assert.ok((await page.locator('.matchup .tn').last().textContent()).includes(expected.split(' · ')[0]));
+  else {
+    assert.ok(await page.locator('.taunt').count());
+    assert.match(await page.locator('.match-intro-content').textContent(),/Long Bomb Night/);
+    if(variant==='boss') assert.ok(await page.locator('.match-intro .perk-chip').count()>=2);
+  }
   checks.push({activation:'Enter opened selected rival'});
   if (process.argv.includes('--intro-layout')) {
     for (const [width,height,scale] of [[1280,720,1],[390,844,1],[390,844,1.5]]) {
@@ -75,7 +87,7 @@ try {
       await page.evaluate(scale=>{window.__hokyz.meta.textScale=scale;window.__hokyz.applyAccessPrefs();document.querySelector('.screen').scrollTop=0;},scale);
       await page.screenshot({path:join(out,`intro-${width}-${scale}.png`)});
       const clipped=[];
-      for(const el of await page.locator('.screen [data-nav], .screen-title, .matchup .tn, .matchup .gimmick, .mod-tag').all()) {
+      for(const el of await page.locator('.screen [data-nav], .screen-title, .matchup .tn, .matchup .gimmick, .mod-tag, .taunt, .match-intro .perk-chip').all()) {
         await el.evaluate(el=>el.scrollIntoView({block:'center',inline:'nearest'}));
         const r=await el.boundingBox();
         if(!r||r.x< -1||r.y< -1||r.x+r.width>width+1||r.y+r.height>height+1)clipped.push(await el.textContent());
@@ -86,7 +98,7 @@ try {
     }
     // Actual keyboard back, then controller activation of the selected match.
     await press('Escape'); assert.equal(await page.locator('.run-shell').count(),1);
-    await press('Enter'); assert.equal(await page.locator('.screen-title').textContent(),'NEXT MATCH');
+    await press('Enter'); assert.equal(await page.locator('.screen-title').textContent(),heading);
     await page.evaluate(()=>{window.__mapPad.buttons[0]={pressed:true,value:1};window.__hokyz.simStep();window.__mapPad.buttons[0]={pressed:false,value:0};window.__hokyz.simStep();});
     assert.equal(await page.evaluate(()=>window.__hokyz.humanPlaying),true);
     checks.push({introNavigation:'Keyboard back/re-entry and controller Drop the Puck'});
@@ -94,5 +106,5 @@ try {
   assert.deepEqual(errors,[]);
 } catch(e){errors.push(String(e));process.exitCode=1;}
 finally{await browser?.close();await new Promise(resolve=>server.httpServer.close(resolve));}
-writeFileSync(join(out,'report.json'),JSON.stringify({pass:!errors.length,checks,errors,scope:'Seeded map, keyboard/synthetic-pad selection and keyboard activation; reduced-motion preference requested, not a whole-UI animation audit. Not physical controller evidence.'},null,2));
+writeFileSync(join(out,'report.json'),JSON.stringify({pass:!errors.length,variant,checks,errors,scope:'Seeded map, keyboard/synthetic-pad selection and keyboard activation; optional prepared boss/elite, grudge, ascension and mutator fixture. Reduced-motion preference requested, not a whole-UI animation audit. Not physical controller evidence.'},null,2));
 console.log(out,errors.length?errors:'PASS map focus');

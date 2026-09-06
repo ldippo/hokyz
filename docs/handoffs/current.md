@@ -39,6 +39,24 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest evidence: map-focus --intro-layout --boss-intro / --elite-intro prepares
+boss_maidens, grudge beaten2, ascension5 and long_bombs on reachable nodes after
+normal map-focus checks. Asserts taunt/modifier text and>=2 boss phase cards,
+all those boxes plus actions reachable at1280x720/390x844/150%; keyboard back/
+re-entry and pad Drop the Puck. Boss .gaming/map-focus/1788715098167-WNvzuV/ and
+elite .gaming/map-focus/1788715097770-VECDF7/ pass. Boss150% image inspected.
+No game edits required. Initial trials1788715045223-OE2y9n/1788715046495-vi9jWI
+failed because fixture used invalid maidens instead of boss_maidens; not game bugs.
+Gates .gaming/runs/1788715047446-UyrwuE/ build/152 tests/bot pass. Self-review
+supports extended intro access, abstains on balance/human play/natural progression.
+Next precise action: Outnumbered mutator in mutators.ts pushes an extraSkater
+phase for period1, but buildMatch generates mods.extraSkater only within boss
+branch, and MatchSim phase code requires that definition. Reproduce an actual
+elite+outnumbered buildMatch->MatchSim sequence and assert fourth opponent joins;
+existing depth tests manually populate extraSkater and may mask this omission.
+Also check boss phase assignment does not erase mutator phases. Fix only confirmed
+behavior, compare deterministic gates, preserve unrelated README/ROADMAP edits.
+
 Latest layout fix: matchIntroScreen gets match-intro/content wrapper; scoped CSS
 bounds content860px, scrolls overflow, preserves centered desktop, stacks teams
 <=700px, uses readable team/gimmick/action text and440px max unskewed buttons.
