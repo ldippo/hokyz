@@ -25,6 +25,12 @@ and `gates.json`; nonzero means failed. `pnpm harness:bot` runs just the bot gat
 Bounds derive from the existing balance test. `pnpm sim:batch 4` remains available
 for the original broader diagnostic report.
 
+Bot reports also include read-only possession diagnostics: live-play seconds owned
+by each team versus loose, pass attempts, intended-target completions, teammate /
+passer recoveries, interceptions, and unresolved passes at stoppages or capture
+end. These use end-of-tick ownership (plus immediate pass/shot events), not exact
+touch-by-touch tracking. Completion rate is diagnostic, not a new balance gate.
+
 `pnpm harness:playtest` checks the built game in Chromium: title layout at desktop
 and narrow sizes, real keyboard menu navigation and text entry, captain selection,
 save/continue, human movement and aimed shots in fixed-step fixtures, and pause /

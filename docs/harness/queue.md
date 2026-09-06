@@ -30,6 +30,14 @@ frame-rate and gamepad play are not established by these software-renderer check
 
 ## P2: On-ice responsiveness and decision-making (in-progress, depends on P0)
 
+Completed iteration: sustained passing/possession evidence. Read-only bot metrics
+and seven accounting tests added; baseline match outcomes exactly unchanged and
+repeat metrics deterministic. `.gaming/runs/1788705761716-bDK6Sz/` passes build,
+126 tests and eight bot games. Of 1,381 passes: 462 intended completions (33.5%),
+141 team/pass-owner recoveries, 769 interceptions, nine unresolved. Loose puck:
+34.4% of live play. Diagnostic, not a new gate. Next investigate AI passing into
+blocked lanes and receiver behavior before tuning passing frequency.
+
 Completed bounded iteration: separate breakout support lanes. Six regression
 cases reproduced both outlets choosing the same wing; both attack directions
 now offer opposite-side targets stable as teammates cross the carrier.

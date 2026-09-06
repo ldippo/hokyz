@@ -39,6 +39,21 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest P2 evidence iteration: added `scripts/harness/possession.ts`, integrated
+in botplay, and seven tests in `tests/sim/possessionMetrics.test.ts`. Read-only
+end-of-tick ownership plus immediate pass/shot events; distinguishes intended
+completion, same-team recovery, interception and unresolved-at-stoppage outcomes.
+Baseline `.gaming/runs/1788705678149-2HeKMA/`; final
+`.gaming/runs/1788705761716-bDK6Sz/` passes build, 126 tests and all bot gates.
+All original match fields exactly match baseline; repeated instrumentation run
+`.gaming/botplay/1788705715966.json` yields identical metrics. 1,381 attempts,
+462 completions, 141 recoveries, 769 interceptions, nine unresolved. Live play
+34.4% loose puck. No gameplay or visual changes, no new balance thresholds.
+Self-review: useful arcade-veteran diagnostic evidence, not proof of human feel.
+Next precise action: reproduce AI choosing blocked passing lanes (pressured and
+outlet branches), inspect intended receiver movement, then compare candidates
+against this completion/interception baseline and existing hockey bounds.
+
 Latest resumed P2 iteration: fixed breakout outlets converging on the same wing.
 `src/sim/ai/skaterAI.ts` derives both support lanes from the carrier's side;
 `tests/sim/support.test.ts` covers six cases (both attack directions, three carrier
