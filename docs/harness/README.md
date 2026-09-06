@@ -97,6 +97,12 @@ checks. Keyboard uses the actual movement-down binding, not aim ArrowDown; each
 press asserts its menu input edge. Focus traces and failure captures retain
 selected-action evidence. Synthetic pads do not prove physical hardware support.
 
+`node scripts/harness/map-focus.mjs` captures a seeded map before/after keyboard
+and synthetic-pad selection, checks the ring/pointer cue, and activates the chosen
+rival at narrow150% text. `--baseline` records without asserting cue styles.
+Evidence: `.gaming/map-focus/`. Reduced-motion preferences are requested, but
+this is not an audit of all existing UI animations or physical controllers.
+
 `node scripts/harness/route.mjs` exercises event -> shop -> rest in one run,
 reloading between encounters. It preserves generated links while preparing the
 first three encounter types/injuries. Checks cash, healing, training, pending

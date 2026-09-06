@@ -39,6 +39,25 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest visual fix: .node.available.focus now has static outer ring and ▶ marker,
+26px scroll margin. No animation added. New map-focus.mjs seeds map-focus-1,
+captures initial/keyboard-next/controller-previous/narrow150% and verifies Enter
+opens chosen rival. Baseline .gaming/map-focus/1788714361262-oSBXZo/ had no focus
+outline/marker; final .gaming/map-focus/1788714445147-y2Cb0w/ passes; desktop and
+narrow captures inspected, selected GHOULS unambiguous beside available WIZARDS.
+Same map/roster/viewport, randomized home team name differs. Gates
+.gaming/runs/1788714425884-ruMo59/ build/152 tests/bot pass; baseline
+.gaming/runs/1788714362257-ddUtsW/ passes. Map/rest --layout --nav regression
+.gaming/rest/1788714446436-hcG1t0/ passes layouts, keyboard/pad Save/Continue and
+training/skip persistence. Impeccable guided static shape cue; self-review prefers
+selection clarity, no physical-controller or overall animation-compliance claim.
+Next precise action: inspect reduced-motion CSS handling. app.applyQualityPref
+uses meta.reducedMotion for renderer, but applyAccessPrefs sets no CSS motion
+state, and OS media rule only disables title transitions. Map nodes still pulse
+under requested reduced motion. Reproduce both app setting and OS preference,
+then ensure nonessential UI pulses/transitions stop while focus stays visible.
+Preserve existing render behavior and unrelated README.md/ROADMAP-v4.md edits.
+
 Resolved prior navigation investigation. Probe bug: ArrowDown maps to aimDown,
 not Nav down. Corrected run-probe reads movement binding (normallyS), asserts
 down edge, retains focus trace. Prior clipping/unchanged-focus claims are not

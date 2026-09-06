@@ -102,6 +102,17 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed map selection cue: static ice-colored outer ring plus pointer on
+.node.available.focus, with scroll margin preserving marker visibility. Baseline
+.gaming/map-focus/1788714361262-oSBXZo/ shows identical available nodes (outline/
+marker none). Final .gaming/map-focus/1788714445147-y2Cb0w/ passes keyboard-next,
+pad-previous, narrow150% and Enter-selected-rival, desktop/narrow inspected. Same
+seeded map/roster; randomized team name differs. Gates
+.gaming/runs/1788714425884-ruMo59/ pass build/152 tests/bot. Map/rest navigation
+and persistence .gaming/rest/1788714446436-hcG1t0/ pass. Impeccable guided static
+non-color focus indication; self-review prefers clarity. Existing pulse remains
+even with reduced-motion preferences: next verify/map CSS animation suppression.
+
 Resolved focus investigation: prior probe used ArrowDown (aimDown), not menu-down.
 Probe now reads actual movement binding and asserts input edge. Corrected baseline
 rest1788714111297-IzWPke trace proves genuine hover stealing: keyboard selects

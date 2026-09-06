@@ -234,6 +234,8 @@ table.box td.num { text-align: right; }
 .node .ico { font-size: 26px; line-height: 1; }
 .node.available { border-color: var(--gold); color: #fff; cursor: pointer; box-shadow: 0 0 20px rgba(255,210,63,0.4); animation: pulse 1.4s infinite; }
 .node.available:hover { transform: scale(1.12); }
+.node.available.focus { outline: 3px solid var(--ice); outline-offset: 5px; scroll-margin: 26px; }
+.node.available.focus::after { content: '▶'; position: absolute; left: -24px; top: 50%; transform: translateY(-50%); color: var(--ice); font: 16px/1 var(--font-body); pointer-events: none; }
 .node.done { border-color: #2fa84f; opacity: 0.6; }
 .node.current { border-color: #fff; background: #2a3352; }
 .node.boss { width: 92px; height: 92px; margin: -46px 0 0 -46px; border-color: var(--red); }
