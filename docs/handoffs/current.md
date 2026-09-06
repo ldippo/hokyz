@@ -39,6 +39,26 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest model iteration: fixed deke handedness in skaterRig.ts (render Y rotation
+has opposite sign to sim left). Optional rigViewer puck/production stickPoint hook
+and models.mjs --stride --stick --puck measure carried puck vs actual blade verts.
+Baseline gap normal.584-.621m (1788724873271-q1r0Wc), charge.579-.621m
+(1788724909311-IgTOfA), dragL1.701-1.733m (1788724885973-00hAGd), dragR1.078-
+1.166m (1788724897799-ji7uWD). Before/after model captures inspected. Candidate
+1788725006200-8ESXLR left1.019-1.101m;1788725017518-FFiQBp right.808-1.053m.
+Direction assertions in1788725054457-7Xq1WC /1788725065751-D765uN pass12 phases,
+left lateral+.55..+.58m/right-.34..-.31m. Grip and ice gates still pass. Paths under
+.gaming/models/. Final gates .gaming/runs/1788725098413-1722pK build/214 tests/bots;
+baseline1788724810800-hhYdqp. Keyboard .gaming/playtests/1788725077857-StkV2X pass.
+Self-review prefers corrected deke direction but does NOT claim stick contact:
+large forward/reach mismatch remains. Next precise action: carrier-only right-arm/
+stick reach correction toward production stickPoint, preserving left grip and
+blade clearance. Keep simulation untouched; test normal/turbo/charge/both drags.
+Current fixture uses facing0; extend to both facing directions before broad claim.
+Full goal active, unrelated README/roadmap edits untouched.
+Final reruns with fixture hasPuck explicitly true also pass:
+.gaming/models/1788725146733-Cuetfg (left),1788725158730-V98bVt (right).
+
 Latest completed reduced-motion locator: PuckMesh.update optional reducedMotion
 flag holds scale1; MatchView supplies access preference in live AND replay paths.
 New unit test and scripts/harness/puck-motion.mjs cover normal/reduced/restored

@@ -102,6 +102,19 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed deke handedness correction: Three.js positive Y turns +X toward -Z,
+opposite simulation left (+y/render+Z). Mirror rig deke side, retaining existing
+grip-safe poses. Both12-phase direction/grip/ice checks pass. Added optional real
+puck to rig viewer and production stickPoint/nearest-blade diagnostics. Baseline
+normal1788724873271-q1r0Wc gap.584-.621m, charge1788724909311-IgTOfA .579-.621m;
+dragL1788724885973-00hAGd1.701-1.733m, dragR1788724897799-ji7uWD1.078-1.166m.
+Corrected captures1788725006200-8ESXLR /1788725017518-FFiQBp inspected: gaps
+1.019-1.101m / .808-1.053m. Direction assertions1788725054457-7Xq1WC (left+.55m)
+/1788725065751-D765uN (right-.32m) pass. All under .gaming/models/.
+Gates1788725098413-1722pK build/214 tests/bots and keyboard playtest
+1788725077857-StkV2X pass. Self-review prefers correct deke direction, but full
+stick contact remains visibly wrong. Next solve carrier reach without moving sim.
+
 Completed reduced-motion locator: live/replay MatchView passes preference into
 PuckMesh; reduced mode uses steady scale1. New unit and production-startView
 browser fixture verify normal/reduced/restored scales1,1.15,.85 ->1,1,1 ->normal.

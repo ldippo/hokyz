@@ -1,6 +1,8 @@
 import * as THREE from 'three/webgpu';
 import type { App } from '../app';
-import { makeSkater } from '../sim/skater';
+import { makeSkater, stickPoint } from '../sim/skater';
+import { makePuck } from '../sim/puck';
+import { PuckMesh } from './puckMesh';
 import { stats } from '../sim/fixtures';
 import { SkaterRig, jerseySpecFor, loadRigs } from './skaterRig';
 import { RinkMesh } from './rinkMesh';
@@ -112,5 +114,12 @@ export async function startRigViewer(app: App): Promise<void> {
   };
   if (capture) for (let i = 0; i < 45; i++) tick(false);
   tick();
-  (window as unknown as { __rigview: unknown }).__rigview = { entries, grig, gState };
+  const puck = params.has('puck') ? new PuckMesh() : null;
+  puck?.addTo(app.rig.scene);
+  const placePuck = (sk: typeof entries[number]['st']) => {
+    const state = makePuck(); state.pos = stickPoint(sk); state.owner = sk.id;
+    puck?.snap(state); puck?.update(state, 1, 0, true);
+    return state.pos;
+  };
+  (window as unknown as { __rigview: unknown }).__rigview = { entries, grig, gState, placePuck };
 }

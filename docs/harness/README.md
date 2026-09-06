@@ -269,6 +269,10 @@ check support height and ring anchoring, not natural human skating or stick cont
 Add `--stick` to assert stick clearance and opposite-hand grip error below2cm.
 `--action=charge`, `--action=dragL` and `--action=dragR` prepare additional poses
 through the same12 stride phases. These are pose fixtures, not actual shot input.
+Add `--puck` to show a carried puck placed by production stickPoint and measure
+nearest blade-vertex distance in the ice plane. It also asserts deke blade lateral
+motion follows the puck's side; it does not assert full blade/puck contact. Viewer
+support is opt-in via `?rigview=1&puck=1`, with a diagnostic placePuck hook.
 `--arena --low --crowd-motion` explicitly enables only crowd animation on the
 low-tier fixture, records idle/wave/settled images and uniforms, and checks three
 animated meshes plus wave activity 0/1/0. This override is a shader exercise, not

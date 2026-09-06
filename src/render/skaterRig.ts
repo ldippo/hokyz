@@ -456,7 +456,9 @@ export class SkaterRig {
     }
     if (sk.deke > 0 && sk.dekeKind !== 'spin') {
       const k = Math.sin(Math.min(1, sk.deke / 0.45) * Math.PI);
-      const side = sk.dekeKind === 'dragL' ? 1 : -1;
+      // Positive Three.js Y rotation turns +X toward -Z; simulation left is
+      // +y (render +Z). Mirror the rig sweep to follow the actual puck drag.
+      const side = sk.dekeKind === 'dragL' ? -1 : 1;
       // The far-side drag is carried mostly by the torso. A full mirrored arm
       // sweep puts the top grip beyond the opposite arm's physical reach.
       const armSweep = side < 0 ? 0.15 : 1;
