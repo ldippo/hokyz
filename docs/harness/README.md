@@ -161,6 +161,13 @@ match counters, draft/level-up reloads, and earned Act2 or natural loss settleme
 Evidence goes to `.gaming/natural-route/`. A forced Hit Parade is explicitly
 unsupported, never rewritten. Shootout handling exists but is not covered by the
 initial three seeds. This is not human difficulty or complete-run victory evidence.
+Add `--through-act=2` to continue until earned Act3 or natural loss. Map checks
+allow only the production new-act rematch rule: at most half eligible match/elite
+nodes reassigned to previously beaten rivals; topology and other content stay fixed.
+Each saved step also writes a full `.checkpoint.json` with persisted run/meta.
+`--resume=.gaming/natural-route/<run>/<step>.checkpoint.json` loads that exact
+checkpoint through Continue; reports retain its path. Resumed evidence depends on
+the source checkpoint's provenance, not merely on the presence of a save file.
 
 `node scripts/harness/hit-parade-full.mjs` runs idle and scripted pursuit through
 all 60 simulated seconds, using DOM movement/check keys and natural timer expiry.

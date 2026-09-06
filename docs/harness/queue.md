@@ -102,6 +102,17 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed extended natural-route/checkpoints: --through-act=2 and --resume.
+Full persisted run/meta roundtrip exact; fresh Act2 resume1788722536277-yTO2iI
+passes. Initial all-map gate correctly exposed intentional new-act rival rematches;
+repair permits only at most half eligible nodes, beaten rivals, unchanged topology.
+Audited original transitions3/6 and4/8 nodes. Resumed route-act-2
+1788722658419-7JRFXM wins Act2 matches5-2,3-2,2-0 then loses boss2-6;
+route-act-3 1788722701908-BHxH7t loses first Act2 match1-5. Both settlement checks
+pass; screenshots inspected. Gates1788722732015-K594SW build/197 tests/bot pass.
+No game edits/Act3 victory. Next inspect saved Act2 boss setup/counterplay rather
+than reduce difficulty based on first-offer AI strategy.
+
 Completed untouched-map Act1 traversal: natural-route.mjs preserves generated
 maps/rosters/injuries, uses connected real choices and AI pilots, checks upgrades/
 reloads/map immutability. route-act-1 loses2-3 first match; route-act-2 wins10-1,

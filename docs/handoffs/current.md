@@ -39,6 +39,35 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest Act2 evidence: natural-route.mjs supports --through-act=2, all-map checks,
+full persisted run/meta `.checkpoint.json` files and --resume=<checkpoint> via
+Continue. Source paths retained in reports. No gameplay edits.
+Full-start runs1788722303223-N4s2d3 /1788722304745-j1RWPe repeated Act1 wins,
+then failed an over-strict new all-map assertion: completeNode intentionally
+calls reassignActRivals on act entry. One focused repair permits rival-only changes
+in newly entered act, only match/elite nodes, previously beaten rivals, at most
+half eligible nodes; all other content/topology fixed. Read-only audit of retained
+initial maps and Act2 checkpoints confirms exactly3/6 and4/8 legitimate changes.
+Source state is earned despite this harness assertion failure, not an injected win.
+Fresh-browser resume .gaming/natural-route/1788722536277-yTO2iI passes Act2 arrival;
+input/output full run AND meta JSON compare exactly. Its source is
+.gaming/natural-route/1788722303223-N4s2d3/act-1-row-5-run.checkpoint.json.
+Resumed through Act2:1788722658419-7JRFXM wins5-2,3-2,2-0, visits event/rest,
+loses boss2-6;1788722701908-BHxH7t loses first Act2 match1-5. Both pass natural
+loss/reload settlement, preserved earned state/map checks. Result screenshots
+inspected. Gates .gaming/runs/1788722732015-K594SW build/197 tests/bot pass;
+baseline1788722301834-25kRop. No Act3 advancement claim; new transition assertion
+audited against prior retained artifacts but not yet reached at Act3 in these runs.
+Self-review supports checkpoint recovery and honest progression outcomes, not
+human difficulty/fun or complete-run victory. First-offer upgrade policy and
+healing-only shop spending are limited strategies; do not infer needed nerfs.
+Next precise action: inspect earned pre-Act2-boss checkpoint
+.gaming/natural-route/1788722658419-7JRFXM/act-2-row-4-run.checkpoint.json,
+including roster/perks/modifiers and intro counterplay. Verify boss rules and
+readability before considering balance. Resume with --through-act=2 and this
+--resume path for an exact natural replay. Full goal active; unrelated README.md
+and docs/ROADMAP-v4.md edits untouched.
+
 Latest natural Act1 evidence: new scripts/harness/natural-route.mjs starts via
 New Run/captain and never edits map nodes, rosters, injuries, scores or winners.
 Only hockey pilot switches to production AI. Chooses connected nodes, prioritizes
