@@ -102,6 +102,17 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed Controls layout iteration: bounded 640px list, readable body labels,
+compact unskewed actions, stacked narrow rows and restrained dark backdrop.
+Baseline `.gaming/controls-layout/1788708545165-I5BgRw/` clips reset at narrow
+normal text and all action labels at narrow150%. Candidate
+`.gaming/controls-layout/1788708623724-DUAwYk/` passes all three viewport/text
+cases, keys/labels/actions/overflow and Reset/Back. Desktop/narrow150% images
+inspected. Gates `.gaming/runs/1788708608986-GMoruF/`: build/141 tests/bot pass.
+Impeccable informed bounded typography, standard buttons and stacked layout.
+Self-review prefers readability; keyboard/controller menu navigation still needs
+repair because controlsScreen disables Nav for the entire screen, not just capture.
+
 Completed input-safety iteration: occupied gameplay bindings now swap instead of
 silently unbinding another action; menu confirmation/back cannot be stolen.
 Settings help uses actual bindings. Four unit cases cover swapping, reserved keys,

@@ -69,6 +69,10 @@ reward/league transitions and settlement run normally. Evidence is under
 each action is reachable within the viewport after scrolling. `--baseline`
 records clipping without asserting. Evidence: `.gaming/result-layout/`.
 
+`node scripts/harness/controls-layout.mjs` checks Controls at desktop, narrow,
+and narrow 150% text: labels, keys, actions, horizontal overflow and Reset/Back.
+Use `--baseline` to record without asserting. Evidence: `.gaming/controls-layout/`.
+
 After building, `pnpm harness:capture` starts its own Vite preview server on an
 ephemeral loopback port, uses Playwright Chromium, and writes title/rink screenshots
 and telemetry under `.gaming/captures/`. Install Chromium once with

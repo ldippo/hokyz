@@ -11,7 +11,7 @@ export function controlsScreen(app: App): void {
     const rows = REMAPPABLE.map((r) => {
       const isWaiting = waiting === r.action;
       const key = h('span', { class: isWaiting ? 'rebind-wait' : '' }, isWaiting ? 'PRESS A KEY…' : app.input.label(r.action));
-      return h('div', { class: 'settings-row' }, h('span', {}, r.label), h('div', { style: 'display:flex;gap:10px;align-items:center' }, h('kbd', { style: 'font-size:16px;padding:4px 10px' }, key), btn('Rebind', () => {
+      return h('div', { class: 'settings-row' }, h('span', {}, r.label), h('div', { class: 'binding-action' }, h('kbd', {}, key), btn('Rebind', () => {
         waiting = r.action;
         render();
         app.input.capture = (code) => {
@@ -31,11 +31,11 @@ export function controlsScreen(app: App): void {
         };
       })));
     });
-    const el = h('div', { class: 'screen transparent', style: 'overflow:auto;justify-content:flex-start;padding:24px 0' },
+    const el = h('div', { class: 'screen controls-screen' },
       h('h2', { class: 'screen-title' }, 'CONTROLS'),
       h('p', { class: 'screen-sub' }, 'Choose a key. Occupied gameplay keys swap bindings; Enter stays available for menus. Escape cancels. Gamepad uses the standard layout.'),
-      h('div', { style: 'margin:12px 0' }, ...rows),
-      h('div', { class: 'menu', style: 'flex-direction:row' },
+      h('div', { class: 'bindings-list' }, ...rows),
+      h('div', { class: 'menu' },
         btn('Reset to defaults', () => { app.input.resetKeys(); app.meta.keymap = null; app.saveMeta(); render(); }),
         btn('Back', () => { app.input.capture = null; settingsScreen(app); }, 'primary'),
       ),

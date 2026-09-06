@@ -255,6 +255,26 @@ p.screen-sub { color: #8fa3d9; letter-spacing: 0.15em; text-transform: uppercase
 .unlock-grid { display: grid; grid-template-columns: repeat(auto-fill, 220px); gap: 12px; justify-content: center; max-width: 1000px; margin-top: 20px; }
 .settings-row { display: flex; align-items: center; justify-content: space-between; width: 360px; padding: 8px 0; border-bottom: 1px solid #2b3352; font-family: var(--font-display); letter-spacing: 0.08em; font-size: 20px; }
 .settings-row input[type=range] { width: 160px; }
+.controls-screen { justify-content: flex-start; overflow-y: auto; padding: 32px 24px; background: oklch(14% .008 260 / .98); }
+.controls-screen > * { flex-shrink: 0; width: 100%; max-width: 640px; }
+.controls-screen .screen-title { font-size: 2.5rem; margin: 0; }
+.controls-screen .screen-sub { font-size: 1rem; line-height: 1.5; letter-spacing: 0; text-transform: none; color: oklch(81% .025 260); margin-top: 12px; }
+.bindings-list { margin: 24px 0 0; }
+.controls-screen .settings-row { width: 100%; gap: 12px; padding: 12px 0; font-family: var(--font-body); font-size: 1rem; line-height: 1.5; letter-spacing: 0; }
+.controls-screen .settings-row > span { flex: 1; min-width: 0; }
+.binding-action { display: flex; align-items: center; gap: 12px; }
+.binding-action kbd { font-family: var(--font-body); font-size: 1rem; padding: 4px 8px; text-align: center; min-width: 44px; overflow-wrap: anywhere; }
+.controls-screen .btn { font-family: var(--font-body); font-size: 1rem; letter-spacing: 0; text-transform: none; padding: 8px 16px; min-height: 44px; transform: none; }
+.controls-screen .btn:hover, .controls-screen .btn.focus { transform: none; }
+.controls-screen .btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.controls-screen .menu { min-width: 0; margin-top: 24px; }
+@media (max-width: 600px) {
+  .controls-screen { padding: 24px 16px; }
+  .controls-screen .screen-title { font-size: 2rem; }
+  .controls-screen .settings-row { flex-wrap: wrap; gap: 8px; }
+  .controls-screen .settings-row > span { flex-basis: 100%; }
+  .binding-action { width: 100%; justify-content: space-between; }
+}
 .settings-screen { justify-content: flex-start; overflow-y: auto; padding: 32px 24px; }
 .settings-screen > * { flex-shrink: 0; max-width: 100%; }
 .settings-screen .settings-row { width: min(580px, calc(100vw - 48px)); gap: 24px; font-family: var(--font-body); font-size: 14px; letter-spacing: 0; line-height: 1.5; padding: 12px 0; }

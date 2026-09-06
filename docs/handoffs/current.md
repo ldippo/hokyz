@@ -39,6 +39,25 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest P3 visual pass: Controls uses scoped controls-screen/bindings-list styles,
+640px maximum width, body labels/buttons, dark backdrop, 44px minimum actions,
+stacked rows at narrow widths and full-width Reset/Back. No simulation changes.
+Baseline gates .gaming/runs/1788708511158-v8FEVr/; final
+.gaming/runs/1788708608986-GMoruF/ (build/141 tests/bot pass).
+New controls-layout.mjs baseline .gaming/controls-layout/1788708545165-I5BgRw/
+shows narrow reset and 150% labels clipped. Final
+.gaming/controls-layout/1788708623724-DUAwYk/ passes desktop720/narrow844/
+narrow150%, including all keys/labels/actions/overflow and Reset/Back interaction.
+Desktop and narrow150% captures inspected. Impeccable informed hierarchy, standard
+buttons and stacked layout. Self-review prefers accessibility readability.
+Remap/reload/pass/receive/shot regression also passes:
+.gaming/playtests/1788708625009-2Sdimn/.
+Next precise action: Controls currently calls showScreen(el,false) for the whole
+screen, so keyboard/gamepad menu navigation is disabled even outside capture.
+Restore navigation while idle, suspend only during capture, preserve selection,
+and verify keyboard entry/rebinding/cancel/reset/back without a mouse. Then test
+match/skills result layouts and gamepad/hardware/full-run behavior.
+
 Latest P3 fix: safe remapping in src/core/input.ts swaps occupied gameplay keys,
 rejects stealing confirm/back, and clears held keyboard actions after a change.
 Controls explains swaps/reserved keys and handles rejection; Settings help renders
