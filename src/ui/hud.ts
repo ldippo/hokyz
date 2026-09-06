@@ -7,6 +7,7 @@ export class Hud {
   private announceTimer = 0;
   private promptTimer = 0;
   private lastCountdown = -1;
+  private shootoutKey = '';
   constructor(parent: HTMLElement, private humanTeam: 0 | 1 | null, perkNames: string[] = []) {
     this.root = document.createElement('div');
     this.root.className = 'hud';
@@ -21,10 +22,9 @@ export class Hud {
       <div class="fight" data-el="fight"><div class="fighter f0"><div class="fname" data-el="fname0"></div><div class="fhp"><div class="fhp-fill" data-el="fhp0"></div></div></div><div class="fcue" data-el="fcue"></div><div class="fighter f1"><div class="fname" data-el="fname1"></div><div class="fhp"><div class="fhp-fill" data-el="fhp1"></div></div></div></div>
       <div class="player-tag"><div class="pname" data-el="pname"></div><div class="ptype" data-el="ptype"></div><div class="hp"><div class="hp-fill" data-el="hp"></div></div></div>
       <div class="fire-streak" data-el="streak"><span></span><span></span><span></span></div>
-      <div class="hud-feedback"><div class="announce" data-el="announce"></div><div class="countdown" data-el="countdown"></div></div>
+      <div class="hud-feedback"><div class="so" data-el="so"><div class="so-row" data-el="so0"></div><div class="so-mid">SHOOTOUT</div><div class="so-row" data-el="so1"></div></div><div class="announce" data-el="announce"></div><div class="countdown" data-el="countdown"></div></div>
       <div class="cine-tag" data-el="tag"></div>
       <div class="prompt" data-el="prompt"></div>
-      <div class="so" data-el="so"><div class="so-row" data-el="so0"></div><div class="so-mid">SHOOTOUT</div><div class="so-row" data-el="so1"></div></div>
       <div class="flash" data-el="flash"></div>
       <div class="vignette-fire" data-el="vig"></div>
     `;
@@ -55,12 +55,23 @@ export class Hud {
   shootout(on: boolean, results: [boolean[], boolean[]] = [[], []], rounds = 3, names: [string, string] = ['', '']): void {
     this.els.so.classList.toggle('on', on);
     if (!on) return;
+    const key = JSON.stringify([results, rounds, names]);
+    if (key === this.shootoutKey) return;
+    this.shootoutKey = key;
     for (const i of [0, 1] as const) {
       const r = results[i];
       const cells = [];
       const n = Math.max(rounds, r.length);
-      for (let k = 0; k < n; k++) cells.push(k < r.length ? (r[k] ? '●' : '✕') : '○');
-      this.els[`so${i}`].textContent = `${names[i]}  ${cells.join(' ')}`;
+      for (let k = Math.max(0, n - 5); k < n; k++) cells.push(k < r.length ? (r[k] ? '●' : '✕') : '○');
+      const row = this.els[`so${i}`];
+      const summary = document.createElement('span');
+      summary.className = 'so-summary';
+      summary.textContent = `${names[i]} · ${r.filter(Boolean).length} goals / ${r.length} shots`;
+      const recent = document.createElement('span');
+      recent.className = 'so-attempts';
+      recent.textContent = `${n > 5 ? 'Last 5: ' : ''}${cells.join(' ')}`;
+      recent.setAttribute('aria-label', r.map((goal, k) => `Attempt ${k + 1}: ${goal ? 'goal' : 'miss'}`).join(', ') || 'No attempts yet');
+      row.replaceChildren(summary, recent);
       this.els[`so${i}`].classList.toggle('lead', r.filter(Boolean).length > results[i === 0 ? 1 : 0].filter(Boolean).length);
     }
   }

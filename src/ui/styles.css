@@ -413,11 +413,14 @@ p.screen-sub { color: #8fa3d9; letter-spacing: 0.15em; text-transform: uppercase
 .drill-btns { display: flex; gap: 10px; justify-content: center; }
 .drill-btns .btn { font-size: 16px; padding: 6px 14px; }
 
-.so { position: absolute; left: 50%; top: 96px; transform: translateX(-50%); display: none; align-items: center; gap: 18px; font-family: var(--font-display); background: rgba(8,10,18,0.8); border: 2px solid #3a4260; padding: 6px 16px; }
-.so.on { display: flex; }
-.so-row { font-size: 22px; letter-spacing: 0.25em; color: #dbe9ff; }
+.so { display: none; width: 100%; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 16px; font-family: var(--font-body); background: oklch(17% .03 260 / .94); border: 1px solid oklch(40% .035 260); border-radius: 4px; padding: 8px 12px; }
+.so.on { display: grid; }
+.so-row { min-width: 0; font-size: 16px; line-height: 1.25; color: var(--ice); overflow-wrap: anywhere; }
+.so-summary { display: block; font-size: 12px; }
+.so-attempts { display: block; margin-top: 3px; }
 .so-row.lead { color: var(--gold); }
-.so-mid { font-size: 12px; letter-spacing: 0.3em; color: var(--red); }
+.so-mid { grid-column: 1 / -1; grid-row: 1; font-size: 12px; letter-spacing: 0.12em; text-align: center; color: var(--ice); }
+@media (max-width: 700px) { .so { grid-template-columns: minmax(0, 1fr); gap: 6px; } }
 
 .taunt { font-family: var(--font-display); font-size: 22px; letter-spacing: 0.06em; color: var(--red); text-shadow: 0 2px 0 #000; margin-bottom: 6px; text-align: center; max-width: 720px; }
 .taunt span { display: block; font-size: 12px; letter-spacing: 0.25em; color: var(--gold); margin-top: 4px; }

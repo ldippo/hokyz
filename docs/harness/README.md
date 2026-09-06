@@ -68,6 +68,9 @@ and zero-cash skip. Reports actual outcomes, not guaranteed wins. Evidence:
 `.gaming/shootout-full/`. Not human difficulty or hardware timing evidence.
 It also checks the committed final setup RNG draw equals the consumed match seed,
 using the production RNG constructor and one-draw rewind, with JSON evidence.
+Add `--layout` for opening and extended natural-shootout tracker captures at
+desktop and390px/150% text, bounds checks and exact goal/attempt totals. The named
+AI fixture must reach extended history. `--baseline` skips layout assertions.
 
 `node scripts/harness/endings.mjs` (after building) prepares a terminal loss and
 checks that the saved ended run survives the result screen, Continue settles it,

@@ -102,6 +102,15 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed shootout tracker: flow-separated from announcements, wrapped team rows,
+full goals/shots totals and recent5 symbols (full history aria-label). Cached
+updates. Impeccable guided layout. Natural baseline1788716895247-cmLyjr clips;
+final .gaming/shootout-full/1788717005768-1lzLIi passes opening/extended desktop
+and narrow150% bounds/totals; images inspected. Natural idle/AI outcomes and
+times unchanged (5/20 attempts). Gates1788716994544-f8BKYy build/157 tests/bot
+pass. Self-review prefers readable tracker; no human difficulty approval. Next:
+fight challenge/cue layout and actual accept/decline controls.
+
 Completed shot-power HUD: labeled panel anchored above actual turbo panel,
 matching width/no overlap. Impeccable guided clarity. Baseline playtest
 1788716668975-VPRHIi desktop overlap/narrow floating bar; final

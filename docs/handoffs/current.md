@@ -39,6 +39,24 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest shootout tracker polish: tracker moved into shared feedback flow above
+announcement, compact desktop2-column/narrowstack, explicit goals/shots totals,
+up to5 recent symbols (Last5 label after longer history). Full attempt sequence
+retained as aria-label; cached HUD signature avoids replacing DOM every frame.
+Impeccable guided bounded hierarchy/readability. Baseline natural --layout
+.gaming/shootout-full/1788716895247-cmLyjr clips narrow tracker; final
+1788717005768-1lzLIi passes opening/extended desktop/narrow150% bounds and exact
+totals. Opening and AIextended narrow screenshots inspected; latter shows6shots
+each with recent5 and separate NO GOAL announcement. Natural outcomes unchanged:
+idle54.85s/5attempts0-1; AI115.4667s/20attempts3-4 (team deciding point0-1).
+Gates .gaming/runs/1788716994544-f8BKYy build/157 tests/bot pass, baseline
+1788716869450-WnRzB0. Self-review prefers readable attempt history/totals, abstains
+on physical accessibility or human difficulty. Entire history is not visually
+listed once>5; totals preserve all attempts. Script now requires AIextended
+capture; that final assertion was added during run, observed report does contain
+extended case. Next precise action: fight challenge/fight cue HUD at narrow150%,
+including actual keyboard accept/decline and cue routing. Full goal active.
+
 Latest charge HUD fix: charge-wrap now lives inside turbo-wrap, anchored above
 its actual dimensions with8px gap, matching width and labeled SHOT POWER. Dark
 backing/track replaces floating skewed unlabeled bar. Impeccable guided grouping

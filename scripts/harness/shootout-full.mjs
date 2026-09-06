@@ -49,6 +49,7 @@ try {
     });
     let over = false;
     const events = [];
+    const captured=new Set();
     for (let ticks = 0; ticks < 36000 && !over; ticks += 300) {
       const batch = await page.evaluate(() => {
         const app = window.__hokyz, events = [];
@@ -60,8 +61,31 @@ try {
         return { over: false, events };
       });
       over = batch.over; events.push(...batch.events);
+      const stage=events.filter(e=>e.type==='shootoutResult').length>=12?'extended':'opening';
+      if(process.argv.includes('--layout')&&!over&&!captured.has(stage)) {
+        captured.add(stage);
+        for(const [width,height,scale] of [[1280,720,1],[390,844,1.5]]) {
+          await page.setViewportSize({width,height});
+          await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+          const layout=await page.evaluate(scale=>{
+            const app=window.__hokyz;app.meta.textScale=scale;app.applyAccessPrefs();app.view.render(1,0);
+            const boxes=[...document.querySelectorAll('.so,.so-row,.so-mid')].map(el=>{const r=el.getBoundingClientRect();return {text:el.textContent,left:r.left,right:r.right,top:r.top,bottom:r.bottom,scroll:el.scrollWidth,width:el.clientWidth};});
+            const st=app.view.sim.st,so=st.shootout;
+            return {boxes,results:so,summary:[...document.querySelectorAll('.so-summary')].map(el=>el.textContent),expected:st.teams.map(t=>`${t.short} · ${so.goals[t.id]} goals / ${so.attempts.filter(a=>a.team===t.id).length} shots`)};
+          },scale);
+          checks.push({layout:{control,stage,width,height,scale,...layout}});
+          await page.screenshot({path:join(out,`${control}-${stage}-${width}.png`)});
+          if(!process.argv.includes('--baseline')) {
+            assert.ok(layout.boxes.every(b=>b.left>=0&&b.right<=width&&b.bottom<=height&&b.scroll<=b.width+1),JSON.stringify(layout));
+            assert.deepEqual(layout.summary,layout.expected);
+          }
+        }
+        await page.setViewportSize({width:1280,height:900});
+        await page.evaluate(()=>{const app=window.__hokyz;app.meta.textScale=1;app.applyAccessPrefs();});
+      }
     }
     assert.ok(over, `${control}: natural shootout did not terminate`);
+    if(process.argv.includes('--layout')&&control==='ai')assert.ok(captured.has('extended'),'Named AI fixture did not exercise extended tracker');
     const result = await page.evaluate(() => {
       const app = window.__hokyz, st = app.view.sim.st;
       const result = { time: st.t, winner: st.winner, score: st.teams.map(t => t.score), shootout: st.shootout };
