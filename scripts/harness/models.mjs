@@ -1,4 +1,5 @@
-import { mkdirSync, mkdtempSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import assert from 'node:assert/strict';
 import { resolve, join } from 'node:path';
 import { preview } from 'vite';
 import { chromium } from 'playwright';
@@ -16,6 +17,41 @@ try {
     if (version === 'before') await page.route('**/models/*.glb', route => route.fulfill({ path: resolve('.gaming/models-before', new URL(route.request().url()).pathname.split('/').pop()), contentType: 'model/gltf-binary' }));
     await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/?rigview=1&capture=1&poses=idle,skate,charge,lunge,down&goalie=butterfly`);
     await page.waitForFunction(() => window.__rigview, null, { timeout: 90000 });
+    if (process.argv.includes('--timing')) {
+      const samples=[];
+      for (const fps of [30,60,120]) {
+        const sample=await page.evaluate(fps=>{
+          const app=window.__hokyz,{entries,grig}=window.__rigview;
+          const {rig,st}=entries[0];
+          entries.forEach(e=>e.rig.group.visible=e.rig===rig);grig.group.visible=false;
+          for(const key of ['fall','lean','roll','spin','stride','turnRate','prevFacing','snapT','celebrateT'])rig[key]=0;
+          rig.fallSeed=0;st.facing=0;st.vel={x:6,y:0};st.controlled=true;st.knockdown=1;
+          rig.snap(st);
+          const state=()=>({fall:rig.fall,lean:rig.lean,pivot:rig.pivot.position.toArray(),ring:rig.ring.getWorldPosition(rig.group.position.clone()).toArray(),position:rig.group.position.toArray()});
+          for(let i=0;i<fps/10;i++)rig.update(st,1,1/fps,(i+1)/fps);
+          const down=state();
+          const cam=app.rig.camera;cam.position.set(4,3,-.8);cam.lookAt(.5,.6,-3.4);
+          document.querySelectorAll('#ui, .hud').forEach(el=>el.style.display='none');
+          app.rig.render(0);
+          return {fps,down};
+        },fps);
+        await page.screenshot({path:join(out,`${version}-down-${fps}.png`)});
+        sample.recovery=await page.evaluate(fps=>{
+          const {rig,st}=window.__rigview.entries[0];st.knockdown=0;
+          for(let i=0;i<fps/5;i++)rig.update(st,1,1/fps,.1+(i+1)/fps);
+          return {fall:rig.fall,lean:rig.lean};
+        },fps);
+        samples.push(sample);
+      }
+      writeFileSync(join(out,`${version}-timing.json`),JSON.stringify(samples,null,2));
+      if(!process.argv.includes('--baseline'))for(const sample of samples){
+        for(const phase of ['down','recovery'])for(const field of ['fall','lean'])assert.ok(Math.abs(sample[phase][field]-samples[1][phase][field])<1e-6,`${phase} ${field} depends on render rate`);
+        assert.ok(Math.abs(sample.down.ring[0]-sample.down.position[0])<1e-6&&Math.abs(sample.down.ring[2]-sample.down.position[2])<1e-6,'Control ring drifted from simulation position');
+      }
+      if(errors.length)throw new Error(errors.join('\n'));
+      await page.close();
+      continue;
+    }
     for (const subject of ['skater', 'goalie', 'poses']) {
       await page.evaluate(subject => {
         const app = window.__hokyz, { entries, grig } = window.__rigview;

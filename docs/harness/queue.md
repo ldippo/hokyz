@@ -102,6 +102,15 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed consistent player pose damping: poseBlend preserves60Hz coefficients
+with elapsed-time composition for fall/recovery, lean, roll, turn rate and spin
+settling. Six math tests; real rig timing assertion failed before, passes after.
+Baseline1788720205354-cnDy4g fall .848/.797/.774 at30/60/120Hz after100ms;
+final1788720253123-bxSVOj all .797, matching recovery/lean and ring x/z anchoring.
+Wider before/after captures inspected. Gates1788720241938-SJGv1a pass build/197
+tests/bot; human browser1788720254570-dSo4gt passes. Self-review prefers consistent
+pose response, not hardware FPS approval. Impeccable informed motion consistency.
+
 Completed bounded label release hysteresis: keep a valid raised lane until lower
 space remains available for300ms; resolve collisions/control priority immediately.
 Desktop1788719900911-uvAcDr changes41->35/displacement47.2->44m; narrow

@@ -2,6 +2,7 @@ import * as THREE from 'three/webgpu';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as skeletonClone } from 'three/addons/utils/SkeletonUtils.js';
 import type { Skater } from '../sim/types';
+import { poseBlend } from './poseDamping';
 import { jerseyTexture, teamPalette, type JerseySpec, type LogoShape, type StripePattern } from './jerseyTexture';
 
 /** Model-space axes (Y-up glTF): forward +X, up +Y, side +Z. */
@@ -276,17 +277,17 @@ export class SkaterRig {
     while (dfa > Math.PI) dfa -= Math.PI * 2;
     while (dfa < -Math.PI) dfa += Math.PI * 2;
     this.prevFacing = facing;
-    if (dt > 0) this.turnRate += ((dfa / dt) - this.turnRate) * Math.min(1, dt * 10);
+    if (dt > 0) this.turnRate += ((dfa / dt) - this.turnRate) * poseBlend(10, dt);
 
     // fall / spin / lean state
     const targetFall = sk.knockdown > 0 ? 1 : 0;
-    this.fall += (targetFall - this.fall) * Math.min(1, dt * (targetFall ? 14 : 6));
+    this.fall += (targetFall - this.fall) * poseBlend(targetFall ? 14 : 6, dt);
     if (sk.deke > 0 && !sk.isGoalie && sk.dekeKind === 'spin') this.spin += dt * 16;
-    else this.spin += (Math.round(this.spin / (Math.PI * 2)) * Math.PI * 2 - this.spin) * Math.min(1, dt * 12);
+    else this.spin += (Math.round(this.spin / (Math.PI * 2)) * Math.PI * 2 - this.spin) * poseBlend(12, dt);
     const targetLean = Math.min(0.62, Math.min(0.4, speed * 0.035) + (sk.lunge > 0 ? 0.45 : 0) + (sk.stumble > 0 ? 0.3 : 0));
-    this.lean += (targetLean - this.lean) * Math.min(1, dt * 8);
+    this.lean += (targetLean - this.lean) * poseBlend(8, dt);
     const targetRoll = THREE.MathUtils.clamp(-this.turnRate * 0.12 * Math.min(1, speed / 6), -0.45, 0.45);
-    this.roll += (targetRoll - this.roll) * Math.min(1, dt * 8);
+    this.roll += (targetRoll - this.roll) * poseBlend(8, dt);
     this.celebrateT = Math.max(0, this.celebrateT - dt);
     if (sk.charging) this.wasCharging = true;
     else if (this.wasCharging) {

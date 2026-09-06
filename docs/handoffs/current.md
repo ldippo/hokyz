@@ -39,6 +39,27 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest player-animation fix: src/render/poseDamping.ts supplies exponential blend
+calibrated to original60Hz coefficients. SkaterRig uses it for fall/recovery,
+lean, roll, turn-rate and spin settling; simulation unchanged. Six new tests in
+tests/render/poseDamping.test.ts cover preserved60Hz response,30/60/120/240Hz and
+irregular elapsed-time composition, paused redraw/long-frame boundedness.
+New models.mjs --timing resets a real rig fixture,100ms knockdown/200ms recovery
+at30/60/120Hz. Assertion failed before for fall; baseline
+.gaming/models/1788720205354-cnDy4g values .848/.797/.774; candidate
+1788720253123-bxSVOj all .7969329369 and matching lean/recovery. Control ring
+remains anchored in x/z. Before/after wider captures inspected; initial probe
+1788720166742-oS1vOZ had clipped closeup, superseded by wider comparison.
+Build/197 tests/bot gates .gaming/runs/1788720241938-SJGv1a pass, baseline
+1788720165338-K78Yak. Human browser .gaming/playtests/1788720254570-dSo4gt passes.
+Self-review prefers consistent visual response across render rates. Impeccable
+informed motion consistency; no claim of target hardware FPS or identical poses
+for every changing target/cue. Detailed GLB models and rig bones unchanged.
+Next precise action: inspect on-ice skating/turning and skate-to-ice contact with
+the new detailed rig across a stride, using low side-view captures and measured
+foot/bone positions. Existing torso lean may lift or bury skate blades; establish
+evidence before changing animation. Full goal active; preserve unrelated edits.
+
 Latest visual change: MatchView retains a valid raised name-tag lane until lower
 space has remained clear300ms. Collision resolution and controlled priority stay
 immediate. Hidden/offscreen/cinematic/replay tags clear placement history.
