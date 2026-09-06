@@ -39,6 +39,24 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest layout fix: matchIntroScreen gets match-intro/content wrapper; scoped CSS
+bounds content860px, scrolls overflow, preserves centered desktop, stacks teams
+<=700px, uses readable team/gimmick/action text and440px max unskewed buttons.
+map-focus --intro-layout measures names/gimmicks/modifiers/actions at1280x720,
+390x844 normal/150%, then keyboard Escape/re-entry and synthetic-pad Drop the Puck.
+Baseline .gaming/map-focus/1788714840163-Af9nOw/ clips team names/gimmick atnarrow,
+both buttons at150%. Final .gaming/map-focus/1788714924438-UXY5kE/ passes; inspected
+desktop/narrow150% show complete text and vertically reachable buttons. Same
+seeded rival/roster, randomized home name differs. Gates
+.gaming/runs/1788714906198-Wqa1Pe/ build/152 tests/bot and input/passing/save/
+reduced-motion regression .gaming/playtests/1788714925928-67yvMD/ pass. Baseline
+1788714841141-Y3SziR passes. Impeccable guided restrained readable hierarchy and
+structural stacking. Self-review prefers accessibility/first-session clarity;
+not full human-match feel or all intro variants. Next precise action: exercise
+boss phases, grudge taunts and mutator notes at narrow150% with all text/actions
+reachable, then actual Back/Start paths. Normal-case evidence does not establish
+those larger-copy variants. Preserve unrelated README.md/ROADMAP-v4.md edits.
+
 Latest reduced-motion UI fix: app.applyAccessPrefs sets #ui data-reduced-motion;
 styles.css uses inherited animation-name variables for pulse/pop/countdown/flash.
 Game preference OR OS reduce stops nonessential pulses/transitions/hover movement.

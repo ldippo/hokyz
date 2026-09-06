@@ -102,6 +102,17 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed pre-match layout: scoped match-intro content bounds/scroll, readable
+actions and matchup type, narrow stacked teams. Baseline
+.gaming/map-focus/1788714840163-Af9nOw/ clips names/gimmick on narrow and actions
+at150%. Final .gaming/map-focus/1788714924438-UXY5kE/ passes all three layouts,
+keyboard Back/re-entry, pad match start; desktop/150% captures inspected. Same
+seeded normal rival/roster, randomized home name differs. Gates
+.gaming/runs/1788714906198-Wqa1Pe/ build/152 tests/bot and
+.gaming/playtests/1788714925928-67yvMD/ pass. Impeccable guided bounded hierarchy
+and structural stacking. Self-review prefers readable matchup choices; no broad
+human-feel claim. Next: boss/grudge/mutator intro variants with additional copy.
+
 Completed reduced-motion UI pass: applyAccessPrefs exposes preference on #ui;
 CSS variables select stationary timed announcements and disable countdown zoom,
 flashes and looping pulses for app or OS preference. Transitions/hover movement

@@ -106,6 +106,9 @@ Add `--motion` to verify app/OS reduced-motion toggles and normal-mode restorati
 map pulse/transition styles, plus mounted HUD-class fixtures for announcements,
 countdowns, flashes and status pulses. Announcement checks preserve reading time
 and expiry without transform keyframes; fixtures do not establish live match feel.
+Add `--intro-layout` for pre-match team/rival/action reachability at desktop,
+narrow and150% text, followed by keyboard Back/re-entry and controller match start.
+The default seeded case is a normal match, not every boss/grudge/modifier variant.
 
 `node scripts/harness/route.mjs` exercises event -> shop -> rest in one run,
 reloading between encounters. It preserves generated links while preparing the

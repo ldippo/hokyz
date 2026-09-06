@@ -285,6 +285,22 @@ p.screen-sub { color: #8fa3d9; letter-spacing: 0.15em; text-transform: uppercase
 .matchup .team .tn { font-family: var(--font-display); font-size: 44px; letter-spacing: 0.06em; }
 .matchup .vs { font-family: var(--font-display); font-size: 60px; color: var(--red); }
 .matchup .gimmick { font-size: 13px; color: var(--gold); letter-spacing: 0.1em; max-width: 220px; }
+.match-intro { overflow: auto; justify-content: flex-start; padding: 24px; background: oklch(15% 0.018 265 / .96); }
+.match-intro-content { flex: 0 0 auto; width: min(100%, 860px); margin: auto 0; text-align: center; overflow-wrap: anywhere; }
+.match-intro .screen-title { font-size: 2.5rem; margin: 0 0 24px; }
+.match-intro .matchup { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 24px; }
+.match-intro .matchup .tn { font-size: 2rem; }
+.match-intro .matchup .vs { font-size: 2rem; }
+.match-intro .matchup .gimmick { font-size: 1rem; line-height: 1.5; letter-spacing: normal; max-width: none; margin-top: 10px; }
+.match-intro .menu { min-width: 0; width: min(100%, 440px); margin: 28px auto 0; }
+.match-intro .btn { font-family: var(--font-body); font-size: 1.125rem; letter-spacing: normal; text-transform: none; min-height: 44px; padding: 12px 16px; transform: none; }
+.match-intro .btn:hover, .match-intro .btn.focus { transform: none; }
+@media (max-width: 700px) {
+  .match-intro { padding: 24px 16px; }
+  .match-intro .matchup { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .match-intro .screen-title { font-size: 2rem; }
+  .match-intro .matchup .vs { font-size: 1.25rem; }
+}
 .mod-tag { display: inline-block; margin: 6px 4px 0 0; padding: 3px 8px; border: 1px solid var(--red); color: #fff; font-size: 12px; letter-spacing: 0.1em; }
 .toast { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); background: #10141f; border: 2px solid var(--gold); padding: 8px 16px; font-family: var(--font-display); letter-spacing: 0.1em; color: #fff; }
 .unlock-grid { display: grid; grid-template-columns: repeat(auto-fill, 220px); gap: 12px; justify-content: center; max-width: 1000px; margin-top: 20px; }

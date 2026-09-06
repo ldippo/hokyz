@@ -69,6 +69,28 @@ try {
   assert.equal(await page.locator('.screen-title').textContent(),'NEXT MATCH');
   assert.ok((await page.locator('.matchup .tn').last().textContent()).includes(expected.split(' · ')[0]));
   checks.push({activation:'Enter opened selected rival'});
+  if (process.argv.includes('--intro-layout')) {
+    for (const [width,height,scale] of [[1280,720,1],[390,844,1],[390,844,1.5]]) {
+      await page.setViewportSize({width,height});
+      await page.evaluate(scale=>{window.__hokyz.meta.textScale=scale;window.__hokyz.applyAccessPrefs();document.querySelector('.screen').scrollTop=0;},scale);
+      await page.screenshot({path:join(out,`intro-${width}-${scale}.png`)});
+      const clipped=[];
+      for(const el of await page.locator('.screen [data-nav], .screen-title, .matchup .tn, .matchup .gimmick, .mod-tag').all()) {
+        await el.evaluate(el=>el.scrollIntoView({block:'center',inline:'nearest'}));
+        const r=await el.boundingBox();
+        if(!r||r.x< -1||r.y< -1||r.x+r.width>width+1||r.y+r.height>height+1)clipped.push(await el.textContent());
+      }
+      const overflow=await page.locator('.screen').evaluate(el=>el.scrollWidth>el.clientWidth+1);
+      checks.push({intro:true,width,height,scale,clipped,overflow});
+      if(!process.argv.includes('--baseline'))assert.ok(!clipped.length&&!overflow,JSON.stringify(checks.at(-1)));
+    }
+    // Actual keyboard back, then controller activation of the selected match.
+    await press('Escape'); assert.equal(await page.locator('.run-shell').count(),1);
+    await press('Enter'); assert.equal(await page.locator('.screen-title').textContent(),'NEXT MATCH');
+    await page.evaluate(()=>{window.__mapPad.buttons[0]={pressed:true,value:1};window.__hokyz.simStep();window.__mapPad.buttons[0]={pressed:false,value:0};window.__hokyz.simStep();});
+    assert.equal(await page.evaluate(()=>window.__hokyz.humanPlaying),true);
+    checks.push({introNavigation:'Keyboard back/re-entry and controller Drop the Puck'});
+  }
   assert.deepEqual(errors,[]);
 } catch(e){errors.push(String(e));process.exitCode=1;}
 finally{await browser?.close();await new Promise(resolve=>server.httpServer.close(resolve));}

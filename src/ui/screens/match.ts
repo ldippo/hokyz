@@ -22,7 +22,7 @@ export function matchIntroScreen(app: App, node: MapNode): void {
   const rival = RIVAL_BY_ID[bundle.away.rivalId];
   const mut = node.mutatorId ? MUTATOR_BY_ID[node.mutatorId] : null;
   const diffName = ['ROOKIE', 'PRO', 'ALL-STAR', 'BRUTAL'][bundle.away.difficulty];
-  const el = h('div', { class: 'screen transparent' },
+  const el = h('div', { class: 'screen match-intro' }, h('div', { class: 'match-intro-content' },
     h('h2', { class: 'screen-title' }, node.type === 'boss' ? '👑 BOSS FIGHT' : node.type === 'elite' ? '💀 ELITE MATCH' : 'NEXT MATCH'),
     bundle.away.taunt ? h('div', { class: 'taunt' }, `“${bundle.away.taunt}”`, h('span', {}, ` — GRUDGE MATCH · +${bundle.away.grudge * 50}% BOUNTY · TIER +${Math.min(2, bundle.away.grudge)}`)) : null,
     h('div', { class: 'matchup' },
@@ -33,7 +33,7 @@ export function matchIntroScreen(app: App, node: MapNode): void {
     h('div', {}, h('span', { class: 'mod-tag' }, `AI: ${diffName}`), mut ? h('span', { class: 'mod-tag', title: mut.desc }, `MUTATOR: ${mut.name} — ${mut.desc}`) : null, run.flags.easyNext ? h('span', { class: 'mod-tag' }, 'REF BRIBED') : null, run.flags.hardNext ? h('span', { class: 'mod-tag' }, 'REF ANGRY') : null),
     bundle.mods.bossPhases.length ? h('div', { style: 'max-width:640px;margin-top:10px' }, ...bundle.mods.bossPhases.map((p) => h('div', { class: 'perk-chip epic', style: 'margin-top:6px' }, h('b', {}, `👑 ${p.label}`), h('div', {}, p.desc)))) : null,
     h('div', { class: 'menu' }, btn('Drop the Puck', () => startRunMatch(app, node, bundle), 'primary'), btn('Back to Map', () => runMapScreen(app))),
-  );
+  ));
   const nav = app.showScreen(el);
   if (nav) nav.onBack = () => runMapScreen(app);
 }
