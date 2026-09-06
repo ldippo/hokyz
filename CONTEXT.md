@@ -21,6 +21,11 @@ ice plane into 3D. `MatchSim.step()` advances state and emits events; presentati
 consumes those events. Keep browser dependencies out of the simulation and run
 model. Use the seeded RNG for gameplay randomness.
 
+Hit Parade dummy steering lives in `src/sim/hitParade.ts`, with a challenge-local
+seeded RNG independent of the match and rendering RNGs. The skills screen owns
+the challenge timer, pause, score and reward lifecycle; duplicate-time steering
+updates do not consume randomness.
+
 `window.__hokyz` already exposes the App for inspection. There is no survival-game
 `window.__bot` API. Harness bot play runs MatchSim directly; browser capture checks
 the rendered attract match separately. Neither proves the full human run flow.

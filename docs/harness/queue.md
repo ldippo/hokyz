@@ -102,6 +102,16 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed seeded Hit Parade steering: extracted DOM-free HitParadeDummies with
+challenge-local RNG, duplicate-time guard, existing target ranges and turbo odds.
+Skills uses a derived match seed and commits run RNG after consuming that seed.
+Four cases cover full-minute input replay, full MatchSim movement/nonzero scoring
+replay with pause, seed variation and escaped-dummy return. Final build/147 tests/
+bot gates `.gaming/runs/1788710370603-dMhVS1/` pass. Browser pause/end regression
+`.gaming/hit-parade/1788710347654-meIvzn/` passes. Self-review prefers repeatable
+challenge behavior; this does not establish human difficulty/fun. Next: sustained
+Hit Parade hits and natural timer expiry/rewards, then full-run and hardware.
+
 Completed Hit Parade pause fix: P/Escape opens Resume and explicit End challenge;
 paused sim/score/timer/save are retained. Timer follows simulation advancement,
 and a menu-resume callback cannot recount the previous hit. Final gates

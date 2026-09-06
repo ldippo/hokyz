@@ -39,6 +39,22 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest gameplay change: src/sim/hitParade.ts HitParadeDummies owns seeded wander/
+turbo inputs, preserving prior ranges/probability and boundary return. It ignores
+duplicate/nonadvancing timestamps. skills.ts derives its seed from matchSeed,
+commits run RNG after consuming matchSeed, and no longer uses Math.random for
+dummy behavior. Four new tests in tests/sim/hitParade.test.ts: full60s input trace
+without global RNG, pause/no-RNG-consumption, seed variation/boundaries, and full
+MatchSim movement/nonzero hit-score replay across pause. A nullable controlledId
+typing error in that fixture was repaired; failed run
+.gaming/runs/1788710308211-JZr1nN/ preserved. Final
+.gaming/runs/1788710370603-dMhVS1/ passes build/147 tests/bot. Browser pause/end
+regression .gaming/hit-parade/1788710347654-meIvzn/ passes. No new rendering edits.
+Self-review prefers repeatability; headless scripted play doesn't establish human
+challenge difficulty/fun. Next precise action: exercise full60s Hit Parade with
+actual movement/check inputs and natural timer expiry, inspect earned rewards/
+loss results. Then resume broader full-run/hardware/result-layout validation.
+
 Latest gameplay fix: src/ui/screens/skills.ts Hit Parade now pauses on P/Escape
 instead of finishing. Pause reuses existing menu with Resume/End challenge and
 score/time; finish clears pause/screen. lastTick gate prevents previous hit events

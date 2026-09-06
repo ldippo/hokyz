@@ -10,7 +10,7 @@ import { runMapScreen } from './runMap';
 import { playMatch } from './match';
 import { perkCard } from './draft';
 import { sfx } from '../../audio/sfx';
-import { EMPTY_INPUT, type Input } from '../../sim/types';
+import { HitParadeDummies } from '../../sim/hitParade';
 import { setControlled } from '../../sim/puck';
 
 const HIT_PARADE_TIME = 60;
@@ -60,7 +60,9 @@ function startHitParade(app: App, node: MapNode, reward: number): void {
   const rng = runRng(run);
   const dummies = [0, 1, 2].map(() => generateSkater(rng, 'speedster', 0, 'dummy'));
   dummies.forEach((d) => (d.stats.balance = 3));
+  const matchSeed = rng.int(1, 1e9);
   commitRng(run, rng);
+  const dummyController = new HitParadeDummies(matchSeed ^ 0x485054);
   const mods = defaultMatchMods();
   mods.noGoalies = true;
   mods.noFights = true;
@@ -71,7 +73,7 @@ function startHitParade(app: App, node: MapNode, reward: number): void {
       { name: 'Dummies', short: 'DUMMY', color: '#8a8f99', skaters: dummies, goalie: null, isHuman: false, difficulty: 0, scripted: true },
     ],
     mods,
-    rng.int(1, 1e9),
+    matchSeed,
   );
   sim.freezeClock = true;
   const st = sim.st;
@@ -105,7 +107,6 @@ function startHitParade(app: App, node: MapNode, reward: number): void {
     ));
     if (nav) nav.onBack = resume;
   };
-  const wander = new Map<string, { x: number; y: number; until: number }>();
   const finish = () => {
     if (done) return;
     done = true;
@@ -128,15 +129,10 @@ function startHitParade(app: App, node: MapNode, reward: number): void {
     t += st.t - lastTick;
     lastTick = st.t;
     // dummies wander; knocked-down ones get up and keep going
+    const dummyInputs = dummyController.update(t, st.teams[1].skaters.map(id => st.skaters[id]));
     for (const id of st.teams[1].skaters) {
       const d = st.skaters[id];
-      let w = wander.get(id);
-      if (!w || t > w.until || Math.abs(d.pos.x) > 18 || Math.abs(d.pos.y) > 9) {
-        w = { x: (Math.random() - 0.5) * 30, y: (Math.random() - 0.5) * 14, until: t + 1.5 + Math.random() * 2 };
-        wander.set(id, w);
-      }
-      const inp: Input = { ...EMPTY_INPUT, move: { x: w.x - d.pos.x, y: w.y - d.pos.y }, aim: { x: 0, y: 0 }, turbo: Math.random() < 0.3 };
-      sim.scriptInputs.set(id, inp);
+      sim.scriptInputs.set(id, dummyInputs.get(id)!);
       if (st.puck.owner === id) d.hasPuck = false, (st.puck.owner = null);
     }
     if (st.teams[0].controlledId !== me.id) setControlled(st, 0, me.id, []);
