@@ -91,6 +91,7 @@ export class SkaterRig {
   private tag: THREE.Sprite | null = null;
   /** IK: hand grip offsets in the stick bone's rest local frame + arm segment lengths */
   private grips: { side: 'L' | 'R'; offset: THREE.Vector3; upper: number; fore: number }[] = [];
+  private bladeContacts: { bone: THREE.Bone; points: THREE.Vector3[] }[] = [];
   ikEnabled = true;
   private punchT = 0;
   private punchHigh = true;
@@ -139,6 +140,24 @@ export class SkaterRig {
       ref.bone.getWorldQuaternion(ref.invRestWorld);
       ref.invRestWorld.invert();
     }
+    // Cache the actual blade underside in foot-local space once, not mesh
+    // vertices every frame. Keep asset dimensions out of the animation code.
+    this.model.traverse(o => {
+      const mesh = o as THREE.SkinnedMesh;
+      if (!mesh.isSkinnedMesh || Array.isArray(mesh.material) || mesh.material.name !== 'blade') return;
+      const position = mesh.geometry.attributes.position, skin = mesh.geometry.attributes.skinIndex;
+      for (let i = 0; i < position.count; i++) {
+        const bone = mesh.skeleton.bones[skin.getX(i)];
+        if (!bone || !['footL', 'footR'].includes(bone.name)) continue;
+        const point = mesh.localToWorld(mesh.getVertexPosition(i, new THREE.Vector3()));
+        // The underside is the lowest millimeter of the rest-pose blade.
+        if (point.y > 0.001) continue;
+        bone.worldToLocal(point);
+        let contact = this.bladeContacts.find(c => c.bone === bone);
+        if (!contact) { contact = { bone, points: [] }; this.bladeContacts.push(contact); }
+        if (!contact.points.some(p => p.distanceToSquared(point) < 1e-10)) contact.points.push(point);
+      }
+    });
     const stick = this.bones.get('stick')?.bone;
     if (stick) {
       for (const side of ['L'] as const) {
@@ -331,6 +350,12 @@ export class SkaterRig {
       this.rot('shin.R', AX_Z, -crouch * 1.4);
       this.rot('foot.L', AX_Z, crouch * 0.4);
       this.rot('foot.R', AX_Z, crouch * 0.4);
+      // Ankles counter the whole-body forward lean so the support blade lies
+      // along the ice instead of pitching its toe beneath it.
+      if (!sk.isGoalie && this.fall < 0.02) {
+        this.rot('foot.L', AX_Z, this.lean);
+        this.rot('foot.R', AX_Z, this.lean);
+      }
     } else {
       // goalie butterfly: knees drop, pads flare outward
       this.rot('thigh.L', AX_X, 1.1);
@@ -422,6 +447,17 @@ export class SkaterRig {
       this.rot('foreArm.R', AX_Y, side * 0.3 * k);
       this.rot('chest', AX_Y, side * 0.35 * k);
       this.rot('chest', AX_X, -side * 0.25 * k);
+    }
+
+    // Ground the lowest blade during normal skating; leave falls, lunges and
+    // goalie butterfly poses free. Indicators remain on the simulation origin.
+    if (!sk.isGoalie && this.fall < 0.02 && sk.lunge <= 0 && !this.fightStance && this.bladeContacts.length) {
+      this.group.updateMatrixWorld(true);
+      let low = Infinity;
+      for (const { bone, points } of this.bladeContacts) for (const point of points) {
+        low = Math.min(low, bone.localToWorld(tmpV.copy(point)).y);
+      }
+      this.pivot.position.y += 0.003 - low;
     }
 
     // stick-hand IK: keep both hands on the stick unless the arms are busy

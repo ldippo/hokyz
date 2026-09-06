@@ -102,6 +102,15 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed grounded skating blades: counter torso lean at ankles, align visual
+pivot using8 cached blade underside points. Baseline1788720390151-qlhGjb support
+height-4.1cm; candidate1788720473834-UCqlfm all12 phases+.003m. Low side images
+inspected. Turbo/turn1788720528231-DMRDQz and idle1788720529491-RnYCnE pass;
+ring error0. Timing1788720497510-GgPNZl and human1788720498845-N37PGG pass.
+Gates1788720474850-lddPpO build/197 tests/bot pass. Self-review prefers grounded
+skates; Impeccable guided contact review. Next: stick blade dips under ice in
+leaned poses, establish bounds/contact before correcting grip/arm pose.
+
 Completed consistent player pose damping: poseBlend preserves60Hz coefficients
 with elapsed-time composition for fall/recovery, lean, roll, turn rate and spin
 settling. Six math tests; real rig timing assertion failed before, passes after.

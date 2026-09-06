@@ -17,6 +17,50 @@ try {
     if (version === 'before') await page.route('**/models/*.glb', route => route.fulfill({ path: resolve('.gaming/models-before', new URL(route.request().url()).pathname.split('/').pop()), contentType: 'model/gltf-binary' }));
     await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/?rigview=1&capture=1&poses=idle,skate,charge,lunge,down&goalie=butterfly`);
     await page.waitForFunction(() => window.__rigview, null, { timeout: 90000 });
+    if(process.argv.includes('--stride')) {
+      const speed=Number(process.argv.find(a=>a.startsWith('--speed='))?.split('=')[1]??6);
+      const roll=Number(process.argv.find(a=>a.startsWith('--roll='))?.split('=')[1]??0);
+      const samples=[];
+      for(let phase=0;phase<12;phase++) {
+        const sample=await page.evaluate(({phase,speed,roll})=>{
+          const app=window.__hokyz,{entries,grig}=window.__rigview,{rig,st}=entries[0];
+          entries.forEach(e=>e.rig.group.visible=e.rig===rig);grig.group.visible=false;
+          Object.assign(rig,{fall:0,spin:0,lean:Math.min(.4,speed*.035),roll,turnRate:0,stride:phase*Math.PI/6});
+          Object.assign(st,{vel:{x:speed,y:0},turboActive:speed>9,knockdown:0,controlled:true});
+          rig.update(st,1,0,0);rig.group.updateMatrixWorld(true);
+          const feet={footL:[],footR:[]};
+          rig.model.traverse(mesh=>{
+            if(!mesh.isSkinnedMesh)return;
+            const p=mesh.geometry.attributes.position,indices=mesh.geometry.attributes.skinIndex;
+            for(let i=0;i<p.count;i++) {
+              const name=mesh.skeleton.bones[indices.getX(i)]?.name;
+              if(!(name in feet)||p.getY(i)>.027)continue;
+              const v=rig.group.position.clone();mesh.getVertexPosition(i,v);mesh.localToWorld(v);
+              feet[name].push(v.y);
+            }
+          });
+          const heights=Object.fromEntries(Object.entries(feet).map(([name,ys])=>[name,{count:ys.length,min:Math.min(...ys),max:Math.max(...ys)}]));
+          const cam=app.rig.camera;cam.position.set(.4,.85,.2);cam.lookAt(.3,.7,-3.4);
+          document.querySelectorAll('#ui, .hud').forEach(el=>el.style.display='none');
+          app.rig.render(0);
+          const ring=rig.ring.getWorldPosition(rig.group.position.clone());
+          return {phase,speed,roll,heights,ringError:Math.hypot(ring.x-st.pos.x,ring.z-st.pos.y),contactPoints:rig.bladeContacts?.reduce((n,c)=>n+c.points.length,0)};
+        },{phase,speed,roll});
+        samples.push(sample);
+        if(phase%3===0)await page.screenshot({path:join(out,`${version}-stride-${phase}.png`)});
+      }
+      writeFileSync(join(out,`${version}-stride.json`),JSON.stringify(samples,null,2));
+      for(const sample of samples){
+        assert.ok(Object.values(sample.heights).every(f=>f.count>0),'No blade vertices sampled');
+        assert.ok(sample.ringError<1e-6,'Control ring left simulation position');
+        if(!process.argv.includes('--baseline')) {
+          const support=Math.min(...Object.values(sample.heights).map(f=>f.min));
+          assert.ok(support>=-.015&&support<=.025,`Stride ${sample.phase} support blade height ${support}`);
+        }
+      }
+      if(errors.length)throw new Error(errors.join('\n'));
+      await page.close();continue;
+    }
     if (process.argv.includes('--timing')) {
       const samples=[];
       for (const fps of [30,60,120]) {

@@ -39,6 +39,27 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest player contact fix: SkaterRig caches8 asset-derived blade-bottom points
+in foot-local coordinates at construction. Ankles counter forward body lean;
+normal skating adjusts only pivot height so lowest blade stays3mm above ice.
+Goalies/falls/lunges/fight grounding excluded; simulation/group/ring unchanged.
+models.mjs --stride samples12 prepared phases/6m/s and lower foot-weighted vertices.
+Baseline .gaming/models/1788720390151-qlhGjb minimum support-4.098cm; candidate
+1788720473834-UCqlfm every phase+.003m. Before/after side phases0/3 inspected;
+skates flatter and grounded. Extended --speed=12 --roll=.35
+1788720528231-DMRDQz and --speed=0 1788720529491-RnYCnE pass; ring error0,
+8 cached contacts. Turbo phase3 inspected. Fall timing1788720497510-GgPNZl and
+human browser .gaming/playtests/1788720498845-N37PGG pass. Gates
+.gaming/runs/1788720474850-lddPpO build/197 tests/bot pass; baseline1788720344033-o62mYO.
+Self-review prefers grounded blades; Impeccable informed visual contact. No claim
+of complete skating realism, changing-target timing or target GPU performance.
+Next precise action: side captures show stick blade buried under ice in normal
+and turbo lean (also visible before this fix). Measure stick-weighted vertex
+bounds throughout stride; adjust grip/arm/stick pose to retain ice contact without
+breaking two-hand grip, charge/release, dekes or goalie presentation. Avoid moving
+simulation puck/shot geometry to compensate for a rendering problem. Full goal
+active; unrelated README.md and docs/ROADMAP-v4.md remain untouched.
+
 Latest player-animation fix: src/render/poseDamping.ts supplies exponential blend
 calibrated to original60Hz coefficients. SkaterRig uses it for fall/recovery,
 lean, roll, turn-rate and spin settling; simulation unchanged. Six new tests in

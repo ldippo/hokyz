@@ -222,6 +222,10 @@ High-quality capture can time out on software rendering; report that separately.
 fall/lean values and control-ring anchoring, retaining JSON and close captures.
 `--baseline` records without those assertions. Initial pose, velocity and cosmetic
 fall seed are prepared; this does not measure hardware FPS or all animation paths.
+`--stride` instead samples12 fixed stride phases, measuring foot-weighted lower
+vertices against the ice and retaining four side captures. Optional `--speed=12`
+and `--roll=0.35` exercise turbo/turn lean; default6m/s and zero roll. Assertions
+check support height and ring anchoring, not natural human skating or stick contact.
 `--arena --low --crowd-motion` explicitly enables only crowd animation on the
 low-tier fixture, records idle/wave/settled images and uniforms, and checks three
 animated meshes plus wave activity 0/1/0. This override is a shader exercise, not
