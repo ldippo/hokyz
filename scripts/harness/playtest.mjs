@@ -99,6 +99,76 @@ try {
   assert.ok(movedX > movement.x + 0.1, 'Human movement did not move the skater');
   checks.push('Real keyboard input moves the human skater in a fixed-step match');
   await page.screenshot({ path: join(out, 'human-match.png') });
+  // Prepared open-ice start only; pass flight, AI receiving, possession and
+  // control transfer below all use the production simulation and keyboard input.
+  const passing = await page.evaluate(() => {
+    const app = window.__hokyz, st = app.view.sim.st, team = st.teams[0];
+    const [passerId, receiverId, thirdId] = team.skaters;
+    for (const id of st.order) {
+      const sk = st.skaters[id];
+      sk.hasPuck = false; sk.controlled = false; sk.charging = false;
+      sk.knockdown = 0; sk.pickupCooldown = 0; sk.stumble = 0;
+      sk.vel = { x: 0, y: 0 };
+      if (!sk.isGoalie) sk.pos = { x: 15, y: 8 };
+    }
+    const passer = st.skaters[passerId], receiver = st.skaters[receiverId];
+    passer.pos = { x: -6, y: 0 }; passer.facing = 0;
+    receiver.pos = { x: 0, y: 0.5 }; receiver.vel = { x: 1, y: 0 };
+    st.skaters[thirdId].pos = { x: -8, y: 8 };
+    passer.hasPuck = true; passer.controlled = true; team.controlledId = passerId;
+    team.switchLock = 0;
+    Object.assign(st.puck, { owner: passerId, pos: { ...passer.pos }, vel: { x: 0, y: 0 },
+      z: 0, vz: 0, isShot: false, saucer: false, passTarget: null });
+    app.input.poll();
+    return { passerId, receiverId };
+  });
+  await page.keyboard.down('d'); await page.keyboard.down('j');
+  await page.evaluate(() => window.__hokyz.input.poll());
+  await page.keyboard.up('j');
+  const passEvent = await page.evaluate(() => {
+    const app = window.__hokyz;
+    app.input.poll();
+    const events = app.view.sim.step({ 0: app.input.simInput() });
+    app.view.afterStep(events);
+    return events.find(event => event.type === 'pass');
+  });
+  assert.equal(passEvent?.from, passing.passerId, 'Keyboard pass did not release from carrier');
+  assert.equal(passEvent?.to, passing.receiverId, 'Keyboard direction selected wrong receiver');
+  await page.keyboard.up('d');
+  const reception = await page.evaluate(({ receiverId }) => {
+    const app = window.__hokyz, sim = app.view.sim, events = [];
+    let ticks = 0;
+    while (ticks++ < 120 && sim.st.puck.owner !== receiverId && sim.st.phase === 'play') {
+      app.input.poll();
+      const next = sim.step({ 0: app.input.simInput() });
+      events.push(...next); app.view.afterStep(next);
+    }
+    app.view.render(1, 0);
+    return { ticks, owner: sim.st.puck.owner, controlled: sim.st.teams[0].controlledId,
+      switches: events.filter(event => event.type === 'switch') };
+  }, passing);
+  assert.equal(reception.owner, passing.receiverId, 'Moving AI receiver did not collect the pass');
+  assert.equal(reception.controlled, passing.receiverId, 'Reception did not transfer human control');
+  assert.ok(reception.switches.some(event => event.to === passing.receiverId), 'No reception switch event');
+  await page.screenshot({ path: join(out, 'human-pass-received.png') });
+  await page.keyboard.down('k');
+  await page.evaluate(() => {
+    const app = window.__hokyz;
+    for (let i = 0; i < 18; i++) {
+      app.input.poll(); app.view.afterStep(app.view.sim.step({ 0: app.input.simInput() }));
+    }
+  });
+  await page.keyboard.up('k');
+  const followupShot = await page.evaluate(() => {
+    const app = window.__hokyz;
+    app.input.poll();
+    const events = app.view.sim.step({ 0: app.input.simInput() });
+    app.view.afterStep(events);
+    return events.find(event => event.type === 'shot');
+  });
+  assert.equal(followupShot?.shooter, passing.receiverId, 'Shoot input did not reach the new controlled receiver');
+  writeFileSync(join(out, 'human-passing.json'), JSON.stringify({ passing, passEvent, reception, followupShot }, null, 2));
+  checks.push('Keyboard pass to moving AI receiver, automatic control switch and follow-up shot without resetting possession');
   // Isolate shot direction from contact/possession changes in a prepared fixture.
   await page.evaluate(() => {
     const app = window.__hokyz, st = app.view.sim.st;

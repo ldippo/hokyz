@@ -36,6 +36,9 @@ and narrow sizes, real keyboard menu navigation and text entry, captain selectio
 save/continue, human movement and aimed shots in fixed-step fixtures, and pause /
 resume. Evidence goes in `.gaming/playtests/`. It does not certify an entire run,
 gamepad hardware, or real-time performance. Rebuild before using it on changed code.
+It also exercises keyboard pass release to a moving AI receiver, natural pickup,
+automatic control transfer, and a follow-up keyboard shot without resetting
+possession. `human-passing.json` retains the pass/switch/shot event evidence.
 
 After building, `pnpm harness:capture` starts its own Vite preview server on an
 ephemeral loopback port, uses Playwright Chromium, and writes title/rink screenshots

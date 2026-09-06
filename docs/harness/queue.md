@@ -30,6 +30,17 @@ frame-rate and gamepad play are not established by these software-renderer check
 
 ## P2: On-ice responsiveness and decision-making (in-progress, depends on P0)
 
+Human pass/receive control-flow check completed:
+`.gaming/playtests/1788706278835-21ERT2/` passes keyboard pass H1 -> moving H2,
+natural reception, automatic control switch and H2 follow-up shot, without
+resetting possession between actions. Event evidence: human-passing.json;
+human-pass-received.png inspected (control ring and HUD identify H2).
+Baseline `.gaming/runs/1788706220798-dKMKJY/` passes build/132 tests/bot gates.
+No game code changed. Self-review: prefer stronger first-session input evidence;
+abstain on full-match human feel and hardware timing. Further P2 tuning should
+wait for that evidence; next iteration proceeds to P3 full-run/accessibility
+validation now that core input/AI contracts have been exercised.
+
 Completed iteration: intentional pass reception. Intended receivers previously
 became generic support while the passer chased the puck. Added a receive role
 that meets the flight path; teammates retain support. Expired passes, shots and

@@ -39,6 +39,20 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest validation chunk: scripts/harness/playtest.mjs now exercises real keyboard
+pass release, natural moving-AI pickup, automatic control switch and a follow-up
+shot in a continuous fixed-step sequence. Only the initial open-ice state is
+prepared; no possession injection after release. Passing evidence:
+.gaming/playtests/1788706278835-21ERT2/; human-passing.json records H1 -> H2,
+H2 ownership/control and H2 shot. Inspected human-pass-received.png confirms
+control ring and HUD identify H2. Full baseline build/132 tests/bot gates pass:
+.gaming/runs/1788706220798-dKMKJY/. No game-code changes in this chunk.
+Self-review: first-session control-flow evidence improved, real-time feel not
+proven. Next precise action: inspect/run complete roguelite progression through
+match outcome, reward, next node, save/reload and run-over, then larger-text,
+remapping and gamepad paths. Proceed to P3 validation rather than more isolated
+AI tuning until sustained human play supplies additional evidence.
+
 Latest P2 iteration: added `receive` role in teamAI/skaterAI. Intended receiver
 meets the puck trajectory near their position; passer/third skater retain support
 instead of chasing. Four tests cover receiver assignment/steering and fallback
