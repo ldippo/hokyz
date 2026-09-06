@@ -274,6 +274,11 @@ and `--roll=0.35` exercise turbo/turn lean; default6m/s and zero roll. Assertion
 check support height and ring anchoring, not natural human skating or stick contact.
 Add `--stick` to assert stick clearance and opposite-hand cached-anchor error
 below2cm. Cached anchors are not proof of actual glove-to-shaft contact.
+Use `--speed=16.0225 --roll=-0.017 --stick` for the full-speed phase9 clearance
+regression; the former1.2rad correction limit abandoned a nearly-clear pose.
+`--clearance-scan --baseline` additionally records37 right-arm correction angles
+from0 to1.8rad, restoring the original pose afterward. This diagnoses available
+clearance, not a recommendation to use every sampled angle in live animation.
 `--action=charge`, `--action=dragL` and `--action=dragR` prepare additional poses
 through the same12 stride phases. These are pose fixtures, not actual shot input.
 Add `--puck` to show a carried puck placed by production stickPoint and measure

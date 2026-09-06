@@ -102,6 +102,22 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed ordinary turbo16m/s clearance: scan1788728473258-chGPlX shows phase9
+low=-.0069m at1.2rad but+.0407m at1.25rad. Old endpoint failure restored a deeply
+buried pose. Expanded search endpoint to1.35rad, retaining minimal-clearance
+bisection. Final phase9 .0148m/all12 phases>=.0058m, grips<6.7e-8m:
+.gaming/models/1788728530809-yiraXG/ inspected against before1788728337611-4tMmPN.
+Normal1788728542204-NWO2Dv,left1788728553726-tkSKWb,right1788728570355-pqL2tm,
+charge1788728589456-su3WfS,opposite turbo1788728614627-RXu402,timing1788728631309-nRXWgd
+and transitions1788728577499-OctvKJ pass. Keyboard1788728554539-ZFipmN passes.
+Gates .gaming/runs/1788728523890-x4uZHK build/214 tests/bots pass; baseline
+1788728442112-QDxgMa. Moving capture .gaming/captures/1788728553341-ILmmcE/
+passes; all60 non-goalie carrier samples blade>=.0011m/grips<6.4e-8m, exact t6.8
+height-.4114m -> .0127m,120 sim/events unchanged. Frame40 inspected. Self-review
+prefers corrected clearance with retained silhouette. Goalie below-ice positions
+remain separate; full dynamic contact/feel unproven. Next inspect goalie carrying
+clearance or remaining low-lean fallback using saved match states.
+
 Completed moving carrier diagnostic; found existing high-speed clearance failure.
 capture.mjs now records actual blade vertices, grip errors, full Skater/rig pose
 state and first low-lean/action/below-ice images. .gaming/captures/1788728023612-ShFpQW/

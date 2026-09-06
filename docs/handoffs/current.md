@@ -39,6 +39,34 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest accepted fix: src/render/skaterRig.ts clearStickFromIce search endpoint
+1.2 ->1.35rad, still8-step minimum-clearance bisection. Measured phase9 scan
+.gaming/models/1788728473258-chGPlX/ (new --clearance-scan --baseline) shows
+rotation1.2 low=-.006895m,1.25 low=.040717m; no intermediate solution below1.2.
+Old early return restored base low=-.415827m. This was insufficient endpoint,
+not non-monotonic search within the old bound. No sim/asset changes.
+Failing before1788728337611-4tMmPN and fixed1788728530809-yiraXG phase9 images
+inspected, retained normal silhouette. Fixed measured phase9 .014789m/all12
+phases>=.00582m, both grip errors<6.7e-8m. Other model regressions:
+normal1788728542204-NWO2Dv,left1788728553726-tkSKWb,right1788728570355-pqL2tm,
+charge1788728589456-su3WfS,opposite-facing16m/s1788728614627-RXu402,
+timing1788728631309-nRXWgd,transitions1788728577499-OctvKJ all pass. Paths under
+.gaming/models/. Keyboard .gaming/playtests/1788728554539-ZFipmN passes.
+Baseline .gaming/runs/1788728442112-QDxgMa, final1788728523890-x4uZHK pass
+build/214 tests/bots. Final moving capture
+.gaming/captures/1788728553341-ILmmcE/ passes; frame40 inspected. Compared to
+1788728227538-E8HDKB all120 skater/puck/event samples identical. All60 non-goalie
+carrier samples blade>=.001108m,grips<6.4e-8m; exact t6.8 improves-.411357m to
+.012713m. Goalie minimum remains-.390628m (3 goalie samples), intentionally not
+covered by this non-goalie correction. No remaining non-goalie clearance failure
+in this short trace; not universal action/mesh-collision or hardware-feel proof.
+Self-review prefers corrected clearance and retained silhouette; full goal active.
+Next precise action: inspect the saved goalie carrying cases at t11.1–11.3 in
+the final trace (full carrier.state/poseState included) or low-lean reach fallback.
+Goalie is a separate rig/asset/animation context; do not apply skater correction
+blindly to butterfly/goalie gloves. Keep exact scenario evidence and both grips.
+Unrelated README.md/docs/ROADMAP-v4.md changes preserved.
+
 Latest moving-play diagnostic changes next priority to HIGH-SPEED STICK CLEARANCE.
 No runtime/asset changes this turn. scripts/harness/capture.mjs --arena --low
 --play-motion now records actual carrier tape-blade vertices, hand-anchor errors,

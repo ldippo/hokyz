@@ -159,9 +159,10 @@ try {
       const action=process.argv.find(a=>a.startsWith('--action='))?.split('=')[1]??'skate';
       const facing=Number(process.argv.find(a=>a.startsWith('--facing='))?.split('=')[1]??0);
       const carry=process.argv.includes('--carry');
+      const scan=process.argv.includes('--clearance-scan');
       const samples=[];
       for(let phase=0;phase<12;phase++) {
-        const sample=await page.evaluate(({phase,speed,roll,action,facing,carry})=>{
+        const sample=await page.evaluate(({phase,speed,roll,action,facing,carry,scan})=>{
           const app=window.__hokyz,{entries,grig}=window.__rigview,{rig,st}=entries[0];
           entries.forEach(e=>e.rig.group.visible=e.rig===rig);grig.group.visible=false;
           Object.assign(rig,{fall:0,spin:0,lean:Math.min(.4,speed*.035),roll,turnRate:0,stride:phase*Math.PI/6});
@@ -204,8 +205,17 @@ try {
           const stick=rig.bones.get('stick').bone;
           const gripErrors=rig.grips.map(g=>rig.bones.get(`hand${g.side}`).bone.getWorldPosition(rig.group.position.clone()).distanceTo(stick.localToWorld(g.offset.clone())));
           const gripReach=rig.grips.map(g=>{const s=rig.bones.get(`upperArm${g.side}`).bone.getWorldPosition(rig.group.position.clone());return {max:g.upper+g.fore-.01,start:s.distanceTo(stick.localToWorld(g.offset.clone())),end:s.distanceTo(rig.bones.get('handR').bone.getWorldPosition(rig.group.position.clone()))};});
-          return {phase,speed,roll,action,facing,carry,heights,puck,dragLateral,bladePuckDistance:Math.min(...bladePoints.map(v=>Math.hypot(v.x-puck.x,v.z-puck.y))),bladePoints:bladePoints.length,stickMin:Math.min(...stickHeights),gripErrors,gripReach,ringError:Math.hypot(ring.x-st.pos.x,ring.z-st.pos.y),contactPoints:rig.bladeContacts?.reduce((n,c)=>n+c.points.length,0)};
-        },{phase,speed,roll,action,facing,carry});
+          const clearanceScan=[];
+          if(scan){
+            const arm=rig.bones.get('upperArmR').bone,base=arm.quaternion.clone();
+            for(let i=0;i<=36;i++){
+              arm.quaternion.copy(base);rig.rot('upperArm.R',rig.group.position.clone().set(0,0,1),i*.05);arm.updateMatrixWorld(true);
+              clearanceScan.push({angle:i*.05,low:Math.min(...rig.stickContacts.map(p=>stick.localToWorld(p.clone()).y))});
+            }
+            arm.quaternion.copy(base);arm.updateMatrixWorld(true);
+          }
+          return {phase,speed,roll,action,facing,carry,clearanceScan,heights,puck,dragLateral,bladePuckDistance:Math.min(...bladePoints.map(v=>Math.hypot(v.x-puck.x,v.z-puck.y))),bladePoints:bladePoints.length,stickMin:Math.min(...stickHeights),gripErrors,gripReach,ringError:Math.hypot(ring.x-st.pos.x,ring.z-st.pos.y),contactPoints:rig.bladeContacts?.reduce((n,c)=>n+c.points.length,0)};
+        },{phase,speed,roll,action,facing,carry,scan});
         samples.push(sample);
         if(phase%3===0)await page.screenshot({path:join(out,`${version}-stride-${phase}.png`)});
       }

@@ -528,7 +528,9 @@ export class SkaterRig {
       this.rot('upperArm.R', AX_Z, angle);
       arm.updateMatrixWorld(true);
     };
-    let low = 0, high = 1.2;
+    // Full-speed strides can need just over 1.2rad. The old endpoint remained
+    // millimeters below ice, causing a rollback to the deeply buried base pose.
+    let low = 0, high = 1.35;
     pose(high);
     if (height() < 0.003) { pose(0); return; }
     for (let i = 0; i < 8; i++) {
