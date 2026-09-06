@@ -171,10 +171,16 @@ export class InputManager {
   fill(text: string): string {
     return text.replace(/\{(\w+)\}/g, (_, a: string) => this.label(a as Action));
   }
-  /** Rebind: remove other keys for the action, keep one binding per action. */
-  bind(code: string, a: Action): void {
+  /** Swap occupied gameplay keys; never steal the menu's confirm/back keys. */
+  bind(code: string, a: Action): boolean {
+    const displaced = this.keymap[code];
+    const previous = Object.keys(this.keymap).find(k => this.keymap[k] === a);
+    if (displaced && displaced !== a && (displaced === 'confirm' || displaced === 'back' || !previous)) return false;
     for (const k of Object.keys(this.keymap)) if (this.keymap[k] === a) delete this.keymap[k];
     this.keymap[code] = a;
+    if (displaced && displaced !== a && previous) this.keymap[previous] = displaced;
+    this.keyHeld.clear();
+    return true;
   }
   resetKeys(): void {
     this.keymap = { ...DEFAULT_KEYS };

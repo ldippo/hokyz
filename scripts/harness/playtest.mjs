@@ -9,6 +9,8 @@ process.chdir(fileURLToPath(new URL('../../', import.meta.url)));
 mkdirSync('.gaming/playtests', { recursive: true });
 const out = mkdtempSync(resolve('.gaming/playtests', `${Date.now()}-`));
 const checks = [], errors = [];
+const remap = process.argv.includes('--remap');
+const passKey = remap ? 'k' : 'j', shotKey = remap ? 'j' : 'k';
 let server, browser, page;
 try {
   server = await preview({ preview: { host: '127.0.0.1', port: 0, open: false } });
@@ -21,7 +23,7 @@ try {
   page.on('pageerror', (error) => errors.push(String(error)));
   page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
   await page.addInitScript(() => {
-    localStorage.setItem('hokyz.meta.v1', JSON.stringify({ quality: 'low', cinematics: false, music: false }));
+    if (!localStorage.getItem('hokyz.meta.v1')) localStorage.setItem('hokyz.meta.v1', JSON.stringify({ quality: 'low', cinematics: false, music: false }));
   });
   await page.goto(`http://127.0.0.1:${address.port}/`);
   await page.waitForFunction(() => window.__hokyz?.assetsLoaded && window.__hokyz?.view, null, { timeout: 60000 });
@@ -60,6 +62,30 @@ try {
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await page.locator('.settings-row').filter({ hasText: 'Reduced motion' }).getByRole('button').first().click();
   assert.equal(await page.evaluate(() => window.__hokyz.meta.reducedMotion), true);
+  if (remap) {
+    await page.getByRole('button', { name: 'Controls…', exact: true }).click();
+    const passRow = () => page.locator('.settings-row').filter({ hasText: 'Pass / switch / block' });
+    await passRow().getByRole('button').click();
+    await page.keyboard.press('k');
+    assert.equal(await passRow().locator('kbd').textContent(), 'K');
+    assert.equal(await page.locator('.settings-row').filter({ hasText: 'Shoot / check / high' }).locator('kbd').textContent(), 'J');
+    await passRow().getByRole('button').click();
+    await page.keyboard.press('Enter');
+    assert.equal(await passRow().locator('kbd').textContent(), 'K');
+    assert.equal(await page.evaluate(() => window.__hokyz.input.keymap.Enter), 'confirm');
+    await passRow().getByRole('button').click();
+    await page.keyboard.press('Escape');
+    assert.equal(await passRow().locator('kbd').textContent(), 'K');
+    await page.screenshot({ path: join(out, 'remapped-controls.png') });
+    await page.reload();
+    await page.waitForFunction(() => window.__hokyz?.assetsLoaded && window.__hokyz?.view, null, { timeout: 60000 });
+    await page.evaluate(() => window.__hokyz.loop.stop());
+    assert.deepEqual(await page.evaluate(() => [window.__hokyz.input.keymap.KeyK, window.__hokyz.input.keymap.KeyJ]), ['pass', 'shoot']);
+    await page.getByRole('button', { name: 'Settings', exact: true }).click();
+    assert.equal(await page.locator('.settings-row').filter({ hasText: 'Pass · Switch' }).locator('kbd').textContent(), 'K');
+    assert.equal(await page.locator('.settings-row').filter({ hasText: 'Shoot (hold) · Check' }).locator('kbd').textContent(), 'J');
+    checks.push('Occupied keys swap, Enter is protected, Escape cancels, and bindings survive reload');
+  }
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await navKey('s');
   await navKey('s');
@@ -122,9 +148,9 @@ try {
     app.input.poll();
     return { passerId, receiverId };
   });
-  await page.keyboard.down('d'); await page.keyboard.down('j');
+  await page.keyboard.down('d'); await page.keyboard.down(passKey);
   await page.evaluate(() => window.__hokyz.input.poll());
-  await page.keyboard.up('j');
+  await page.keyboard.up(passKey);
   const passEvent = await page.evaluate(() => {
     const app = window.__hokyz;
     app.input.poll();
@@ -151,14 +177,14 @@ try {
   assert.equal(reception.controlled, passing.receiverId, 'Reception did not transfer human control');
   assert.ok(reception.switches.some(event => event.to === passing.receiverId), 'No reception switch event');
   await page.screenshot({ path: join(out, 'human-pass-received.png') });
-  await page.keyboard.down('k');
+  await page.keyboard.down(shotKey);
   await page.evaluate(() => {
     const app = window.__hokyz;
     for (let i = 0; i < 18; i++) {
       app.input.poll(); app.view.afterStep(app.view.sim.step({ 0: app.input.simInput() }));
     }
   });
-  await page.keyboard.up('k');
+  await page.keyboard.up(shotKey);
   const followupShot = await page.evaluate(() => {
     const app = window.__hokyz;
     app.input.poll();
@@ -181,9 +207,9 @@ try {
   });
   await page.keyboard.down('s');
   await page.keyboard.down('ArrowUp');
-  await page.keyboard.down('k');
+  await page.keyboard.down(shotKey);
   await page.evaluate(() => window.__hokyz.input.poll());
-  await page.keyboard.up('k');
+  await page.keyboard.up(shotKey);
   const shot = await page.evaluate(() => {
     const app = window.__hokyz;
     app.input.poll();

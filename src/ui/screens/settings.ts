@@ -3,8 +3,11 @@ import { btn, h } from '../dom';
 import { titleScreen } from './title';
 import { sfx } from '../../audio/sfx';
 import { controlsScreen } from './controls';
+import type { Action } from '../../core/input';
 
 export function settingsScreen(app: App): void {
+  const help = (text: string) => h('span', {}, ...text.split(/(\{\w+\})/).map(part =>
+    part.startsWith('{') ? h('kbd', {}, app.input.label(part.slice(1, -1) as Action)) : part));
   const levels = ['auto', 'low', 'med', 'high'] as const;
   const qLbl = h('span', {}, '');
   const refreshQ = () => { qLbl.textContent = `${app.meta.quality.toUpperCase()}${app.meta.quality === 'auto' ? ` (${app.rig.tier.toUpperCase()})` : ''} · ${app.rig.gpu.backend.toUpperCase()}`; };
@@ -46,16 +49,16 @@ export function settingsScreen(app: App): void {
       toggleBool('Gamepad rumble', () => app.meta.rumble !== false, (v) => { app.meta.rumble = v; app.applyAccessPrefs(); }),
       h('div', { class: 'settings-row' }, h('span', {}, 'Key bindings'), btn('Controls…', () => controlsScreen(app))),
       h('div', { class: 'settings-row' }, h('span', {}, 'Quality'), h('div', { style: 'display:flex;gap:8px;align-items:center' }, btn('‹', () => cycleQ(-1)), qLbl, btn('›', () => cycleQ(1)))),
-      h('div', { class: 'settings-row' }, h('span', {}, 'Move'), h('span', { html: '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / Left stick' })),
-      h('div', { class: 'settings-row' }, h('span', {}, 'Turbo'), h('span', { html: '<kbd>SHIFT</kbd> / RT' })),
-      h('div', { class: 'settings-row' }, h('span', {}, 'Pass · Switch'), h('span', { html: '<kbd>J</kbd> / A' })),
-      h('div', { class: 'settings-row' }, h('span', {}, 'Shoot (hold) · Check'), h('span', { html: '<kbd>K</kbd> / B' })),
-      h('div', { class: 'settings-row' }, h('span', {}, 'Special move'), h('span', { html: '<kbd>SPACE</kbd> / Y' })),
-      h('div', { class: 'settings-row' }, h('span', {}, 'Aim shot'), h('span', { html: '<kbd>↑</kbd><kbd>↓</kbd> / Right stick / Mouse' })),
-      h('div', { class: 'settings-row' }, h('span', {}, 'Saucer · Pull goalie'), h('span', { html: 'Hold <kbd>J</kbd> short / 1s (last 2:00)' })),
-      h('div', { class: 'settings-row' }, h('span', {}, 'Fight'), h('span', { html: '<kbd>K</kbd> high · <kbd>L</kbd> low · <kbd>J</kbd> block · mash <kbd>K</kbd>' })),
-      h('div', { class: 'settings-row' }, h('span', {}, 'Deke · Spin'), h('span', { html: '<kbd>L</kbd> / X' })),
-      h('div', { class: 'settings-row' }, h('span', {}, 'Pause'), h('span', { html: '<kbd>P</kbd> / <kbd>ESC</kbd> / Start' })),
+      h('div', { class: 'settings-row' }, h('span', {}, 'Move'), help('{up}{left}{down}{right} / Left stick')),
+      h('div', { class: 'settings-row' }, h('span', {}, 'Turbo'), help('{turbo} / RT')),
+      h('div', { class: 'settings-row' }, h('span', {}, 'Pass · Switch'), help('{pass} / A')),
+      h('div', { class: 'settings-row' }, h('span', {}, 'Shoot (hold) · Check'), help('{shoot} / B')),
+      h('div', { class: 'settings-row' }, h('span', {}, 'Special move'), help('{special} / Y')),
+      h('div', { class: 'settings-row' }, h('span', {}, 'Aim shot'), help('{aimUp}{aimDown} / Right stick / Mouse')),
+      h('div', { class: 'settings-row' }, h('span', {}, 'Saucer · Pull goalie'), help('Hold {pass} short / 1s (last 2:00)')),
+      h('div', { class: 'settings-row' }, h('span', {}, 'Fight'), help('{shoot} high · {deke} low · {pass} block · mash {shoot}')),
+      h('div', { class: 'settings-row' }, h('span', {}, 'Deke · Spin'), help('{deke} / X')),
+      h('div', { class: 'settings-row' }, h('span', {}, 'Pause'), help('{pause} / {back} / Start')),
     ),
     h('div', { class: 'menu' },
       btn('Wipe Save Data', () => { if (confirm('Delete all progress?')) { localStorage.clear(); location.reload(); } }),

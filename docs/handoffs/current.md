@@ -39,6 +39,24 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest P3 fix: safe remapping in src/core/input.ts swaps occupied gameplay keys,
+rejects stealing confirm/back, and clears held keyboard actions after a change.
+Controls explains swaps/reserved keys and handles rejection; Settings help renders
+current bindings instead of default literals. tests/sim/keymap.test.ts adds four
+cases. scripts/harness/playtest.mjs --remap checks actual Controls UI swap, Enter
+rejection, Escape cancel, reload persistence and Settings labels before reusing
+pass/receive/shot fixtures with K pass/J shoot. Final gates:
+.gaming/runs/1788708392096-NJb0i1/ (build,141 tests,botplay pass); remapped browser:
+.gaming/playtests/1788708404722-kehkjo/ passes. Remapped-controls screenshot
+and default-key regression .gaming/playtests/1788708425127-QtDWcU/ pass.
+The remapped-controls screenshot was
+inspected: bindings visible, but narrow label column and oversized buttons remain
+cramped; this iteration does not claim layout quality. Self-review prefers safe
+remapping for accessibility/first-session users; abstain on hardware/gamepad feel.
+Next precise action: improve Controls layout and verify narrow/large-text access
+including reset/back, then match/skills result variants and gamepad coverage.
+Unrelated README.md and docs/ROADMAP-v4.md edits remain intentionally unstaged.
+
 Latest visual pass: src/ui/styles.css bounds result content to 860px/actions to
 440px, allows screen scroll, strengthens dark background/contrast, uses readable
 body type/actions and responsive tables. League/runOver explanatory copy now uses

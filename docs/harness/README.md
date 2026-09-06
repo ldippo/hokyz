@@ -39,6 +39,9 @@ gamepad hardware, or real-time performance. Rebuild before using it on changed c
 It also exercises keyboard pass release to a moving AI receiver, natural pickup,
 automatic control transfer, and a follow-up keyboard shot without resetting
 possession. `human-passing.json` retains the pass/switch/shot event evidence.
+Add `--remap` when invoking `node scripts/harness/playtest.mjs` to swap Pass and
+Shoot through Controls, test protected Enter/cancel, reload persistence and
+Settings help, then exercise the match fixtures with the swapped keys.
 
 `node scripts/harness/rewards.mjs` (after building) uses a terminal-win fixture
 through the real match outcome UI, reloads at result and draft screens, verifies

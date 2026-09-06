@@ -102,6 +102,16 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed input-safety iteration: occupied gameplay bindings now swap instead of
+silently unbinding another action; menu confirmation/back cannot be stolen.
+Settings help uses actual bindings. Four unit cases cover swapping, reserved keys,
+free/same keys and reset. Build/141 tests/bot gates pass:
+`.gaming/runs/1788708392096-NJb0i1/`. Remapped browser flow passes:
+`.gaming/playtests/1788708404722-kehkjo/` (Controls swap, Enter protection, Escape
+cancel, reload, help labels, actual pass/receive/shoot with swapped keys).
+Controls capture inspected. Self-review prefers retained controls/accessibility;
+Controls layout remains cramped, and gamepad/full-run/hardware evidence is open.
+
 Completed visual iteration: bounded result/league layouts, opaque dark broadcast
 backdrop, readable prose separate from actual scores, smaller unskewed actions,
 responsive tables and scroll access. Baseline

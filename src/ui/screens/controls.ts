@@ -16,7 +16,12 @@ export function controlsScreen(app: App): void {
         render();
         app.input.capture = (code) => {
           if (code !== 'Escape') {
-            app.input.bind(code, r.action);
+            if (!app.input.bind(code, r.action)) {
+              app.toast('That key is reserved for menu navigation. Choose another key.');
+              waiting = null;
+              render();
+              return;
+            }
             app.meta.keymap = { ...app.input.keymap };
             app.saveMeta();
             sfx.uiConfirm();
@@ -28,7 +33,7 @@ export function controlsScreen(app: App): void {
     });
     const el = h('div', { class: 'screen transparent', style: 'overflow:auto;justify-content:flex-start;padding:24px 0' },
       h('h2', { class: 'screen-title' }, 'CONTROLS'),
-      h('p', { class: 'screen-sub' }, 'Keyboard bindings. Gamepad uses the standard layout. Prompts in-game follow your bindings.'),
+      h('p', { class: 'screen-sub' }, 'Choose a key. Occupied gameplay keys swap bindings; Enter stays available for menus. Escape cancels. Gamepad uses the standard layout.'),
       h('div', { style: 'margin:12px 0' }, ...rows),
       h('div', { class: 'menu', style: 'flex-direction:row' },
         btn('Reset to defaults', () => { app.input.resetKeys(); app.meta.keymap = null; app.saveMeta(); render(); }),
