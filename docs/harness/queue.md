@@ -102,6 +102,19 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed result clarification: optional MatchOutcome.shootoutGoals carries only
+completed attempts; result shows both teams' shootout totals, deciding-point rule
+and exclusion from player G/A. Reuses result-description styles, no new motion.
+Impeccable informed subordinate plain-language copy. Baseline
+.gaming/rewards/1788712844269-aJDz1D/; final
+.gaming/rewards/1788712925461-PomMfN/ passes desktop/narrow/150% layout and
+pick/skip reload, captures inspected. Same viewport/terminal scenario, randomized
+team labels differ. Regulation .gaming/rewards/1788712926755-YzbwR2/ verifies no
+shootout copy and reward regression. Gates .gaming/runs/1788712910680-SIaFE6/
+pass build/152 tests/bot. Self-review prefers explanation/accessibility; fixtures
+do not establish human play. Next: full natural shootout skills-node flow and
+outcome/reward, beyond the existing terminal-win and headless simulation tests.
+
 Completed shootout accounting fix: checkGoal no longer credits regulation goals,
 assists or perk-weighted team points during shootout attempts. Removed the old
 fixed-one-point undo; shootout settlement still awards exactly one deciding point.

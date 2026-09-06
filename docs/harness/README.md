@@ -55,6 +55,10 @@ coverage, not proof of a complete run or a human-played victory.
 Add `--skills` to exercise the shootout reward path with a prepared reachable
 shootout node and terminal win. Skills skips must preserve cash (no +25 match
 bonus). Unit tests cover both Shootout and Hit Parade draft persistence.
+Use `--shootout-result --layout --assert-layout` for a completed-shootout match
+result fixture, explanation text, responsive reachability and reward recovery.
+`--baseline` skips explanation assertions for before captures. This prepares the
+terminal shootout state; natural shootout evidence remains a separate check.
 
 `node scripts/harness/endings.mjs` (after building) prepares a terminal loss and
 checks that the saved ended run survives the result screen, Continue settles it,

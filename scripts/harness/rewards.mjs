@@ -11,6 +11,7 @@ const server = await preview({ preview: { host: '127.0.0.1', port: 0, open: fals
 let browser;
 const checks = [], errors = [];
 const skills = process.argv.includes('--skills');
+const shootoutResult = process.argv.includes('--shootout-result');
 try {
   browser = await chromium.launch({ args: ['--enable-unsafe-swiftshader', '--use-angle=swiftshader', '--disable-dev-shm-usage'] });
   for (const choice of ['pick', 'skip']) {
@@ -36,15 +37,27 @@ try {
     await page.getByRole('button', { name: skills ? 'Take the Shot' : 'Drop the Puck', exact: true }).click();
     // A terminal win fixture exercises production outcome/reward routing, not
     // human match difficulty. No direct mutation of the run or reward itself.
-    await page.evaluate(() => {
+    await page.evaluate(shootoutResult => {
       const app = window.__hokyz, st = app.view.sim.st;
       st.phase = 'over'; st.winner = 0; st.teams[0].score = 3; st.teams[1].score = 1;
+      if (shootoutResult) {
+        st.teams[1].score = 2;
+        st.shootout = { stage: 'done', goals: [2, 0] };
+      }
       app.onTick(); st.t += 3;
-    });
+    }, shootoutResult);
     await page.keyboard.press('Enter');
     await page.evaluate(() => { const app = window.__hokyz; app.input.poll(); app.onTick(); });
     if (!skills) assert.equal(await page.getByRole('button', { name: 'Draft a Perk', exact: true }).count(), 1);
     else assert.equal(await page.locator('.result h2').textContent(), 'CHALLENGE CLEARED');
+    if (!skills && !process.argv.includes('--baseline')) {
+      const note = page.locator('.shootout-summary');
+      if (shootoutResult) {
+        assert.match(await note.textContent(), /Shootout:.*2.*0/);
+        assert.match(await note.textContent(), /deciding point/);
+      } else assert.equal(await note.count(), 0);
+      checks.push(shootoutResult ? 'Completed shootout attempts and deciding-point explanation rendered' : 'Regulation result has no shootout explanation');
+    }
     if (process.argv.includes('--layout') && choice === 'pick') writeFileSync(join(out, 'layout.json'), JSON.stringify(await resultProbe(page, out, 'result'), null, 2));
     const pending = await page.evaluate(() => window.__hokyz.run.pendingDraft);
     assert.ok(pending?.perkIds.length, 'Result did not persist earned reward');

@@ -279,6 +279,8 @@ export interface MatchOutcome {
   /** shots blocked by the home team's skaters */
   blocks?: number;
   shootoutWon?: boolean;
+  /** Successful attempts, home then away, only for a completed shootout. */
+  shootoutGoals?: [number, number];
   topCornerGoals?: number;
   /** hp by roster skater id after the match */
   hp: Record<string, number>;

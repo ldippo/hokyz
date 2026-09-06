@@ -126,6 +126,7 @@ export function playMatch(app: App, sim: MatchSim, perkNames: string[], done: (o
       bigHits: st.stats.bigHits[0],
       hp,
       ...extras,
+      shootoutGoals: st.shootout?.stage === 'done' ? [...st.shootout.goals] : undefined,
       boxScore: st.order.map((id) => {
         const s = st.skaters[id];
         return { id, name: s.name, team: s.team, goals: s.goals, assists: s.assists, hits: s.hits, bigHits: s.bigHits, shots: s.shots, saves: s.saves, blocks: s.blocks, isGoalie: s.isGoalie };
@@ -199,6 +200,10 @@ export function matchResultScreen(app: App, node: MapNode, outcome: MatchOutcome
     h('div', { class: 'result' },
       h('h2', { class: outcome.won ? 'win' : 'lose' }, outcome.won ? 'VICTORY' : res.usedLife ? 'SECOND WIND' : 'RUN OVER'),
       h('div', { class: 'score-line' }, `${run.teamShort} ${outcome.scoreFor} — ${outcome.scoreAgainst} ${RIVAL_BY_ID[node.rivalId!]?.short ?? 'OPP'}`),
+      outcome.shootoutGoals ? h('p', { class: 'result-description shootout-summary' },
+        `Shootout: ${run.teamShort} ${outcome.shootoutGoals[0]} : ${outcome.shootoutGoals[1]} ${RIVAL_BY_ID[node.rivalId!]?.short ?? 'OPP'}. `,
+        'Winner receives one deciding point. Player goals and assists exclude shootout attempts.',
+      ) : null,
       res.cash ? h('div', { style: 'font-family:var(--font-display);font-size:24px;color:var(--gold);margin-bottom:12px' }, `+${res.cash} CASH`) : null,
       res.usedLife ? h('p', { class: 'screen-sub' }, 'Second Wind burned. You live to skate again.') : null,
       injured.length ? h('p', { class: 'screen-sub', style: 'color:#f66' }, `INJURED: ${injured.map((s) => s.name).join(', ')} — out until healed`) : null,

@@ -39,6 +39,26 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest presentation: MatchOutcome optional shootoutGoals copies final successful
+attempts only when shootout.stage is done. matchResultScreen explains both teams'
+shootout totals, deciding point and player G/A exclusions beneath final score.
+Uses existing result-description styling; Impeccable guided subordinate readable
+copy. rewards.mjs --shootout-result prepares terminal state, asserts explanation
+and existing pick/skip recovery; result-probe includes summary reachability.
+Baseline .gaming/rewards/1788712844269-aJDz1D/; final
+.gaming/rewards/1788712925461-PomMfN/ passes 1280x720,390x844 normal/150% with no
+overflow/clipping and reachable choices/table. Desktop and150% images inspected;
+baseline same terminal scenario/viewport but randomized labels differ. Regulation
+.gaming/rewards/1788712926755-YzbwR2/ confirms no shootout copy, reward regression.
+Gates .gaming/runs/1788712910680-SIaFE6/ pass build/152 tests/bot; baseline
+.gaming/runs/1788712842818-EcorvN/ also passes. Self-review prefers clarity for
+first-session/accessibility players, abstains on human feel/full-run/hardware.
+Next precise action: exercise a full natural shootout skills node through its
+real browser controller and outcome/reward. Existing skills reward harness uses
+terminal injection; headless natural shootout tests do not cover browser wiring.
+Keep real difficulty, attempt clocks and outcome; disclose scripted/AI control.
+Unrelated README.md and docs/ROADMAP-v4.md remain unstaged.
+
 Latest fix: shootout attempts leaked goals/assists into regulation player stats,
 and undoing only1 team point leaked goal-value perk bonuses. rules.checkGoal now
 emits goal feedback with value1/no assist in shootouts without modifying those

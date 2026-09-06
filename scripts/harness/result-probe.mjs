@@ -8,7 +8,7 @@ export async function resultProbe(page, out, prefix) {
     await page.evaluate(scale => { const app = window.__hokyz; app.meta.textScale = scale; app.applyAccessPrefs(); document.querySelector('.screen').scrollTop = 0; const stats = document.querySelector('.match-stats'); if (stats) stats.scrollLeft = 0; }, scale);
     await page.screenshot({ path: join(out, `${prefix}-${width}-${scale}.png`) });
     const clipped = [];
-    for (const el of await page.locator('.result [data-nav], .result h2, .result td, .result th').all()) {
+    for (const el of await page.locator('.result [data-nav], .result h2, .result td, .result th, .result .shootout-summary').all()) {
       await el.evaluate(el => el.scrollIntoView({ block: 'center', inline: 'nearest' }));
       const r = await el.boundingBox();
       if (!r || r.x < -1 || r.y < -1 || r.x+r.width > width+1 || r.y+r.height > height+1) clipped.push(await el.textContent());
