@@ -241,14 +241,14 @@ export function buildMatch(run: RunState, node: MapNode): MatchSetupBundle {
   }
   if (node.type === 'boss') {
     mods.teams[1].speedMul *= 1.05;
-    mods.bossPhases = (rival.phases ?? []).map((p) => ({ ...p, applied: false }));
+    mods.bossPhases.push(...(rival.phases ?? []).map((p) => ({ ...p, applied: false })));
     const stacks = (run.ascension >= 5 ? 1 : 0) + (run.act >= 4 ? 1 : 0);
     for (let i = 0; i < stacks; i++) {
       const extra = extraBossPhase(rng, mods.bossPhases);
       if (extra) mods.bossPhases.push({ ...extra, label: `${run.act >= 4 && i === stacks - 1 ? 'OVERTIME RULES' : 'ASCENSION RULES'} · ${extra.label}` });
     }
-    if (mods.bossPhases.some((p) => p.kind === 'extraSkater')) mods.extraSkater = generateSkater(rng, 'enforcer', nodeTier(run, node) + 1, 'opp');
   }
+  if (mods.bossPhases.some((p) => p.kind === 'extraSkater')) mods.extraSkater = generateSkater(rng, 'enforcer', nodeTier(run, node) + 1, 'opp');
   if (run.flags.easyNext) mods.teams[1].turboRegenMul *= 0.6;
   if (run.flags.hardNext) mods.teams[1].hitPowerMul *= 1.2;
   if (run.flags.scoutedBoss && node.type === 'boss') mods.teams[1].speedMul *= 0.9;

@@ -63,6 +63,32 @@ describe('skater xp', () => {
 });
 
 describe('boss phases', () => {
+  it.each(['elite', 'boss'] as const)('Outnumbered adds one opponent through real %s encounter setup', (type) => {
+    const r = newRun('outnumbered', CAPTAINS[0], 0, []);
+    const node = availableNodes(r)[0];
+    node.type = type;
+    node.rivalId = type === 'boss' ? 'boss_wrecking' : 'bruisers';
+    node.mutatorId = 'outnumbered';
+    const b = buildMatch(r, node);
+    expect(b.mods.bossPhases.some(p => p.label === 'OUTNUMBERED')).toBe(true);
+    if (type === 'boss') expect(b.mods.bossPhases.some(p => p.label === 'REINFORCEMENTS')).toBe(true);
+    const s = new MatchSim([
+      { ...b.home, isHuman: false, difficulty: 2 },
+      { ...b.away, isHuman: false },
+    ], b.mods, b.seed);
+    const starting = [...s.st.teams[1].skaters];
+    for (let i = 0; i < 300; i++) s.step();
+    expect(s.st.period).toBe(1);
+    expect(s.st.teams[1].skaters.length).toBe(4);
+    const added = s.st.teams[1].skaters.filter(id => !starting.includes(id));
+    expect(added).toEqual([b.mods.extraSkater?.id]);
+    expect(s.st.teams[1].goalie).toBe(b.away.goalie.id);
+    // A later reinforcement phase cannot duplicate an already-dressed skater.
+    s.st.period = 3;
+    s.applyBossPhases([]);
+    s.applyBossPhases([]);
+    expect(s.st.teams[1].skaters.length).toBe(4);
+  });
   function bossSim(rivalId: string, seed = 4) {
     const rng = new Rng(seed);
     const rival = RIVAL_BY_ID[rivalId];

@@ -66,18 +66,18 @@ try {
   await page.evaluate(()=>{window.__hokyz.meta.textScale=1.5;window.__hokyz.applyAccessPrefs();});
   await press('s'); await capture('narrow-next');
   const expected=await page.locator('.node.focus').getAttribute('title');
-  if(variant) await page.evaluate(variant=>{
+  if(variant) await page.evaluate(({variant,outnumbered})=>{
     const run=window.__hokyz.run;
-    run.maps[0].rows[0].forEach(node=>{node.type=variant;node.rivalId='boss_maidens';node.mutatorId='long_bombs';});
+    run.maps[0].rows[0].forEach(node=>{node.type=variant;node.rivalId='boss_maidens';node.mutatorId=outnumbered?'outnumbered':'long_bombs';});
     run.grudges.boss_maidens={beaten:2,act:1};run.ascension=5;
-  },variant);
+  },{variant,outnumbered:process.argv.includes('--outnumbered')});
   await press('Enter');
   const heading=variant==='boss'?'👑 BOSS FIGHT':variant==='elite'?'💀 ELITE MATCH':'NEXT MATCH';
   assert.equal(await page.locator('.screen-title').textContent(),heading);
   if(!variant) assert.ok((await page.locator('.matchup .tn').last().textContent()).includes(expected.split(' · ')[0]));
   else {
     assert.ok(await page.locator('.taunt').count());
-    assert.match(await page.locator('.match-intro-content').textContent(),/Long Bomb Night/);
+    assert.match(await page.locator('.match-intro-content').textContent(),process.argv.includes('--outnumbered')?/Outnumbered/:/Long Bomb Night/);
     if(variant==='boss') assert.ok(await page.locator('.match-intro .perk-chip').count()>=2);
   }
   checks.push({activation:'Enter opened selected rival'});
@@ -102,6 +102,17 @@ try {
     await page.evaluate(()=>{window.__mapPad.buttons[0]={pressed:true,value:1};window.__hokyz.simStep();window.__mapPad.buttons[0]={pressed:false,value:0};window.__hokyz.simStep();});
     assert.equal(await page.evaluate(()=>window.__hokyz.humanPlaying),true);
     checks.push({introNavigation:'Keyboard back/re-entry and controller Drop the Puck'});
+    if(process.argv.includes('--outnumbered')) {
+      await page.setViewportSize({width:1280,height:720});
+      await page.evaluate(()=>{window.__hokyz.meta.textScale=1;window.__hokyz.applyAccessPrefs();});
+      const roster=await page.evaluate(()=>{
+        const app=window.__hokyz;for(let i=0;i<300;i++)app.simStep();
+        const st=app.view.sim.st;app.render(1,1/60);
+        return {period:st.period,home:st.teams[0].skaters.length,away:st.teams[1].skaters.length,extraId:st.mods.extraSkater?.id,extraPresent:!!st.skaters[st.mods.extraSkater?.id],phases:st.mods.bossPhases};
+      });
+      assert.equal(roster.period,1);assert.equal(roster.home,3);assert.equal(roster.away,4);assert.ok(roster.extraPresent);
+      checks.push({outnumbered:roster});await page.screenshot({path:join(out,'outnumbered-match.png')});
+    }
   }
   assert.deepEqual(errors,[]);
 } catch(e){errors.push(String(e));process.exitCode=1;}

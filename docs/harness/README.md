@@ -112,6 +112,9 @@ The default seeded case is a normal match, not every boss/grudge/modifier varian
 Combine `--intro-layout` with `--boss-intro` or `--elite-intro` to prepare an
 Iron Maidens encounter with grudge2, ascension5 and Long Bomb Night. Checks taunt,
 modifier and phase text too; this is UI/setup coverage, not natural progression.
+Add `--outnumbered` to either variant to use that mutator, start the match, and
+verify three home/four away skaters during period1 with the extra roster entry.
+It captures the started match at desktop size; no winner or clock is injected.
 
 `node scripts/harness/route.mjs` exercises event -> shop -> rest in one run,
 reloading between encounters. It preserves generated links while preparing the

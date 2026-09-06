@@ -102,6 +102,18 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed Outnumbered fix: preserve mutator phases when appending boss phases,
+generate extraSkater for every encounter that requests it, and apply period1
+phases before opening faceoff. Real buildMatch->MatchSim elite/boss tests failed
+before repair (3skaters / missing mutator), now verify4 opponents inperiod1 and
+no duplicate later. Final .gaming/runs/1788715268066-4XehhI/ build/154 tests/bot
+pass; eight bot reports exactly unchanged from red-test baseline
+1788715226640-7efzfQ. Browser elite1788715300730-grsrA0/boss1788715335370-7nc6BB
+under .gaming/map-focus/ pass intro/navigation/start and3v4 atperiod1. Desktop
+boss match inspected. Self-review prefers truthful encounter rules, not balance
+or human-feel approval. Next: verify four-skater faceoff placement; current
+setupFaceoff assigns the third winger the same offset as the second.
+
 Completed extended intro evidence: map-focus --intro-layout plus --boss-intro or
 --elite-intro prepares Iron Maidens/grudge2/ascension5/Long Bomb Night. Boss
 .gaming/map-focus/1788715098167-WNvzuV/ and elite1788715097770-VECDF7 pass six

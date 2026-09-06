@@ -148,6 +148,7 @@ export class MatchSim {
             startShootout(st, events, st.mods.shootoutRounds);
             break;
           }
+          this.applyBossPhases(events);
           setupFaceoff(st, events);
           events.push({ type: 'period', period: st.period, overtime: st.overtime });
         }

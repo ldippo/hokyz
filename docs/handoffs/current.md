@@ -39,6 +39,27 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest gameplay fix: Outnumbered now actually dresses fourth opponent inperiod1.
+runState.buildMatch appends boss phases instead of erasing mutator phases, and
+creates extraSkater outside boss-only branch when any phase needs it. MatchSim
+applies initial phases before opening setupFaceoff (previously only on later
+periods). tests/run/depth.test.ts adds elite/boss real-build integration cases:
+missing fourth/missing mutator failed before, now4 opponents at300ticks with
+original goalie, and later phase application cannot duplicate extra. Red-stage
+.gaming/runs/1788715226640-7efzfQ/ failed those two new tests, build/bot passed;
+final .gaming/runs/1788715268066-4XehhI/ build/154 tests/bot pass, eight bot match
+reports exactly unchanged (mean6.375). Browser map-focus --intro-layout
+--elite-intro/--boss-intro --outnumbered passes actual start andperiod1 home3/away4:
+.gaming/map-focus/1788715300730-grsrA0/ elite and1788715335370-7nc6BB boss.
+Boss desktop outnumbered-match.png inspected; no outcome/clock injection.
+Self-review prefers encounter truthfulness, abstains on broader balance/human feel.
+Next precise action: setupFaceoff in rules.ts places winger0 onone side and every
+other winger onthe same offset. Four-skater teams therefore start two attackers
+overlapping. Reproduce actual Outnumbered opening faceoff positions, fix spacing
+for both attack directions without changing ordinary three-skater arrangements,
+and verify subsequent faceoffs/goalie pulls as appropriate. Preserve unrelated
+README.md/ROADMAP-v4.md edits. Full goal remains active.
+
 Latest evidence: map-focus --intro-layout --boss-intro / --elite-intro prepares
 boss_maidens, grudge beaten2, ascension5 and long_bombs on reachable nodes after
 normal map-focus checks. Asserts taunt/modifier text and>=2 boss phase cards,
