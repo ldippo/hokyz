@@ -33,7 +33,7 @@ def M(name, rgb, rough=0.6, metal=0.0):
         MATS[name] = mat(name, rgb, rough, metal)
     return MATS[name]
 
-def box(name, center, size, bevel=0.03, seg=3, sub=0):
+def box(name, center, size, bevel=0.03, seg=6, sub=0):
     bpy.ops.mesh.primitive_cube_add(size=1, location=center)
     o = bpy.context.active_object
     o.name = name
@@ -52,7 +52,7 @@ def box(name, center, size, bevel=0.03, seg=3, sub=0):
     bpy.ops.object.shade_smooth()
     return o
 
-def sphere(name, center, r, seg=20, rings=14, scale=(1,1,1)):
+def sphere(name, center, r, seg=40, rings=28, scale=(1,1,1)):
     bpy.ops.mesh.primitive_uv_sphere_add(radius=r, segments=seg, ring_count=rings, location=center)
     o = bpy.context.active_object
     o.name = name
@@ -61,19 +61,69 @@ def sphere(name, center, r, seg=20, rings=14, scale=(1,1,1)):
     bpy.ops.object.shade_smooth()
     return o
 
-def limb(name, a, b, r0, r1, verts=12):
-    """Tapered cylinder from point a to b."""
+def limb(name, a, b, r0, r1, verts=32):
+    """Contoured padded limb with rounded ends and subtle cloth folds."""
     a, b = Vector(a), Vector(b)
     d = b - a
     L = d.length
-    bpy.ops.mesh.primitive_cone_add(vertices=verts, radius1=r0, radius2=r1, depth=L, location=(a + b) / 2)
-    o = bpy.context.active_object
-    o.name = name
-    o.rotation_mode = 'QUATERNION'
-    o.rotation_quaternion = d.normalized().to_track_quat('Z', 'Y')
-    bpy.ops.object.transform_apply(rotation=True)
-    bpy.ops.object.shade_smooth()
+    axis = d.normalized()
+    u = axis.cross(Vector((0, 0, 1)))
+    if u.length < 0.01: u = axis.cross(Vector((0, 1, 0)))
+    u.normalize(); v = axis.cross(u).normalized()
+    points, faces = [], []
+    rings = 13 if max(r0, r1) > 0.05 else 2
+    for j in range(rings):
+        t = j / (rings - 1)
+        radius = r0 * (1-t) + r1 * t
+        if rings > 2:
+            radius *= 0.86 + 0.18 * math.sin(math.pi * t)
+        for i in range(verts):
+            angle = i * math.tau / verts
+            fold = 1 + (0.025 * math.sin(t * 29 + angle * 3) * math.sin(math.pi*t) if rings > 2 else 0)
+            p = a + d*t + (u*math.cos(angle) + v*math.sin(angle))*radius*fold
+            points.append(tuple(p))
+            if j > 0:
+                k = j*verts+i; prev = j*verts+(i+1)%verts
+                faces.append((k-verts, prev-verts, prev, k))
+    faces.extend([tuple(reversed(range(verts))), tuple((rings-1)*verts+i for i in range(verts))])
+    mesh = bpy.data.meshes.new(name); mesh.from_pydata(points, [], faces); mesh.update()
+    o = bpy.data.objects.new(name, mesh); bpy.context.collection.objects.link(o)
+    for p in mesh.polygons: p.use_smooth = len(p.vertices) == 4
     return o
+
+def tube(name, points, radius=0.006):
+    curve = bpy.data.curves.new(name, 'CURVE'); curve.dimensions = '3D'
+    curve.resolution_u = 12; curve.bevel_depth = radius; curve.bevel_resolution = 3
+    spline = curve.splines.new('BEZIER'); spline.bezier_points.add(len(points)-1)
+    for p, co in zip(spline.bezier_points, points):
+        p.co = co; p.handle_left_type = p.handle_right_type = 'AUTO'
+    obj = bpy.data.objects.new(name, curve); bpy.context.collection.objects.link(obj)
+    bpy.ops.object.select_all(action='DESELECT'); obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj; bpy.ops.object.convert(target='MESH')
+    return bpy.context.object
+
+def jersey_body(width, depth, lo, hi):
+    """Ring-built tailored uniform: rounded shoulders, waist taper, loose hem."""
+    points, faces = [], []
+    count, rows = 64, 25
+    for j in range(rows):
+        t = j / (rows-1)
+        w = width * (0.85 + 0.15*math.sin(t*math.pi*0.72))
+        d = depth * (0.93 + 0.12*math.sin(t*math.pi))
+        if t > 0.88: w *= 1 - (t-0.88)*2.8
+        for i in range(count):
+            a = i*math.tau/count
+            # Low-amplitude folds change the silhouette rather than flat-shaded facets.
+            fold = 1 + 0.028*math.sin(a*9+t*10)*(1-t) + 0.012*math.sin(t*35+a*3)
+            points.append((math.cos(a)*d*fold, math.sin(a)*w*fold, lo+t*(hi-lo)))
+            if j:
+                k = j*count+i; n = j*count+(i+1)%count
+                faces.append((k-count, n-count, n, k))
+    faces.extend([tuple(reversed(range(count))), tuple((rows-1)*count+i for i in range(count))])
+    mesh = bpy.data.meshes.new('tailoredJersey'); mesh.from_pydata(points, [], faces); mesh.update()
+    obj = bpy.data.objects.new('torso', mesh); bpy.context.collection.objects.link(obj)
+    for p in mesh.polygons: p.use_smooth = len(p.vertices) == 4
+    return obj
 
 def assign_mat(o, m):
     o.data.materials.clear()
@@ -164,17 +214,26 @@ def build_skater(goalie=False):
     socks = M('socks', (0.15, 0.15, 0.2), 0.8)
     gloves = M('gloves', (0.1, 0.1, 0.12), 0.7)
     helmet = M('helmet', (0.08, 0.08, 0.1), 0.35, 0.2)
-    visor = M('visor', (0.05, 0.08, 0.15), 0.1, 0.5)
+    visor = M('visor', (0.38, 0.51, 0.58), 0.08, 0.05)
+    visor.node_tree.nodes.get('Principled BSDF').inputs['Alpha'].default_value = 0.28
+    visor.surface_render_method = 'DITHERED'
     skin_m = M('skin', (0.85, 0.62, 0.5), 0.6)
     skate = M('skate', (0.1, 0.1, 0.12), 0.5)
     blade = M('blade', (0.8, 0.8, 0.85), 0.25, 0.9)
-    stick_m = M('stick', (0.16, 0.12, 0.08), 0.6)
+    stick_m = M('stick', (0.025, 0.032, 0.044), 0.32, 0.2)
     tape = M('tape', (0.05, 0.05, 0.05), 0.9)
     pad_m = M('pad', (0.93, 0.93, 0.95), 0.85)
+    trim = M('trim', (0.78, 0.83, 0.88), 0.65)
+    dark = M('rubber', (0.012, 0.019, 0.027), 0.8)
+    eyes = M('eyes', (0.045, 0.055, 0.06), 0.25)
 
-    # proportions (chunky)
-    W = 0.34 if not goalie else 0.40      # torso half-width (y)
-    D = 0.17 if not goalie else 0.20      # torso half-depth (x)
+    def detail(obj, material, bone):
+        assign_mat(obj, material); vgroup_all(obj, bone); parts.append(obj)
+        return obj
+
+    # Athletic anatomy under protective gear, rather than oversized block bodies.
+    W = 0.275 if not goalie else 0.33
+    D = 0.16 if not goalie else 0.19
     HIP_Z, CHEST_Z, NECK_Z = 0.85, 1.38, 1.44
     HEAD_Z = 1.6
     SHOULDER = (0.02, W + 0.02, 1.32)
@@ -182,27 +241,50 @@ def build_skater(goalie=False):
     # pelvis + torso
     pelvis = box('pelvis', (0, 0, 0.84), (0.34, 0.5, 0.2), bevel=0.05, seg=4)
     assign_mat(pelvis, pants); vgroup_all(pelvis, 'hips'); parts.append(pelvis)
-    torso = box('torso', (0, 0, (HIP_Z + CHEST_Z) / 2 + 0.02), (2 * D, 2 * W, CHEST_Z - HIP_Z), bevel=0.06, seg=4)
+    torso = jersey_body(W, D, HIP_Z-0.035, CHEST_Z+0.035)
     assign_mat(torso, jersey); torso_uvs(torso, y_half=W); vgroup_blend_z(torso, 'hips', 'chest', HIP_Z + 0.05, CHEST_Z - 0.15); parts.append(torso)
     for s in (-1, 1):
-        pad = sphere('shoulder%s' % s, (0.0, s * (W + 0.02), 1.33), 0.15, scale=(1.0, 1.1, 0.8))
+        pad = sphere('shoulder%s' % s, (0.0, s * (W - 0.015), 1.32), 0.12, scale=(1.1, 1.0, 0.82))
         assign_mat(pad, sleeve); vgroup_all(pad, 'chest'); parts.append(pad)
+    collar = [(0.085*math.cos(i*math.tau/32), 0.10*math.sin(i*math.tau/32), 1.407) for i in range(33)]
+    detail(tube('collarBinding', collar, 0.014), dark, 'chest')
+    detail(tube('collarStitch', [(x*1.13,y*1.13,z-0.012) for x,y,z in collar], 0.003), trim, 'chest')
 
     # head
     neck = limb('neck', (0, 0, NECK_Z - 0.03), (0, 0, HEAD_Z - 0.12), 0.07, 0.07)
     assign_mat(neck, skin_m); vgroup_all(neck, 'head'); parts.append(neck)
-    face = sphere('face', (0.01, 0, HEAD_Z), 0.155, scale=(1.0, 0.95, 1.05))
+    face = sphere('face', (0.018, 0, HEAD_Z-0.015), 0.135, scale=(0.95, 0.85, 1.18))
+    # Taper jaw/chin; cheeks and brow receive their own soft forms.
+    for vertex in face.data.vertices:
+        if vertex.co.z < -0.02:
+            vertex.co.y *= 1 + vertex.co.z*1.8
     assign_mat(face, skin_m); vgroup_all(face, 'head'); parts.append(face)
-    helm = sphere('helmet', (-0.015, 0, HEAD_Z + 0.03), 0.185, scale=(1.0, 1.0, 0.95))
+    detail(sphere('nose', (0.147,0,HEAD_Z-0.022),0.027,scale=(1.05,0.65,1.35)), skin_m, 'head')
+    detail(tube('mouth', [(0.135,-0.025,HEAD_Z-0.078),(0.145,0,HEAD_Z-0.081),(0.135,0.025,HEAD_Z-0.078)],0.003), M('lips',(0.40,0.20,0.16)), 'head')
+    for s in (-1,1):
+        detail(sphere('ear', (-0.006,s*0.117,HEAD_Z-0.027),0.03,scale=(0.75,0.42,1.3)),skin_m,'head')
+        detail(sphere('cheek', (0.105,s*0.057,HEAD_Z-0.049),0.025,scale=(0.55,1.0,0.8)),skin_m,'head')
+        detail(sphere('eye', (0.134,s*0.048,HEAD_Z+0.006),0.008,seg=24,rings=16,scale=(0.55,1.15,0.65)),eyes,'head')
+        detail(tube('brow',[(0.129,s*0.027,HEAD_Z+0.028),(0.131,s*0.05,HEAD_Z+0.03),(0.12,s*0.07,HEAD_Z+0.024)],0.006),dark,'head')
+        detail(tube('chinStrap', [(-0.02,s*0.142,HEAD_Z+0.01),(0.04,s*0.133,HEAD_Z-0.095),(0.097,s*0.057,HEAD_Z-0.148),(0.11,0,HEAD_Z-0.149)],0.009),dark,'head')
+    helm = sphere('helmet', (-0.015, 0, HEAD_Z + 0.04), 0.158, seg=64, rings=40, scale=(1.08, 0.98, 0.96))
     # cut the helmet: remove faces below the brow
     bm = bmesh.new(); bm.from_mesh(helm.data)
-    geom = [f for f in bm.faces if (helm.matrix_world @ f.calc_center_median()).z < HEAD_Z - 0.03 and (helm.matrix_world @ f.calc_center_median()).x > -0.05]
+    geom = [f for f in bm.faces if ((helm.matrix_world @ f.calc_center_median()).z < HEAD_Z - 0.03 and (helm.matrix_world @ f.calc_center_median()).x > -0.05) or ((helm.matrix_world @ f.calc_center_median()).z < HEAD_Z + 0.028 and (helm.matrix_world @ f.calc_center_median()).x > 0.075)]
     bmesh.ops.delete(bm, geom=geom, context='FACES')
     bm.to_mesh(helm.data); bm.free()
+    bpy.context.view_layer.objects.active = helm
+    solid = helm.modifiers.new('Shell thickness','SOLIDIFY'); solid.thickness=0.009
+    bpy.ops.object.modifier_apply(modifier=solid.name)
     assign_mat(helm, helmet); vgroup_all(helm, 'head'); parts.append(helm)
+    for s in (-1,1):
+        for i in range(3):
+            detail(box('helmetVent',(-0.07+i*0.055,s*0.137,HEAD_Z+0.072),(0.035,0.01,0.024),bevel=0.009),dark,'head')
+        detail(tube('helmetRidge',[(-0.13,s*0.06,HEAD_Z+0.115),(-0.055,s*0.063,HEAD_Z+0.171),(0.04,s*0.061,HEAD_Z+0.165),(0.105,s*0.055,HEAD_Z+0.135)],0.005),helmet,'head')
+        detail(sphere('visorScrew',(0.045,s*0.156,HEAD_Z+0.019),0.012,seg=20,rings=12,scale=(1,0.3,1)),blade,'head')
     if goalie:
         # mask shell (team-colored helmet material) wrapping the face, plus a bar cage and chin guard
-        shell = sphere('maskshell', (0.03, 0, HEAD_Z - 0.01), 0.19, scale=(1.0, 1.02, 1.08))
+        shell = sphere('maskshell', (0.03, 0, HEAD_Z - 0.01), 0.167, seg=64,rings=40, scale=(1.05, 1.02, 1.13))
         bm2 = bmesh.new(); bm2.from_mesh(shell.data)
         # cut the front opening for the cage
         geom2 = [f for f in bm2.faces if (shell.matrix_world @ f.calc_center_median()).x > 0.12 and abs((shell.matrix_world @ f.calc_center_median()).z - (HEAD_Z - 0.02)) < 0.12]
@@ -210,16 +292,25 @@ def build_skater(goalie=False):
         bm2.to_mesh(shell.data); bm2.free()
         assign_mat(shell, helmet); vgroup_all(shell, 'head'); parts.append(shell)
         for i in range(3):
-            bar = limb('cageh%d' % i, (0.19, -0.13, HEAD_Z - 0.1 + i * 0.08), (0.19, 0.13, HEAD_Z - 0.1 + i * 0.08), 0.008, 0.008, verts=6)
+            bar = tube('cageh%d' % i, [(0.12,-0.135,HEAD_Z-0.1+i*0.07),(0.215,0,HEAD_Z-0.11+i*0.07),(0.12,0.135,HEAD_Z-0.1+i*0.07)],0.005)
             assign_mat(bar, blade); vgroup_all(bar, 'head'); parts.append(bar)
         for i in range(4):
             y = -0.12 + i * 0.08
-            bar = limb('cagev%d' % i, (0.19, y, HEAD_Z - 0.14), (0.19, y, HEAD_Z + 0.08), 0.008, 0.008, verts=6)
+            bar = tube('cagev%d' % i,[(0.12,y,HEAD_Z-0.15),(0.20,y,HEAD_Z-0.055),(0.16,y,HEAD_Z+0.08)],0.005)
             assign_mat(bar, blade); vgroup_all(bar, 'head'); parts.append(bar)
         chin = box('chin', (0.16, 0, HEAD_Z - 0.17), (0.08, 0.2, 0.06), bevel=0.02, seg=2)
         assign_mat(chin, pad_m); vgroup_all(chin, 'head'); parts.append(chin)
     else:
-        vz = box('visor', (0.15, 0, HEAD_Z + 0.02), (0.06, 0.3, 0.1), bevel=0.02, seg=2)
+        # Curved transparent shield with visible eyes behind it.
+        verts, faces = [], []
+        for j in range(2):
+            for i in range(33):
+                a = -1.12+i/32*2.24
+                verts.append((0.174*math.cos(a)+0.012,0.166*math.sin(a),HEAD_Z+0.05-j*0.082))
+                if j and i: faces.append((i-1,i,33+i,32+i))
+        me=bpy.data.meshes.new('visor'); me.from_pydata(verts,[],faces); me.update()
+        vz=bpy.data.objects.new('visor',me); bpy.context.collection.objects.link(vz)
+        for p in me.polygons: p.use_smooth=True
         assign_mat(vz, visor); vgroup_all(vz, 'head'); parts.append(vz)
 
     # arms: pre-posed holding the stick in front
@@ -253,6 +344,7 @@ def build_skater(goalie=False):
         assign_mat(ua, sleeve); vgroup_all(ua, 'upperArm.' + side); parts.append(ua)
         fa = limb('foreArm%s' % side, elbow, hand, 0.07, 0.06)
         assign_mat(fa, sleeve); vgroup_all(fa, 'foreArm.' + side); parts.append(fa)
+        detail(sphere('elbowFold',elbow,0.071,seg=32,rings=20),sleeve,'foreArm.'+side)
         hdir = (hand - elbow).normalized()
         if goalie and side == 'R':
             gl = box('blocker', hand + hdir * 0.05, (0.08, 0.28, 0.32), bevel=0.03)
@@ -261,8 +353,12 @@ def build_skater(goalie=False):
             gl = sphere('catcher', hand + hdir * 0.06, 0.15, scale=(0.6, 1.0, 1.0))
             assign_mat(gl, pad_m)
         else:
-            gl = box('glove%s' % side, hand + hdir * 0.05, (0.16, 0.14, 0.13), bevel=0.04, seg=3)
+            gl = box('glove%s' % side, hand + hdir * 0.05, (0.16, 0.14, 0.13), bevel=0.045, seg=8)
             assign_mat(gl, gloves)
+            for finger in range(4):
+                detail(box('fingerPadding',hand+hdir*0.055+Vector((0.075,(finger-1.5)*0.03,0)),(0.035,0.025,0.105),bevel=0.012),gloves,'hand.'+side)
+            detail(sphere('thumb',hand+Vector((0.04,-s*0.078,-0.025)),0.037,scale=(1,0.7,1.4)),gloves,'hand.'+side)
+        detail(limb('gloveCuff',hand-hdir*0.038,hand+hdir*0.007,0.083,0.085),gloves,'hand.'+side)
         vgroup_all(gl, 'hand.' + side); parts.append(gl)
         bones += [('shoulder.' + side, (0, s * 0.1, 1.32), tuple(sh), 'chest'),
                   ('upperArm.' + side, tuple(sh), tuple(elbow), 'shoulder.' + side),
@@ -278,13 +374,26 @@ def build_skater(goalie=False):
         assign_mat(th, pants); vgroup_all(th, 'thigh.' + side); parts.append(th)
         sh_ = limb('shin%s' % side, knee, ankle, 0.085, 0.07)
         assign_mat(sh_, socks); vgroup_all(sh_, 'shin.' + side); parts.append(sh_)
+        for stripe_z in (0.31,0.36):
+            stripe_a=ankle.lerp(knee,(stripe_z-0.1)/0.35)
+            detail(limb('sockStripe',stripe_a,stripe_a+Vector((0,0,0.023)),0.086,0.087),sleeve,'shin.'+side)
         if goalie:
             lp = box('legpad%s' % side, (0.07, s * 0.17, 0.38), (0.2, 0.28, 0.6), bevel=0.07, seg=4)
             assign_mat(lp, pad_m); vgroup_all(lp, 'shin.' + side); parts.append(lp)
             kp = box('kneepad%s' % side, (0.06, s * 0.17, 0.62), (0.18, 0.26, 0.22), bevel=0.06, seg=3)
             assign_mat(kp, pad_m); vgroup_all(kp, 'thigh.' + side); parts.append(kp)
-        boot = box('boot%s' % side, (0.05, s * 0.16, 0.1), (0.3, 0.14, 0.17), bevel=0.04, seg=3)
+            for pad_z in (0.19,0.30,0.41,0.52):
+                detail(tube('padSeam',[(0.164,s*0.17-0.10,pad_z),(0.173,s*0.17,pad_z-0.006),(0.164,s*0.17+0.10,pad_z)],0.004),trim,'shin.'+side)
+            detail(box('padAccent',(0.174,s*0.17+s*0.077,0.37),(0.008,0.018,0.43),bevel=0.006),sleeve,'shin.'+side)
+        boot = box('boot%s' % side, (0.05, s * 0.16, 0.1), (0.3, 0.14, 0.17), bevel=0.055, seg=8)
         assign_mat(boot, skate); vgroup_all(boot, 'foot.' + side); parts.append(boot)
+        detail(sphere('ankleSupport',(-0.035,s*0.16,0.17),0.081,scale=(0.82,0.88,1.18)),skate,'foot.'+side)
+        detail(box('toeCap',(0.15,s*0.16,0.096),(0.115,0.146,0.12),bevel=0.047),dark,'foot.'+side)
+        for lace in range(5):
+            lx=-0.012+lace*0.023
+            detail(tube('lace',[(lx,s*0.16-0.04,0.177),(lx+0.014,s*0.16+0.04,0.177)],0.003),trim,'foot.'+side)
+        for support_x in (-0.045,0.145):
+            detail(box('bladeHolder',(support_x,s*0.16,0.04),(0.045,0.035,0.052),bevel=0.009),trim,'foot.'+side)
         bl = box('blade%s' % side, (0.05, s * 0.16, 0.012), (0.3, 0.02, 0.025), bevel=0.0)
         assign_mat(bl, blade); vgroup_all(bl, 'foot.' + side); parts.append(bl)
         bones += [('thigh.' + side, tuple(hip), tuple(knee), 'hips'),
@@ -294,14 +403,16 @@ def build_skater(goalie=False):
     # stick
     top = grip_top + Vector((-0.06, 0.02, 0.08))
     heel = Vector((0.86, 0.45, 0.02)) if not goalie else Vector((0.75, 0.42, 0.02))
-    shaft = limb('shaft', top, heel, 0.016, 0.016, verts=8)
+    shaft = limb('shaft', top, heel, 0.013, 0.013, verts=24)
     assign_mat(shaft, stick_m); vgroup_all(shaft, 'stick'); parts.append(shaft)
     bdir = Vector((1, 0.35, 0)).normalized()
     if goalie:
         paddle = limb('paddle', heel + Vector((-0.3, -0.12, 0.28)), heel, 0.035, 0.035, verts=8)
         assign_mat(paddle, stick_m); vgroup_all(paddle, 'stick'); parts.append(paddle)
-    bladeo = box('stickblade', heel + bdir * 0.16, (0.34, 0.07, 0.035), bevel=0.01, seg=2)
-    bladeo.rotation_euler = (0, 0, math.atan2(bdir.y, bdir.x)); bpy.ops.object.transform_apply(rotation=True)
+    bladeo = box('stickblade', (0,0,0), (0.34, 0.045, 0.065), bevel=0.012, seg=6)
+    rotation = Matrix.Rotation(math.atan2(bdir.y, bdir.x), 4, 'Z')
+    for vertex in bladeo.data.vertices:
+        vertex.co = rotation @ vertex.co + heel + bdir*0.15 + Vector((0,0,0.013))
     assign_mat(bladeo, tape); vgroup_all(bladeo, 'stick'); parts.append(bladeo)
     bones += [('stick', tuple(top), tuple(heel), 'hand.R')]
 

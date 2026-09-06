@@ -49,7 +49,8 @@ export async function startRigViewer(app: App): Promise<void> {
   let t = 0;
   let celebrated = false;
   app.loop.stop();
-  const tick = () => {
+  const capture = params.has('capture');
+  const tick = (draw = true) => {
     const dt = 1 / 60;
     t += dt;
     gState.butterfly = gpose === 'butterfly' ? 1 : 0;
@@ -106,9 +107,10 @@ export async function startRigViewer(app: App): Promise<void> {
     rig.update(skState, 1, dt, t);
     }
     grig.update(gState, 1, dt, t);
-    app.rig.render(dt);
-    requestAnimationFrame(tick);
+    if (draw) app.rig.render(dt);
+    if (!capture) requestAnimationFrame(() => tick());
   };
+  if (capture) for (let i = 0; i < 45; i++) tick(false);
   tick();
   (window as unknown as { __rigview: unknown }).__rigview = { entries, grig, gState };
 }
