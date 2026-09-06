@@ -45,6 +45,9 @@ through the real match outcome UI, reloads at result and draft screens, verifies
 identical choices and once-only offer telemetry, then checks perk-pick and cash-skip
 persistence. Evidence goes in `.gaming/rewards/`. This is reward/save recovery
 coverage, not proof of a complete run or a human-played victory.
+Add `--skills` to exercise the shootout reward path with a prepared reachable
+shootout node and terminal win. Skills skips must preserve cash (no +25 match
+bonus). Unit tests cover both Shootout and Hit Parade draft persistence.
 
 After building, `pnpm harness:capture` starts its own Vite preview server on an
 ephemeral loopback port, uses Playwright Chromium, and writes title/rink screenshots

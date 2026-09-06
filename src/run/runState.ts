@@ -491,10 +491,15 @@ export function prepareDraft(run: RunState, node: Pick<MapNode, 'id' | 'type'>):
 export function claimDraft(run: RunState, perkId: string | null): boolean {
   const pending = run.pendingDraft;
   if (!pending || (perkId !== null && (!pending.perkIds.includes(perkId) || !PERK_BY_ID[perkId] || run.perks.includes(perkId)))) return false;
-  if (perkId === null) run.cash += 25;
+  if (perkId === null) run.cash += draftSkipCash(run);
   else run.perks.push(perkId);
   delete run.pendingDraft;
   return true;
+}
+
+export function draftSkipCash(run: RunState): number {
+  const type = run.pendingDraft?.type;
+  return type === 'shootout' || type === 'hitparade' ? 0 : 25;
 }
 
 /** Skaters with unspent level-ups. */

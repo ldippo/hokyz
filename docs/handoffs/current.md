@@ -39,6 +39,23 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest P3 fix: skills finishSkills now prepares/saves pending draft before showing
+inline result cards, and claim/skip uses once-only resolution. Shared draftSkipCash
+preserves skills' zero-cash skip policy on both inline and reload screens; match
+drafts still grant +25. Two new unit cases cover Shootout and Hit Parade save/
+reload/skip. `node scripts/harness/rewards.mjs --skills` prepares a reachable
+shootout and terminal win, then exercises real result/reload/Continue/pick and skip.
+Baseline .gaming/runs/1788706788043-3cuXhj/; final
+.gaming/runs/1788706863930-tCCxhq/ passes build, 137 tests and hockey gates.
+.gaming/rewards/1788706874800-J0EsKl/ passes both browser paths with identical
+choices, stable telemetry and correct persisted claims. Resumed draft inspected:
+all choices visible and Skip perk has no cash bonus. Self-review prefers recovery
+integrity; no claim of human skills victory or a complete run. Next precise action:
+exercise complete-act, act-3 league offer/bank, loss/run-over and save/reload routing;
+then larger-text/remapping/gamepad paths. Source inspection also found Hit Parade
+uses Math.random for scripted movement; deterministic challenge behavior needs a
+later focused check, not an unreviewed change in this reward chunk.
+
 Latest P3 fix: earned match drafts now persist before the result screen. Added
 optional pendingDraft, prepareDraft/claimDraft in runState; match callback prepares
 reward after advancing node, before save; runMap routes pending reward before

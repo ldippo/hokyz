@@ -1,7 +1,7 @@
 import type { App } from '../../app';
 import { btn, h } from '../dom';
 import type { MapNode } from '../../run/mapGen';
-import { claimDraft, prepareDraft } from '../../run/runState';
+import { claimDraft, draftSkipCash, prepareDraft } from '../../run/runState';
 import { TAG_INFO, SET_SIZE, tagCounts, type Perk } from '../../run/perks';
 import { runMapScreen } from './runMap';
 import { sfx } from '../../audio/sfx';
@@ -24,6 +24,7 @@ export function perkCard(p: Perk, onPick: () => void, price?: number, disabled =
 export function draftScreen(app: App, node: Pick<MapNode, 'id' | 'type'>): void {
   const run = app.run!;
   const picks = prepareDraft(run, node);
+  const skipCash = draftSkipCash(run);
   const tel = (app.meta.telemetry ??= { perkOffered: {}, perkPicked: {}, nodePicked: {}, runEndAct: {} });
   if (!run.pendingDraft!.offeredLogged) {
     for (const p of picks) tel.perkOffered[p.id] = (tel.perkOffered[p.id] ?? 0) + 1;
@@ -35,7 +36,7 @@ export function draftScreen(app: App, node: Pick<MapNode, 'id' | 'type'>): void 
     h('h2', { class: 'screen-title' }, 'DRAFT A PERK'),
     h('p', { class: 'screen-sub' }, node.type === 'boss' ? 'Boss loot · rare odds boosted' : node.type === 'elite' ? 'Elite loot · rare odds boosted' : 'Pick one'),
     h('div', { class: 'cards' }, ...picks.map((p) => perkCard(p, () => { if (!claimDraft(run, p.id)) return; tel.perkPicked[p.id] = (tel.perkPicked[p.id] ?? 0) + 1; app.saveMeta(); sfx.cash(); app.saveRun(); runMapScreen(app); }, undefined, false, run.perks))),
-    h('div', { class: 'menu' }, btn('Skip (+25 cash)', () => { if (!claimDraft(run, null)) return; app.saveRun(); runMapScreen(app); })),
+    h('div', { class: 'menu' }, btn(skipCash ? `Skip (+${skipCash} cash)` : 'Skip perk', () => { if (!claimDraft(run, null)) return; app.saveRun(); runMapScreen(app); })),
   );
   app.showScreen(el);
 }

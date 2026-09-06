@@ -33,4 +33,16 @@ describe('durable match rewards', () => {
     const run = newRun('old-reward', CAPTAINS[0], 0, []);
     expect(deserializeRun(serializeRun(run))?.pendingDraft).toBeUndefined();
   });
+
+  it.each(['shootout', 'hitparade'] as const)('restores %s choices without granting match-only skip cash', type => {
+    const run = newRun('skills-reward', CAPTAINS[0], 0, []);
+    const node = { ...availableNodes(run)[0], type };
+    const ids = prepareDraft(run, node).map(p => p.id);
+    const restored = deserializeRun(serializeRun(run))!;
+    expect(prepareDraft(restored, node).map(p => p.id)).toEqual(ids);
+    const cash = restored.cash;
+    expect(claimDraft(restored, null)).toBe(true);
+    expect(restored.cash).toBe(cash);
+    expect(claimDraft(restored, null)).toBe(false);
+  });
 });

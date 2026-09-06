@@ -1,7 +1,7 @@
 import type { App } from '../../app';
 import { btn, esc, h } from '../dom';
 import type { MapNode } from '../../run/mapGen';
-import { completeNode, draftPerks, lineup, runEffects, runRng, commitRng, nodeTier } from '../../run/runState';
+import { completeNode, prepareDraft, claimDraft, lineup, runEffects, runRng, commitRng, nodeTier } from '../../run/runState';
 import { MatchSim } from '../../sim/match';
 import { defaultMatchMods } from '../../sim/modifiers';
 import { RIVAL_BY_ID, buildRivalRoster } from '../../run/teams';
@@ -141,16 +141,16 @@ function finishSkills(app: App, node: MapNode, won: boolean, line: string, rewar
   const run = app.run!;
   if (won) run.cash += reward;
   completeNode(run, node);
+  const picks = won ? prepareDraft(run, node) : [];
   app.saveRun();
   app.attract();
-  const picks = won ? draftPerks(run, 3, 0) : [];
   const el = h('div', { class: 'screen transparent' },
     h('div', { class: 'result' },
       h('h2', { class: won ? 'win' : 'lose' }, won ? 'CHALLENGE CLEARED' : 'NOT THIS TIME'),
       h('div', { class: 'score-line' }, line),
       won ? h('div', { style: 'font-family:var(--font-display);font-size:24px;color:var(--gold);margin-bottom:12px' }, `+${reward} CASH · PICK A PERK`) : h('p', { class: 'screen-sub' }, 'No penalty. Skills nodes only give.'),
-      won ? h('div', { class: 'cards' }, ...picks.map((p) => perkCard(p, () => { run.perks.push(p.id); sfx.cash(); app.saveRun(); runMapScreen(app); }, undefined, false, run.perks))) : null,
-      h('div', { class: 'menu' }, btn(won ? 'Skip perk' : 'Back to Map', () => runMapScreen(app), won ? '' : 'primary')),
+      won ? h('div', { class: 'cards' }, ...picks.map((p) => perkCard(p, () => { if (!claimDraft(run, p.id)) return; sfx.cash(); app.saveRun(); runMapScreen(app); }, undefined, false, run.perks))) : null,
+      h('div', { class: 'menu' }, btn(won ? 'Skip perk' : 'Back to Map', () => { if (won) { if (!claimDraft(run, null)) return; app.saveRun(); } runMapScreen(app); }, won ? '' : 'primary')),
     ),
   );
   if (won) sfx.cash();

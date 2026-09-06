@@ -100,7 +100,18 @@ confirmed aiming far while skating near. Also fixed gameplay key bindings eating
 team-name letters. Next: sustained passing/possession and teammate-support play,
 then complete-run progression, settings/reduced-motion and hardware limitations.
 
-## P3: Full-game polish and validation (ready, depends on P1 and P2)
+## P3: Full-game polish and validation (in-progress)
+
+Completed iteration: skills-node rewards share durable pending drafts and once-only
+claims. Preserve the existing zero-cash skills skip policy after reload. Verify
+Shootout/Hit Parade unit cases and real shootout result/reload/claim UI using a
+prepared node and terminal-win fixture. Full-run completion remains unverified.
+Baseline `.gaming/runs/1788706788043-3cuXhj/`; final
+`.gaming/runs/1788706863930-tCCxhq/` passes build, 137 tests and bot gates.
+`.gaming/rewards/1788706874800-J0EsKl/` passes shootout reward pick and skip
+after result/draft reloads, stable choices, telemetry and zero-cash skip.
+Resumed draft inspected. Self-review prefers reward integrity; human skills play
+and full-run routing remain unproven. Next: complete-act/run-over/league routing.
 
 Completed iteration: durable post-match rewards. Source inspection found wins
 advance/save the map before draft choices exist in the save, so reload can skip

@@ -9,6 +9,7 @@ const out = mkdtempSync(resolve('.gaming/rewards', `${Date.now()}-`));
 const server = await preview({ preview: { host: '127.0.0.1', port: 0, open: false } });
 let browser;
 const checks = [], errors = [];
+const skills = process.argv.includes('--skills');
 try {
   browser = await chromium.launch({ args: ['--enable-unsafe-swiftshader', '--use-angle=swiftshader', '--disable-dev-shm-usage'] });
   for (const choice of ['pick', 'skip']) {
@@ -25,8 +26,13 @@ try {
     await ready();
     await page.getByRole('button', { name: 'New Run', exact: true }).click();
     await page.locator('.cards [data-nav]').first().click();
+    if (skills) await page.evaluate(() => {
+      // Prepare a reachable shootout node; outcome and reward code remain real.
+      const run = window.__hokyz.run;
+      run.maps[0].rows[0][0].type = 'shootout';
+    });
     await page.locator('.node.available.match').first().click();
-    await page.getByRole('button', { name: 'Drop the Puck', exact: true }).click();
+    await page.getByRole('button', { name: skills ? 'Take the Shot' : 'Drop the Puck', exact: true }).click();
     // A terminal win fixture exercises production outcome/reward routing, not
     // human match difficulty. No direct mutation of the run or reward itself.
     await page.evaluate(() => {
@@ -36,7 +42,8 @@ try {
     });
     await page.keyboard.press('Enter');
     await page.evaluate(() => { const app = window.__hokyz; app.input.poll(); app.onTick(); });
-    assert.equal(await page.getByRole('button', { name: 'Draft a Perk', exact: true }).count(), 1);
+    if (!skills) assert.equal(await page.getByRole('button', { name: 'Draft a Perk', exact: true }).count(), 1);
+    else assert.equal(await page.locator('.result h2').textContent(), 'CHALLENGE CLEARED');
     const pending = await page.evaluate(() => window.__hokyz.run.pendingDraft);
     assert.ok(pending?.perkIds.length, 'Result did not persist earned reward');
     await page.reload(); await ready();
@@ -51,12 +58,12 @@ try {
     const cash = await page.evaluate(() => window.__hokyz.run.cash);
     await page.screenshot({ path: join(out, `${choice}-resumed-draft.png`) });
     if (choice === 'pick') await page.locator('.cards [data-nav]').first().click();
-    else await page.getByRole('button', { name: 'Skip (+25 cash)', exact: true }).click();
+    else await page.getByRole('button', { name: skills ? 'Skip perk' : 'Skip (+25 cash)', exact: true }).click();
     const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('hokyz.run.v1')));
     assert.ok(!saved.pendingDraft, 'Resolved reward still pending in save');
     if (choice === 'pick') assert.equal(saved.perks.filter(id => id === pending.perkIds[0]).length, 1);
-    else assert.equal(saved.cash, cash + 25);
-    checks.push(`${choice}: result reload, draft reload, stable choices, persisted resolution`);
+    else assert.equal(saved.cash, cash + (skills ? 0 : 25));
+    checks.push(`${skills ? 'skills' : 'match'} ${choice}: result reload, draft reload, stable choices, persisted resolution`);
     await page.close();
   }
   assert.deepEqual(errors, []);
