@@ -102,6 +102,19 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed extra-skater faceoff spacing: preserve standard center/wings, place
+reinforcements in a second row. Tests cover3/4/5 skaters on both teams at all
+five dots, rink clearance and unchanged standard positions. Initial fixture
+silently dressed only3; corrected explicit additions/count checks reproduce two
+zero-distance failures before fix. Baseline .gaming/runs/1788715622965-zdDqNl/;
+final1788715709528-qhFxsJ build/157 tests/bot pass; eight match reports unchanged.
+Browser opening baseline .gaming/map-focus/1788715677184-hIucOx/ min distance0;
+final1788715727249-MXCfhO min1.8m, actual3v4 start/navigation pass. Both captures
+inspected but blank behind HUD;90 render-only updates did not repair capture,
+so removed that extra render loop. No visual-quality approval. Self-review
+prefers distinct gameplay positions, abstains on human feel. Next: investigate
+blank stopped-loop opening capture versus live rendering before further graphics.
+
 Completed Outnumbered fix: preserve mutator phases when appending boss phases,
 generate extraSkater for every encounter that requests it, and apply period1
 phases before opening faceoff. Real buildMatch->MatchSim elite/boss tests failed

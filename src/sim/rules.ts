@@ -87,13 +87,15 @@ export function setupFaceoff(st: MatchState, events: MatchEvent[]): void {
     placeSkater(center, spot.x - dir * 0.9, spot.y, dir);
     const wingerXOff = spot.x === 0 ? 3.5 : 2.5;
     wingers.forEach((w, i) => {
-      const side = i === 0 ? -1 : 1;
+      const side = i % 2 === 0 ? -1 : 1;
+      // Keep the standard wings unchanged; reinforcements occupy a second row.
+      const row = Math.floor(i / 2);
       // keep inside rink
-      let y = spot.y + side * 4.5;
+      let y = spot.y + side * (row === 0 ? 4.5 : 2.25);
       const maxY = RINK.width / 2 - 1.5;
       if (y > maxY) y = maxY;
       if (y < -maxY) y = -maxY;
-      placeSkater(w, spot.x - dir * wingerXOff, y, dir);
+      placeSkater(w, spot.x - dir * (wingerXOff + row * 3), y, dir);
     });
     if (t.goalie) {
       const g = st.skaters[t.goalie];

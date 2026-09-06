@@ -106,12 +106,16 @@ try {
       await page.setViewportSize({width:1280,height:720});
       await page.evaluate(()=>{window.__hokyz.meta.textScale=1;window.__hokyz.applyAccessPrefs();});
       const roster=await page.evaluate(()=>{
-        const app=window.__hokyz;for(let i=0;i<300;i++)app.simStep();
+        const app=window.__hokyz;for(let i=0;i<300&&app.view.sim.st.phase!=='faceoff';i++)app.simStep();
         const st=app.view.sim.st;app.render(1,1/60);
-        return {period:st.period,home:st.teams[0].skaters.length,away:st.teams[1].skaters.length,extraId:st.mods.extraSkater?.id,extraPresent:!!st.skaters[st.mods.extraSkater?.id],phases:st.mods.bossPhases};
+        const positions=st.teams.flatMap(t=>t.skaters.map(id=>({id,team:t.id,...st.skaters[id].pos})));
+        const minSeparation=Math.min(...positions.flatMap((p,i)=>positions.slice(i+1).map(q=>Math.hypot(p.x-q.x,p.y-q.y))));
+        return {phase:st.phase,positions,minSeparation,period:st.period,home:st.teams[0].skaters.length,away:st.teams[1].skaters.length,extraId:st.mods.extraSkater?.id,extraPresent:!!st.skaters[st.mods.extraSkater?.id],phases:st.mods.bossPhases};
       });
       assert.equal(roster.period,1);assert.equal(roster.home,3);assert.equal(roster.away,4);assert.ok(roster.extraPresent);
       checks.push({outnumbered:roster});await page.screenshot({path:join(out,'outnumbered-match.png')});
+      assert.equal(roster.phase,'faceoff');
+      if(!process.argv.includes('--baseline'))assert.ok(roster.minSeparation>1.1,JSON.stringify(roster));
     }
   }
   assert.deepEqual(errors,[]);

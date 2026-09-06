@@ -39,6 +39,23 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest: fixed overlapping extra skaters at faceoffs in src/sim/rules.ts. Existing
+center/two wings unchanged; additional pair uses rear row3m deeper, y±2.25.
+tests/sim/faceoff.test.ts checks3/4/5 players both directions/all five dots,
+pair clearance and rink bounds. Initial fixture accidentally truncated to3 in
+MatchSim constructor; corrected explicit additions/count assertions yielded two
+red tests (distance0), then passed. Baseline .gaming/runs/1788715622965-zdDqNl/;
+final .gaming/runs/1788715709528-qhFxsJ/ build/157 tests/bot pass; eight seeded
+match reports exactly unchanged. Browser map-focus now stops at actual opening
+faceoff and records/asserts positions: baseline1788715677184-hIucOx min0, final
+1788715727249-MXCfhO min1.8 under .gaming/map-focus/. Intro/nav/3v4 checks pass.
+Both screenshots inspected: ice blank behind HUD.90 render-only updates also
+blank, removed unnecessary loop; numerical evidence valid, no visual approval.
+Self-review prefers non-overlapping formations; human feel remains unverified.
+Next precise action: diagnose blank opening capture in stopped-loop map-focus
+versus normal live/render capture, without assuming renderer failure from this
+fixture. Preserve unrelated README/ROADMAP edits; full goal remains active.
+
 Latest gameplay fix: Outnumbered now actually dresses fourth opponent inperiod1.
 runState.buildMatch appends boss phases instead of erasing mutator phases, and
 creates extraSkater outside boss-only branch when any phase needs it. MatchSim
