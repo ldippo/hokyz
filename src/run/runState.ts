@@ -1,6 +1,6 @@
 import { Rng, hashSeed } from '../core/rng';
 import { migrateRun } from '../core/save';
-import type { MatchMods, SkaterDef, TeamMods, GoalieStyle } from '../sim/types';
+import type { MatchMods, SkaterDef, TeamMods, GoalieStyle, Stats } from '../sim/types';
 import { defaultMatchMods, defaultTeamMods } from '../sim/modifiers';
 import { findNode, generateAct, generateRunMap, type ActMap, type MapNode } from './mapGen';
 import type { BossPhase } from '../sim/types';
@@ -35,6 +35,7 @@ export interface RunState {
   /** Earned reward survives reloads until explicitly picked or skipped. */
   pendingDraft?: { id: string; type: MapNode['type']; perkIds: string[]; offeredLogged?: boolean };
   pendingShop?: { id: string; perkIds: string[]; hire: SkaterDef; hired: boolean; rerolls: number };
+  pendingRest?: { id: string; heals: boolean; offers: { skaterId: string; stat: keyof Stats }[] };
   cash: number;
   livesUsed: number;
   matchesWon: number;
@@ -378,6 +379,7 @@ export function applyMatchOutcome(run: RunState, node: MapNode, outcome: MatchOu
 
 /** Mark node complete and advance row; handles act transitions and run win. */
 export function completeNode(run: RunState, node: MapNode): void {
+  if (run.pendingRest?.id === node.id) delete run.pendingRest;
   if (run.pendingShop?.id === node.id) delete run.pendingShop;
   node.done = true;
   run.currentNodeId = node.id;
@@ -511,6 +513,30 @@ export function pendingLevelUps(run: RunState): SkaterDef[] {
 
 export function captainOf(run: RunState): Captain {
   return CAPTAINS.find((c) => c.id === run.captainId) ?? CAPTAINS[0];
+}
+
+export function prepareRest(run: RunState, node: Pick<MapNode, 'id'>): NonNullable<RunState['pendingRest']> {
+  if (run.pendingRest?.id === node.id) return run.pendingRest;
+  const heals = run.ascension < 4;
+  if (heals) { run.roster.forEach(skater => { skater.hp = skater.maxHp; }); run.goalie.hp = 100; }
+  const rng = runRng(run);
+  const keys: (keyof Stats)[] = ['speed', 'shot', 'hands', 'hit', 'balance', 'stamina'];
+  const offers = run.roster.slice(0, 4).map(skater => ({ skaterId: skater.id, stat: rng.pick(keys.filter(key => skater.stats[key] < 10)) ?? 'speed' as const }));
+  commitRng(run, rng);
+  return run.pendingRest = { id: node.id, heals, offers };
+}
+
+export function claimRest(run: RunState, node: MapNode, skaterId: string | null): boolean {
+  const rest = run.pendingRest;
+  if (!rest || rest.id !== node.id || node.done) return false;
+  if (skaterId !== null) {
+    const offer = rest.offers.find(offer => offer.skaterId === skaterId);
+    const skater = run.roster.find(skater => skater.id === skaterId);
+    if (!offer || !skater) return false;
+    skater.stats[offer.stat] = Math.min(10, skater.stats[offer.stat] + 2);
+  }
+  completeNode(run, node);
+  return true;
 }
 
 export function prepareShop(run: RunState, node: Pick<MapNode, 'id'>): NonNullable<RunState['pendingShop']> {

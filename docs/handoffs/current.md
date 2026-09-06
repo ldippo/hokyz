@@ -39,6 +39,22 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest progression fix: runState.pendingRest/prepareRest caches training offers
+and heal policy; first entry heals only below ascension4. claimRest validates
+pending node/offered skater and guards once-only train/skip; completeNode clears.
+restScreen saves on entry; runMap Continue resumes it. Optional field supports
+old saves. tests/run/rest.test.ts covers ascensions0/4, offers/RNG serialize,
+invalid/duplicate claims and skip without training. Gates
+.gaming/runs/1788711286817-4nlqDI/ pass build/151 tests/bot. New rest.mjs prepares
+injuries/node, then uses real Save & Quit/Continue/train or skip/reload.
+.gaming/rest/1788711339833-XEh5t0/ passes normal heals/+2 and ascension4 no heals/
+skip, identical saved offers/RNG and one completed row. Ascension4 screenshot
+inspected. Self-review prefers persistent choices; no broad run/hardware claim.
+Next precise action: exercise successive event -> shop -> rest route choices and
+reload after each, verifying path/row/cash/roster/perks and saved pending-state
+cleanup interact correctly. Then advance actual combat nodes through natural
+outcomes/act transitions, preserving human game-feel uncertainty.
+
 Latest progression fix: runState.pendingShop/prepareShop retains shop offers,
 free-agent definition, hired flag and reroll count. shopScreen saves on entry and
 mutates saved state on purchases/hire/reroll; prices recompute on render so Haggler

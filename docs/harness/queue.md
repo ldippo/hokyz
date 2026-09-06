@@ -102,6 +102,15 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed rest persistence fix: prepareRest saves healing policy and training
+offers once; claimRest validates the offer and resolves train/skip once. Continue
+resumes pending rest; completing clears it. Optional state preserves old saves.
+Build/151 tests/bot `.gaming/runs/1788711286817-4nlqDI/` pass. Browser
+`.gaming/rest/1788711339833-XEh5t0/` passes normal healing/training and ascension4
+no-heal/skip, stable Save & Quit/Continue offers/RNG, and completed reload.
+Ascension4 capture inspected. Self-review prefers persistent choices and policy
+integrity; not full-run evidence. Next: successive event/shop/rest route choices.
+
 Completed shop persistence fix: optional pendingShop caches inventory/free agent,
 hire flag and reroll count. Entry saves; Continue resumes shop; purchases/rerolls
 save retained state; completeNode clears it on departure. Discounts recompute on
