@@ -39,6 +39,26 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest completed fix: pre-match Back could softlock every row after the first,
+including reload, because availableNodes read currentNodeId (the preview) instead
+of the completed predecessor. src/run/runState.ts now reads the last path entry,
+falling back to currentNodeId for legacy state. Preview highlight stays intact.
+Seven tests in tests/run/previewNavigation.test.ts cover later rows, completion,
+and Acts2/3; four original cases failed before. natural-route.mjs mirrors lookup.
+New intro-navigation.mjs restores an earned full checkpoint and checks pointer
+Back, reload, keyboard Escape. Baseline1788723101555-V1IhVh shows zero choices;
+final1788723154992-eFyVOS passes, both map captures inspected under
+.gaming/intro-navigation/. Gates .gaming/runs/1788723141001-Rb5toX pass build,
+204 tests and bots; match arrays identical to baseline1788722987754-LJHg22.
+Natural replay .gaming/natural-route/1788723156246-a8yHZn passes the same earned
+boss2-6 loss/settlement. Self-review prefers recovery/route integrity for first-
+session and roguelite players; style unchanged, human feel/hardware unverified.
+Next precise action: investigate whether matchIntroScreen calling buildMatch on
+each preview consumes RNG and rerolls opponents. Demonstrate before changing;
+any fix must preserve deliberate lineup edits between Back and re-entry. Use the
+earned pre-boss checkpoint below. Full goal active; unrelated README/roadmap edits
+remain untouched. This latest next action supersedes older entries below.
+
 Latest Act2 evidence: natural-route.mjs supports --through-act=2, all-map checks,
 full persisted run/meta `.checkpoint.json` files and --resume=<checkpoint> via
 Continue. Source paths retained in reports. No gameplay edits.

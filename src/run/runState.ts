@@ -138,7 +138,10 @@ export function availableNodes(run: RunState): MapNode[] {
   const act = currentAct(run);
   if (run.row >= act.rows.length) return [];
   if (run.row === 0) return act.rows[0];
-  const prev = run.currentNodeId ? findNode(run.maps, run.currentNodeId) : null;
+  // A preview changes currentNodeId before the encounter is completed. Route
+  // connectivity still comes from the last completed node, including on reload.
+  const previousId = run.path.at(-1) ?? run.currentNodeId;
+  const prev = previousId ? findNode(run.maps, previousId) : null;
   if (!prev || prev.act !== run.act) return act.rows[run.row];
   return act.rows[run.row].filter((n) => prev.next.includes(n.id));
 }

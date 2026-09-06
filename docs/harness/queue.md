@@ -102,6 +102,17 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed pre-match Back softlock fix: availableNodes now uses the completed path
+for connectivity rather than the unplayed preview. Four regressions failed before;
+seven tests now cover later rows, completion and subsequent acts. Baseline browser
+.gaming/intro-navigation/1788723101555-V1IhVh loses all choices after Back/reload;
+final1788723154992-eFyVOS preserves choices through pointer Back, reload and Escape.
+Before/after map captures inspected. Gates1788723141001-Rb5toX pass build/204 tests/
+bot; seeded match arrays identical to baseline1788722987754-LJHg22. Natural earned
+boss replay1788723156246-a8yHZn retains2-6 loss and passes settlement. Self-review:
+prefer-after for first-session recovery and roguelite route integrity; no visual
+restyle or human difficulty claim. Next inspect preview RNG/roster stability.
+
 Completed extended natural-route/checkpoints: --through-act=2 and --resume.
 Full persisted run/meta roundtrip exact; fresh Act2 resume1788722536277-yTO2iI
 passes. Initial all-map gate correctly exposed intentional new-act rival rematches;

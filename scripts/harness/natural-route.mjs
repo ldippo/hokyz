@@ -99,7 +99,7 @@ try {
     if(before.act===throughAct+1){assert.equal(before.row,0);terminal=`act${before.act}`;await save(`earned-act${before.act}`);await page.screenshot({path:join(out,`earned-act${before.act}.png`)});break;}
     assert.ok(before.act>=1&&before.act<=throughAct);assert.ok(!before.over);
     const available=await page.evaluate(()=>{
-      const r=window.__hokyz.run,rows=r.maps[r.act-1].rows,prev=rows.flat().find(n=>n.id===r.currentNodeId);
+      const r=window.__hokyz.run,rows=r.maps[r.act-1].rows,prev=rows.flat().find(n=>n.id===(r.path.at(-1)??r.currentNodeId));
       return rows[r.row].filter(n=>r.row===0||!prev||prev.next.includes(n.id));
     });
     assert.equal(await page.locator('.node.available').count(),available.length);

@@ -169,6 +169,12 @@ Each saved step also writes a full `.checkpoint.json` with persisted run/meta.
 checkpoint through Continue; reports retain its path. Resumed evidence depends on
 the source checkpoint's provenance, not merely on the presence of a save file.
 
+`node scripts/harness/intro-navigation.mjs --resume=<full-checkpoint.json>` checks
+an earned later-row pre-match preview: pointer Back, reload/Continue and keyboard
+Escape retain connected map choices and completed path. The first available node
+must be a hockey match. Evidence: `.gaming/intro-navigation/`; `--baseline` records
+without recovery assertions. This does not assert preview RNG or roster stability.
+
 `node scripts/harness/hit-parade-full.mjs` runs idle and scripted pursuit through
 all 60 simulated seconds, using DOM movement/check keys and natural timer expiry.
 Requires idle loss/no reward and pursuit victory/cash/draft/zero-cash skip.
