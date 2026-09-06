@@ -300,6 +300,10 @@ rig pose state at a normalized origin, captures each case, and checks cached bla
 clearance/hand anchors. `--baseline` records without those assertions. Cached bounds
 are conservative, so heights need not equal actual source blade vertices exactly.
 This is pose reproduction, not a new natural save or goalie-control input test.
+Add `--shaft` to require the goalie blocker hand within3cm of the shaft axis,
+the catching hand more than20cm away, and only the right hand registered as a grip.
+These use bone origins, not exact glove-surface collision. `--standing` overrides
+butterfly to zero for a counterfactual standing-pose regression using the same state.
 `--puck --reach-study` instead evaluates6132 yaw/tilt/placement transforms per
 skating, charge and drag pose, using four cardinal blade-center offsets around
 the puck. Reports shoulder reach, hands ahead of torso bounds, hand height no

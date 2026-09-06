@@ -177,6 +177,7 @@ export class SkaterRig {
         this.stickContacts.push(stick.worldToLocal(new THREE.Vector3(x, y, z)));
       }
       for (const side of ['L', 'R'] as const) {
+        if (isGoalie && side === 'L') continue; // Catching glove is free, not a stick grip.
         const ua = this.bones.get(`upperArm${side}`)?.bone;
         const fa = this.bones.get(`foreArm${side}`)?.bone;
         const hand = this.bones.get(`hand${side}`)?.bone;

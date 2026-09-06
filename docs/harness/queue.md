@@ -102,6 +102,20 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed goalie hand roles: shared shaft top(.18,-.19,1.10),heel(.70,-.24,.02),
+blocker at18%; catcher target(.32,.32,1.10), no target mirroring, assert both arms
+reachable. Only R is registered as a goalie grip; catcher no longer follows stick.
+Baseline shaft distanceR.4546m/L.0500m -> R<6.2e-8m/L.518–.538m in saved cases.
+Baseline .gaming/models/1788729218979-ht0cLj versus final1788729268811-EpYCMp
+inspected/pass; standing override1788729323896-561Vho and goalie portrait
+1788729282727-luIxEB inspected/pass. Regenerated goalie only,98012tris/21bones.
+Gates .gaming/runs/1788729261200-ClNcEM build/214 tests/bots, keyboard
+.gaming/playtests/1788729292681-MLIIi4 and moving capture
+.gaming/captures/1788729291192-LJQyc1 pass. All120 sim/events unchanged; all63 carrier
+samples blade>=.0011m and grip<6.4e-8m. Self-review prefers anatomically distinct
+blocker/catcher roles. No actual human goalie-control or full glove collision claim.
+Next: reproduce remaining low-lean skater carrier alignment from saved t9.4 state.
+
 Completed goalie stick clearance: free-arm goalies now use the existing clearance
 correction before opposite-hand IK. Saved butterfly carrying cases replayed with
 new models --goalie-carry=<trace>. Baseline1788728878612-KoR94R versus candidate

@@ -39,6 +39,36 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest accepted goalie hand-role fix: generator goalie shaft top(.18,-.19,1.10),
+heel(.70,-.24,.02), blocker hand=top.lerp(heel,.18), free catcher(.32,.32,1.10).
+Removed goalie target mirroring; all hand targets now assert <=.57m arm reach.
+SkaterRig caches only R as goalie grip, so existing solveArms no longer drags
+catcher along with shaft. Right hand remains stick parent; goalie clearance stays.
+Regenerated goalie only98012tris/21bones/3476772bytes. Public/dist SHA256
+5b0aff759c6aff7bd8095d43faf54d89bc21f526278f045248bf00bf6bc8e4f2.
+Backup .gaming/goalie-grip-JN1UD4/goalie.glb; skater asset untouched.
+models --goalie-carry=<trace> --shaft now records hand-axis distances, asserts
+R<3cm/L>20cm and only R grip. --standing overrides butterfly to0 (counterfactual
+fixture, not a naturally standing save). Baseline
+.gaming/models/1788729218979-ht0cLj showsR.454609m/L.049982m; image inspected.
+Final1788729268811-EpYCMp R<6.2e-8m/L.518–.538m, blade>=.00469m, cachedRgrip<5e-16.
+Case2 inspected: blocker holds shaft, catcher visibly free. Standing
+1788729323896-561Vho and portrait1788729282727-luIxEB inspected/pass. Smooth pads,
+helmet and cage retained. Bone-origin checks do not prove exact glove-surface
+contact or every goalie animation; no goal physics/save mechanics changed.
+Baseline .gaming/runs/1788729184591-I3kFT1 and final1788729261200-ClNcEM pass
+build/214 tests/bots. Keyboard .gaming/playtests/1788729292681-MLIIi4 passes.
+Final moving capture .gaming/captures/1788729291192-LJQyc1/ passes and hit image
+inspected. Compared to1788728928511-CqBW9T all120 skater/puck/event samples identical.
+All63 carrier samples blade>=.001108m,grips<6.4e-8m; three goalie actual blade
+lows.017879/.013299/.013861m. Full human feel/hardware performance unproven.
+Self-review prefers blocker/catcher roles and retained rounded detail.
+Next precise action: reproduce low-lean skater carrier fallback at t9.4 from
+final play-motion.json (full carrier.state/poseState). Current neutral solver can
+reject reach at some moving poses despite blend1; preserve torso-safe silhouette
+while improving dynamic alignment. Broader goal remains active; unrelated README
+and docs/ROADMAP-v4.md edits untouched.
+
 Latest accepted goalie clearance and paddle fix: free-arm goalies with fall<.02
 now run existing clearStickFromIce before solveArms (src/render/skaterRig.ts).
 Saved natural goalie samples at11.1/11.2/11.3 all have butterfly.45, not standing.

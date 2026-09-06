@@ -318,17 +318,17 @@ def build_skater(goalie=False):
     # Derive skater grips from the shaft itself, within both arms' reach.
     # Mirroring a grip across the body detached the lower glove from the shaft.
     if goalie:
-        grip_top = Vector((0.28, 0.06, 0.95))
-        grip_low = Vector((0.45, 0.32, 0.62))
-        top = grip_top + Vector((-0.06, 0.02, 0.08))
-        heel = Vector((0.75, 0.42, 0.02))
+        top = Vector((0.18, -0.19, 1.10))
+        heel = Vector((0.70, -0.24, 0.02))
+        grip_top = Vector((0.32, 0.32, 1.10))  # free catching glove, not a shaft grip
+        grip_low = top.lerp(heel, 0.18)  # blocker hand owns the stick
     else:
         top = Vector((0.17, 0.015, 1.18))
         heel = Vector((0.68, 0.12, 0.02))
         grip_top = top.lerp(heel, 0.04)
         grip_low = top.lerp(heel, 0.20)
-    hand_targets = {1: grip_top, -1: grip_low}   # +y = left side (top hand), -y = right (low hand)
-    # left hand on top, right hand low  → left is +y in Blender for a +X facing model
+    # +y is left in Blender: skater top hand / goalie catcher; -y is right.
+    hand_targets = {1: grip_top, -1: grip_low}
     arm_len_u, arm_len_f = 0.3, 0.28
     bones = [('root', (0, 0, 0), (0, 0, 0.1), None),
              ('hips', (0, 0, HIP_Z), (0, 0, HIP_Z + 0.12), 'root'),
@@ -339,12 +339,9 @@ def build_skater(goalie=False):
     for s, side in ((1, 'L'), (-1, 'R')):
         sh = Vector((SHOULDER[0], s * SHOULDER[1], SHOULDER[2]))
         target = hand_targets[s].copy()
-        if goalie:
-            target.y = abs(target.y) * s if s > 0 else -abs(target.y)
         # two-bone IK in the plane defined by shoulder, target and an outward/back pole
         d = target - sh
-        if not goalie:
-            assert d.length <= arm_len_u + arm_len_f - 0.01, 'Skater grip exceeds arm reach'
+        assert d.length <= arm_len_u + arm_len_f - 0.01, 'Hand target exceeds arm reach'
         L = min(d.length, arm_len_u + arm_len_f - 0.01)
         cos_a = (arm_len_u ** 2 + L ** 2 - arm_len_f ** 2) / (2 * arm_len_u * L)
         a = math.acos(max(-1, min(1, cos_a)))
