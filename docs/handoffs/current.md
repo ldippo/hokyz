@@ -39,6 +39,21 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest evidence: scripts/harness/route.mjs runs connected event->shop->rest with
+reloads in one run. Generated links untouched; first three row types and initial
+injuries prepared. Actual event +45cash funds doctor -45/full heal, rest trains
+one stat+2, all pending state clears and row/path advance once. Final
+.gaming/route/1788711601985-aJ5MeJ/ passes and map screenshot inspected. First
+.gaming/route/1788711550846-Q65mBR/ failed comparison because migrateRun adds
+xp/level/pendingLevels0; fixture now normalizes only these documented defaults.
+Build/151 tests/bot .gaming/runs/1788711551823-jNXiO4/ pass. No game-code changes.
+Self-review supports connected encounter state, not full-run combat or game feel.
+Next precise action: extend connected route into a normal match with its actual
+run roster/modifiers and natural terminal outcome. If using AI control, disclose
+it; don't inject score/winner/phase, shorten clocks, grant stats or relax balance
+to claim a real run victory. Verify match result/save/reward or loss settlement,
+then act transition. Human and physical hardware evidence remain open.
+
 Latest progression fix: runState.pendingRest/prepareRest caches training offers
 and heal policy; first entry heals only below ascension4. claimRest validates
 pending node/offered skater and guards once-only train/skip; completeNode clears.

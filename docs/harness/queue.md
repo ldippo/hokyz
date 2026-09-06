@@ -102,6 +102,17 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed connected noncombat route evidence: route.mjs preserves generated map
+links, prepares event/shop/rest types and injuries, then uses real event +45cash,
+doctor -45/heal, rest +2training and reloads between every stage. Final
+`.gaming/route/1788711601985-aJ5MeJ/` passes three connected completed nodes,
+state/RNG preservation and cleared pending states; resulting map inspected.
+Initial comparison `.gaming/route/1788711550846-Q65mBR/` rejected harmless save
+migration defaults (xp/level/pendingLevels0); normalized only those documented
+defaults. Build/151 tests/bot `.gaming/runs/1788711551823-jNXiO4/` pass.
+No game-code edits. Self-review confirms successive route integration, not combat
+or full-run game feel. Next: natural combat outcome after these choices.
+
 Completed rest persistence fix: prepareRest saves healing policy and training
 offers once; claimRest validates the offer and resolves train/skip once. Continue
 resumes pending rest; completing clears it. Optional state preserves old saves.

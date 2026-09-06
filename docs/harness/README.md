@@ -76,6 +76,12 @@ Evidence: `.gaming/shop/`. This is shop persistence coverage, not full-run play.
 rest node, then verifies stable Save & Quit/Continue offers, healing policy,
 one training or skip, and completed reload. Evidence: `.gaming/rest/`.
 
+`node scripts/harness/route.mjs` exercises event -> shop -> rest in one run,
+reloading between encounters. It preserves generated links while preparing the
+first three encounter types/injuries. Checks cash, healing, training, pending
+state cleanup and connected path. Evidence: `.gaming/route/`. Save-migration
+zero defaults are normalized in comparisons; substantive state remains strict.
+
 `node scripts/harness/hit-parade-full.mjs` runs idle and scripted pursuit through
 all 60 simulated seconds, using DOM movement/check keys and natural timer expiry.
 Requires idle loss/no reward and pursuit victory/cash/draft/zero-cash skip.
