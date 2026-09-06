@@ -1,0 +1,8 @@
+{
+  "seeds": [101, 202],
+  "difficulties": [0, 1, 2, 3],
+  "maxTicks": 43200,
+  "meanGoalsExclusive": [3, 16],
+  "maxStationaryPlaySeconds": 8,
+  "note": "Matches the existing balance test cohort (seed + difficulty) and limits. Change with a documented balance decision, never just to pass a failed iteration. Browser frame timing is diagnostic until calibrated on target hardware."
+}

@@ -9,7 +9,11 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "sim:batch": "tsx scripts/simBatch.ts"
+    "sim:batch": "tsx scripts/simBatch.ts",
+    "harness:check": "node scripts/harness/check.mjs",
+    "harness:bot": "tsx scripts/harness/botplay.ts",
+    "harness:capture": "node scripts/harness/capture.mjs",
+    "harness:playtest": "node scripts/harness/playtest.mjs"
   },
   "dependencies": {
     "three": "^0.185.1"
@@ -17,6 +21,7 @@
   "devDependencies": {
     "@types/node": "^26.4.1",
     "@types/three": "^0.185.4",
+    "playwright": "^1.63.0",
     "tsx": "^4.23.13",
     "typescript": "^7.0.2",
     "vite": "^8.2.2",

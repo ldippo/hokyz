@@ -28,3 +28,5 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           npx tsx scripts/simBatch.ts 4 | tee -a "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
+      - name: Hockey bot gates
+        run: pnpm harness:bot
