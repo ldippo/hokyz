@@ -39,6 +39,25 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest iteration rejected/reverted: carrier blade reach via8 CCD passes over right
+wrist/forearm/upper arm, target cached blade center at production stickPoint minus
+.22m forward/y.07, then existing ice clearance/left IK. Normal candidate
+.gaming/models/1788725243078-l8gS26 improves gap.282-.401m but grip opens.066-.085m;
+capture inspected. Charge1788725253834-kGBHmY and dragL1788725265739-WTyrCZ fail
+grip; dragR1788725277846-h5ClBo passes. One focused repair keeps wrist orientation:
+normal1788725323734-a78yAB still fails grip.0258m, gap.512-.604m; dragL1788725335289-
+zmJPaL fails, right1788725347562-ea9IFJ and charge1788725359005-mRyXJd pass old gates.
+Removed all attributable skaterRig changes via exact patch; no threshold weakening
+or user-file rollback. Baseline gates1788725195237-Fgquj2 passed214 tests/build/bots.
+Self-review rejects disconnected grip; full blade contact remains unresolved.
+Next precise action: design blade-first desired stick world transform and solve
+both hand targets independently, constrained by shoulder reach and blade height.
+Existing stick is parented to handR and only left grip is cached; account for that
+dependency explicitly. Do not repeat this unconstrained CCD experiment. No sim
+changes authorized by this visual task. Full goal remains active.
+Restored gates .gaming/runs/1788725411763-C1Upxl pass build/214 tests/bots;
+.gaming/models/1788725418743-MOUEFr restored normal grip/ice/ring checks pass.
+
 Latest model iteration: fixed deke handedness in skaterRig.ts (render Y rotation
 has opposite sign to sim left). Optional rigViewer puck/production stickPoint hook
 and models.mjs --stride --stick --puck measure carried puck vs actual blade verts.

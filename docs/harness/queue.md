@@ -102,6 +102,20 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Rejected carrier-only CCD reach experiment; renderer edits fully reverted. Eight
+passes over right wrist/forearm/upper arm aimed cached blade center at stickPoint
+minus.22m forward, y.07, before clearance/left IK. Normal1788725243078-l8gS26
+gap improved to.282-.401m but left grip opened.066-.085m. Charge1788725253834-
+kGBHmY and left drag1788725265739-WTyrCZ also fail grip; right1788725277846-h5ClBo
+passes old gates. One focused repair removed wrist from chain: normal1788725323734-
+a78yAB still fails grip.0258m and gap.512-.604m; left1788725335289-zmJPaL fails,
+right1788725347562-ea9IFJ and charge1788725359005-mRyXJd pass. Paths under
+.gaming/models/. Normal candidate image inspected; no acceptance/threshold changes.
+Next design a blade-first, two-hand constrained pose with independent hand targets;
+do not retry unconstrained single-chain CCD or move the authoritative sim puck.
+Restored gates1788725411763-C1Upxl pass build/214 tests/bots; restored normal
+model1788725418743-MOUEFr passes grip/ice/ring checks. No game change shipped.
+
 Completed deke handedness correction: Three.js positive Y turns +X toward -Z,
 opposite simulation left (+y/render+Z). Mirror rig deke side, retaining existing
 grip-safe poses. Both12-phase direction/grip/ice checks pass. Added optional real
