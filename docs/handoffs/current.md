@@ -39,6 +39,31 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest accepted proportion change: assets/src/build_skater.py non-goalie shaft
+top(.17,.015,1.18),heel(.68,.12,.02), grip fractions.04/.20. Regenerated ONLY
+public/models/skater.glb,92452tris/21bones. Public/dist sha256
+0a53d6f84cf6aeecbe954d5e6fd549ac635397887ed3dde1df007eaae6fb4930. Prior asset
+backup .gaming/shaft-proportion-UzF9Ov/skater.glb. Normal baseline
+.gaming/models/1788727234119-XZpqAS/ and after1788727277380-9V5xk9 inspected:
+lower hands, normal planar nearest-blade-vertex/puck-center distance
+.408-.436m -> .268-.299m. Both remain stylized detailed models, not photorealism.
+No runtime solver or simulation changes. Offline study1788727278687-BIsCmZ has
+188 normal/36 charge/67 dragL/0 dragR candidates. Normal preview inspected: glove
+no longer crowds face. Physical shaft error<=2.66e-7m. It is NOT a runtime pose,
+exact puck-contact proof, or proof every candidate looks good. New action gates:
+charge1788727311018-EBaxvW, dragR1788727312309-VplV2P, dragL1788727327786-5nIcI2,
+turbo1788727330340-j7ucUJ all pass12 phases/grip/ice/deke direction. Gaps remain
+charge.470-.533m,left.659-.748m,right.424-.475m,turbo.523-.656m. Charge, both drag,
+all-pose1788727313563-QbbjkW captures inspected. Timing1788727373215-Am4QRz passes.
+Model paths under .gaming/models/. Keyboard .gaming/playtests/1788727327832-fNjIxQ/
+passes. Baseline .gaming/runs/1788727232743-7BGogs/ and final1788727265561-zsU3T0/
+pass build/214 tests/bots. Self-review prefers lowered normal hand posture and
+closer blade, abstains on full human feel/performance. Next precise action: use
+the feasible neutral transform to build continuous carrier contact, checking
+actual blade/puck surfaces, both hands and facing directions; preserve deke
+handedness and deliberate charge windup. Do not adopt the rejected older high
+hand pose or claim the entire goal complete. Unrelated README/roadmap untouched.
+
 Latest diagnostic (no runtime/asset changes): models.mjs --puck --reach-study
 --shaft --reach-preview samples6132 candidates/action using four cardinal .33m
 blade offsets, yaw/tilt, shoulder reach, full-torso front bound, hand height<=

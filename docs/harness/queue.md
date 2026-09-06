@@ -102,6 +102,20 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed shorter skater shaft: top(.17,.015,1.18),heel(.68,.12,.02), grip
+fractions.04/.20. Rounded92452-triangle/21-bone asset retained; goalie/sim unchanged.
+Normal before .gaming/models/1788727234119-XZpqAS/ versus after
+1788727277380-9V5xk9 inspected: lower hands, planar blade/puck distance
+.408-.436m -> .268-.299m across12 phases. No exact-contact claim. Physical shaft
+study1788727278687-BIsCmZ passes; normal offline preview now clears face, but
+right-drag still has no candidate. Charge1788727311018-EBaxvW, right-drag
+1788727312309-VplV2P, left1788727327786-5nIcI2, turbo1788727330340-j7ucUJ
+pass grip/ice/direction gates; action/all-pose1788727313563-QbbjkW images inspected.
+Timing1788727373215-Am4QRz and keyboard1788727327832-fNjIxQ pass. Build/214 tests/
+bots .gaming/runs/1788727265561-zsU3T0 pass; baseline1788727232743-7BGogs.
+Self-review prefers lower-hand normal silhouette, abstains on full game feel.
+Next: actual carrier blade contact and continuous two-hand posing with this asset.
+
 Completed diagnostic, runtime pose rejected: expanded corrected-grip search to
 6132 candidates per action (four blade offsets, yaw/tilt), capped hand height at
 shoulder+10cm, and added independent two-hand previews. Initial evidence

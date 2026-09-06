@@ -323,10 +323,10 @@ def build_skater(goalie=False):
         top = grip_top + Vector((-0.06, 0.02, 0.08))
         heel = Vector((0.75, 0.42, 0.02))
     else:
-        top = Vector((0.17, 0.015, 1.27))
-        heel = Vector((0.85, 0.12, 0.02))
+        top = Vector((0.17, 0.015, 1.18))
+        heel = Vector((0.68, 0.12, 0.02))
         grip_top = top.lerp(heel, 0.04)
-        grip_low = top.lerp(heel, 0.22)
+        grip_low = top.lerp(heel, 0.20)
     hand_targets = {1: grip_top, -1: grip_low}   # +y = left side (top hand), -y = right (low hand)
     # left hand on top, right hand low  → left is +y in Blender for a +X facing model
     arm_len_u, arm_len_f = 0.3, 0.28
