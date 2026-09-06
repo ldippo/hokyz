@@ -129,8 +129,37 @@ try {
       },`data:image/png;base64,${capture.toString('base64')}`);
       checks.push({openingCaptureIceFraction:iceFraction});
       assert.ok(iceFraction>0.15,'Opening capture lost the rink behind the HUD');
+      const feedback=await page.evaluate(()=>{
+        const box=selector=>{const r=document.querySelector(selector).getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right};};
+        return {score:box('.scoreboard'),announcement:box('.hud .announce'),countdown:box('.hud .countdown')};
+      });
+      checks.push({openingFeedback:feedback});
+      if(!process.argv.includes('--baseline')) {
+        assert.ok(feedback.announcement.top>=feedback.score.bottom,'Announcement covers scoreboard');
+        assert.ok(feedback.countdown.top>=feedback.announcement.bottom,'Countdown overlaps announcement');
+        assert.ok(feedback.countdown.bottom<720*0.35,'Opening feedback covers center ice');
+      }
       assert.equal(roster.phase,'faceoff');
       if(!process.argv.includes('--baseline'))assert.ok(roster.minSeparation>1.1,JSON.stringify(roster));
+      if(process.argv.includes('--feedback-layout')) {
+        for(const [width,height,scale] of [[1280,720,1],[390,844,1.5]]) {
+          await page.setViewportSize({width,height});
+          await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+          const layout=await page.evaluate(scale=>{
+            const app=window.__hokyz;app.meta.textScale=scale;app.applyAccessPrefs();
+            app.view.hud.announce('ASCENSION RULES · HOT GLOVE','red','Score twice and their goalie catches fire.');
+            const el=document.querySelector('.hud .announce');
+            for(const a of el.getAnimations()){a.pause();a.currentTime=400;}
+            app.render(1,0);
+            const r=el.getBoundingClientRect();
+            return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,scroll:el.scrollWidth,width:el.clientWidth,opacity:getComputedStyle(el).opacity};
+          },scale);
+          checks.push({feedbackLayout:{width,height,scale,...layout}});
+          assert.ok(layout.left>=0&&layout.right<=width&&layout.bottom<height&&layout.scroll<=layout.width+1);
+          assert.equal(layout.opacity,'1');
+          await page.screenshot({path:join(out,`feedback-${width}.png`)});
+        }
+      }
     }
   }
   assert.deepEqual(errors,[]);

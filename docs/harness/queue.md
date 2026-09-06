@@ -102,6 +102,16 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed compact HUD feedback: stacked below scoreboard, readable dark-backed
+32px announcements/48px countdown, wrapping subcopy, same1.6s expiry and reduced
+motion. Before .gaming/map-focus/1788715904975-5Tl4vr; final1788716097171-d172hT
+opening and long-copy captures inspected. Opening center ice clear; long copy
+fits desktop/narrow150%, motion settings/restoration pass. Whole narrow HUD still
+clips elsewhere. Gates1788716044167-HSywew build/157 tests/bot pass. Impeccable
+guided hierarchy/contrast. Self-review prefers unobscured players, not human-feel
+approval. Next: investigate missing rendered fourth skater; constructor-only
+MatchView mesh creation may omit dynamically added boss reinforcements.
+
 Completed opening capture repair: viewport resize cleared the stopped-loop
 canvas after rendering. Two animation frames before drawing flush resize;
 no renderer/game changes. .gaming/map-focus/1788715848516-EQLNDe and final

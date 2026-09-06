@@ -22,11 +22,10 @@ export class Hud {
       <div class="fight" data-el="fight"><div class="fighter f0"><div class="fname" data-el="fname0"></div><div class="fhp"><div class="fhp-fill" data-el="fhp0"></div></div></div><div class="fcue" data-el="fcue"></div><div class="fighter f1"><div class="fname" data-el="fname1"></div><div class="fhp"><div class="fhp-fill" data-el="fhp1"></div></div></div></div>
       <div class="player-tag"><div class="pname" data-el="pname"></div><div class="ptype" data-el="ptype"></div><div class="hp"><div class="hp-fill" data-el="hp"></div></div></div>
       <div class="fire-streak" data-el="streak"><span></span><span></span><span></span></div>
-      <div class="announce" data-el="announce"></div>
+      <div class="hud-feedback"><div class="announce" data-el="announce"></div><div class="countdown" data-el="countdown"></div></div>
       <div class="cine-tag" data-el="tag"></div>
       <div class="prompt" data-el="prompt"></div>
       <div class="so" data-el="so"><div class="so-row" data-el="so0"></div><div class="so-mid">SHOOTOUT</div><div class="so-row" data-el="so1"></div></div>
-      <div class="countdown" data-el="countdown"></div>
       <div class="flash" data-el="flash"></div>
       <div class="vignette-fire" data-el="vig"></div>
     `;

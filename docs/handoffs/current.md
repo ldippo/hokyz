@@ -39,6 +39,23 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest HUD polish: hud-feedback stacks compact announcement/countdown below
+scoreboard.32px main/16px sub/48px countdown, dark broadcast backing, wrapped
+copy, restrained entry motion;1.6s timing and reduced-motion expiry unchanged.
+Impeccable informed hierarchy/contrast; arcade palette preserved. Before image
+.gaming/map-focus/1788715904975-5Tl4vr/outnumbered-match.png; after
+1788716050612-G3q9aV/ and final1788716097171-d172hT/ inspected. Center players
+and puck unobscured. Final --motion/--feedback-layout passes opening geometry,
+app/OS reduced-motion restoration, long boss copy desktop/narrow150% reachability.
+Long-copy case uses Hud.announce fixture, not natural boss trigger. Gates
+.gaming/runs/1788716044167-HSywew build/157 tests/bot pass. Self-review prefers
+clear ice and readable feedback, abstains on human feel. Narrow capture still
+shows existing clipped scoreboard/bottom HUD; do not claim whole-HUD responsive.
+Next precise action: fourth Outnumbered skater appears absent visually despite
+sim roster4. MatchView builds meshes only in constructor; inspect synchronization
+after bossPhase adds skater, assert actual mesh map/scene entry and capture it.
+Preserve unrelated README/ROADMAP edits. Full goal active.
+
 Latest harness-only fix: blank opening image was pending viewport resize clearing
 canvas after render. map-focus now waits two animation frames after desktop
 resize, before stopped-loop drawing. .gaming/map-focus/1788715848516-EQLNDe/
