@@ -102,6 +102,13 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Rejected finer-label-grid experiment: desktop overlap frames2->1 but lane
+changes41->69; narrow overlap unchanged1, changes23->41. Summed displacement
+fell47.2->39.8m /28->24.2m; insufficient evidence of net readability/stability
+gain. Candidate captures1788719391102-c5NgRB and1788719392398-JGKxlZ inspected;
+game edit reverted. Retained explicit world-meter movement diagnostics.
+Next: bounded temporal stability experiment, not another finer-grid-only pass.
+
 Completed moving-label diagnostic: --name-motion captures90 frames/9sim seconds
 at10Hz; desktop1788719127694-55p1D4 has2 overlap frames/max1pair/41 lanechanges,
 narrow1788719151594-OhkCcc has1/max1/23. Worst images inspected, cap3 reached

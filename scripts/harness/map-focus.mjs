@@ -220,8 +220,12 @@ try {
           if(frame%30===0) {await page.screenshot({path:join(out,`name-motion-${frame}.png`)});console.log(`Name motion sample ${frame}/90`);}
         }
         const changes=frames.slice(1).reduce((n,f,i)=>n+f.labels.filter(l=>{const p=frames[i].labels.find(p=>p.id===l.id);return p&&p.lane!==l.lane;}).length,0);
-        writeFileSync(join(out,'name-motion.json'),JSON.stringify({width,height,frames,worst,changes,scope:'Nine simulated seconds sampled/rendered at10Hz, not real-time jitter or GPU performance evidence.'},null,2));
-        checks.push({nameMotion:{width,height,samples:frames.length,worst,changes}});
+        const steps=frames.slice(1).flatMap((f,i)=>f.labels.flatMap(l=>{const p=frames[i].labels.find(p=>p.id===l.id);return p?[Math.abs(p.lane-l.lane)*0.8]:[];}));
+        const labels=frames.flatMap(f=>f.labels);
+        const meanRaise=labels.length ? labels.reduce((n,l)=>n+l.lane*0.8,0)/labels.length : 0;
+        const movement={unit:'world meters',total:steps.reduce((a,b)=>a+b,0),max:Math.max(0,...steps),meanRaise};
+        writeFileSync(join(out,'name-motion.json'),JSON.stringify({width,height,frames,worst,changes,movement,scope:'Nine simulated seconds sampled/rendered at10Hz, not real-time jitter or GPU performance evidence.'},null,2));
+        checks.push({nameMotion:{width,height,samples:frames.length,worst,changes,movement}});
       }
       if(process.argv.includes('--hud-layout')) {
         for(const [width,height,scale] of [[1280,720,1],[390,844,1],[390,844,1.5]]) {

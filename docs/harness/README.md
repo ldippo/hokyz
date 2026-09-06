@@ -134,7 +134,8 @@ skew is excluded from text-overflow checks. This is not all fight/shootout HUD.
 stable repeated render, and all/controlled/off visibility restoration. It does
 not establish dense moving-cluster legibility or target-GPU performance.
 `--name-motion` samples90 frames over9 sim seconds at10Hz, recording visible
-label bounds, overlaps, lane changes and worst/periodic captures. Add `--narrow`
+label bounds, overlaps, lane changes, total/max vertical displacement and mean
+raise (world meters), plus worst/periodic captures. Add `--narrow`
 for390px. This is diagnostic: PASS means capture/flow completed, not zero overlap.
 
 `node scripts/harness/route.mjs` exercises event -> shop -> rest in one run,

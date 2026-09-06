@@ -39,6 +39,25 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest experiment rejected: quarter-lane (0.2m) label positions within the same
+2.4m cap. Desktop candidate .gaming/map-focus/1788719391102-c5NgRB reduced overlap
+frames2->1 and summed vertical displacement47.2->39.8m, but changes41->69.
+Narrow1788719392398-JGKxlZ retained1 overlap frame, displacement28->24.2m,
+changes23->41. Worst captures inspected: overlapping names remain. Self-review
+abstains on net visual improvement and real-time smoothness; reverted only the
+candidate matchView edit. No player-model or gameplay changes retained.
+Kept diagnostic total/max displacement and mean height in map-focus JSON, with
+explicit world-meter units and empty-sample guards. These are sampled geometry,
+not hardware jitter. Candidate gates1788719375824-8xx17j passed191 tests/bot;
+explicit subsequent build included candidate. Full goal remains active.
+Final retained diagnostics: .gaming/runs/1788719740106-rHSDrB passes build,
+191 tests and bot gates. Browser .gaming/map-focus/1788719757617-lSozWO passes;
+JSON confirms restored baseline41 changes/47.2m total/2.4m max displacement.
+Next precise action: evaluate temporal stability (retain previous valid label
+offsets with bounded release hysteresis) against these same desktop/narrow traces
+before another placement change. Do not repeat finer-grid-only experiment.
+Unrelated README.md and docs/ROADMAP-v4.md edits remain untouched.
+
 Latest moving-label evidence (no game edits): map-focus --intro-layout --boss-intro
 --outnumbered --name-motion records90 frames/9sim seconds at10Hz, lane changes,
 overlap bounds and periodic/worst captures. Desktop .gaming/map-focus/
