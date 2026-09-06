@@ -102,6 +102,17 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed gameplay-camera evidence pass: capture.mjs --arena --low --play-motion
+records120 samples over12sim seconds with six periodic captures and first hit.
+.gaming/captures/1788723984986-GUkLYM passes; four passes, two shots, two hits and
+one natural goal. Frame40, first-hit and100 inspected: rounded equipment/team
+silhouettes readable; puck visibility in first-hit pileup needs projected-position
+inspection, not a proven mesh defect. Static baseline1788723952558-L8mMfC passed,
+but arena-fixed leaves camera/poses unsettled after360 ticks; motion evidence is
+stronger for framing. Gates1788724109113-26yVHQ pass build/211 tests/bots; baseline
+1788723945783-19mudt. No game changes. Self-review supports better evidence,
+abstains on human feel/hardware performance. Next inspect projected puck in pileup.
+
 Completed Velocity Blur counterplay copy: phase descriptions now give period,
 affected teams and early-turn/check/held-turbo guidance. Source audit found original
 slick-ice claim correct (skater acceleration*.55, idle friction*.5, hit resistance

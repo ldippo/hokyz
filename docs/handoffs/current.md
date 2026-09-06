@@ -39,6 +39,21 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest gameplay-camera evidence: scripts/harness/capture.mjs --arena --low
+--play-motion records120 samples (t6.1..18.0) at10Hz plus six periodic images and
+first natural hit. .gaming/captures/1788723984986-GUkLYM passes: four passes,
+two shots, two hits, one goal. Frame40, first-hit and100 inspected. Rounded player
+silhouettes/equipment remain readable; no demonstrated need to change geometry.
+Static baseline1788723952558-L8mMfC passes, but arena-fixed advances360sim ticks
+with dt0 render, leaving camera/poses unsettled. First motion frame inherits this;
+use later frames. Final gates .gaming/runs/1788724109113-26yVHQ build/211 tests/bots
+pass; baseline1788723945783-19mudt. Self-review only, no human feel/GPU claim.
+Next precise action: inspect projected puck position/occlusion at first-hit sample
+t11.4 (puck18.6124846211,0.9347160897, owner null), compare mesh/glow visibility
+and its nearby particle/skater geometry before editing puck presentation. Existing
+trace lacks puck z/camera projection; add those diagnostics to this same scenario.
+No game code changed this pass; keep full goal active and unrelated edits intact.
+
 Latest completed boss-copy pass: Velocity Blur descriptions in src/run/teams.ts
 now explain period onset, both-team slick ice, early turns/checks, and holding
 turbo once REDLINE enables unlimited turbo. Original falling claim was correct:

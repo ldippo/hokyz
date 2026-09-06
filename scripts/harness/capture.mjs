@@ -72,6 +72,32 @@ try {
       app.view.render(1, 0);
     }, crowdMotion);
     await page.screenshot({ path: join(dir, 'arena-fixed.png') });
+    if (process.argv.includes('--play-motion')) {
+      const samples = [];
+      let capturedHit = false;
+      for (let frame = 0; frame < 120; frame++) {
+        const sample = await page.evaluate(() => {
+          const view = window.__hokyz.view;
+          const events = [];
+          for (let step = 0; step < 6; step++) {
+            const next = view.sim.step(); events.push(...next); view.afterStep(next);
+          }
+          view.render(1, 0.1);
+          const st = view.sim.st;
+          return { t: st.t, phase: st.phase, puck: { ...st.puck.pos }, owner: st.puck.owner,
+            events: events.filter(e => ['hit', 'shot', 'goal', 'pass'].includes(e.type)),
+            skaters: st.order.map(id => { const s = st.skaters[id]; return { id, pos: { ...s.pos }, speed: Math.hypot(s.vel.x,s.vel.y), knockdown: s.knockdown }; }) };
+        });
+        samples.push(sample);
+        if (frame % 20 === 0) await page.screenshot({ path: join(dir, `play-motion-${frame}.png`) });
+        if (!capturedHit && sample.events.some(e => e.type === 'hit')) {
+          await page.screenshot({ path: join(dir, 'play-motion-hit.png') }); capturedHit = true;
+        }
+      }
+      writeFileSync(join(dir, 'play-motion.json'), JSON.stringify({ samples,
+        scope: 'Natural seeded attract play; 12 simulated seconds sampled/rendered at 10Hz. No human input or hardware FPS claim.' }, null, 2));
+      assert.ok(samples.at(-1).t > samples[0].t, 'Motion capture simulation did not advance');
+    }
     if (crowdMotion) {
       const states = [];
       for (const stage of ['idle', 'wave', 'settled']) {

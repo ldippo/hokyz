@@ -242,6 +242,11 @@ Capture option `--arena` adds a restarted, seeded 360-step attract screenshot
 with reduced motion and high quality; `--arena --low` uses low quality for
 software-renderer comparisons. The regular live captures/telemetry still run.
 High-quality capture can time out on software rendering; report that separately.
+Add `--play-motion` with `--arena` to continue another12 simulated seconds at10Hz,
+retaining120 state/event samples, six periodic images and the first natural hit.
+Unlike arena-fixed, this advances camera/pose time. The first frame still inherits
+the unsmoothed fixed-camera setup; inspect later frames for settled framing.
+This is sampled AI attract play, not live human motion or target-GPU performance.
 
 `node scripts/harness/models.mjs --timing` compares the real skater rig after
 100ms knockdown and200ms recovery at fixed30/60/120Hz updates. It asserts matching
