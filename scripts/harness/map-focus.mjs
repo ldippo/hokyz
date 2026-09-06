@@ -116,6 +116,33 @@ try {
       });
       assert.equal(roster.period,1);assert.equal(roster.home,3);assert.equal(roster.away,4);assert.ok(roster.extraPresent);
       checks.push({outnumbered:roster});
+      if(process.argv.includes('--name-tags')) {
+        const labels=await page.evaluate(()=>{
+          const view=window.__hokyz.view,st=view.sim.st;
+          view.rig.camera.updateMatrixWorld();
+          return st.teams.flatMap(t=>t.skaters.map(id=>({id,controlled:st.skaters[id].controlled,bounds:view.skaters.get(id).tagBounds(view.rig.camera)})));
+        });
+        const overlaps=[];
+        for(let i=0;i<labels.length;i++)for(let j=i+1;j<labels.length;j++) {
+          const a=labels[i].bounds,b=labels[j].bounds;
+          if(a&&b&&a.left<b.right&&a.right>b.left&&a.bottom<b.top&&a.top>b.bottom)overlaps.push([labels[i].id,labels[j].id]);
+        }
+        checks.push({nameTags:{labels,overlaps}});
+        if(!process.argv.includes('--baseline'))assert.equal(overlaps.length,0,'Opening name tags overlap');
+        const preferences=await page.evaluate(()=>{
+          const view=window.__hokyz.view,st=view.sim.st;
+          const sample=()=>st.order.filter(id=>view.skaters.get(id).tagBounds(view.rig.camera));
+          const before=st.order.map(id=>view.skaters.get(id).tagBounds(view.rig.camera));
+          view.render(1,0);
+          const stable=JSON.stringify(before)===JSON.stringify(st.order.map(id=>view.skaters.get(id).tagBounds(view.rig.camera)));
+          view.access.nameTags='controlled';view.render(1,0);const controlled=sample();
+          view.access.nameTags='off';view.render(1,0);const off=sample();
+          view.access.nameTags='all';view.render(1,0);const all=sample();
+          return {stable,controlled,expectedControlled:st.order.filter(id=>st.skaters[id].controlled),off,all:all.length,total:st.order.length};
+        });
+        checks.push({nameTagPreferences:preferences});
+        assert.ok(preferences.stable);assert.deepEqual(preferences.controlled,preferences.expectedControlled);assert.deepEqual(preferences.off,[]);assert.equal(preferences.all,preferences.total);
+      }
       const capture=await page.screenshot({path:join(out,'outnumbered-match.png')});
       // Check the captured image, not just the renderer's state: a late resize
       // can clear the canvas after a valid render while the DOM HUD stays visible.

@@ -102,6 +102,14 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed faceoff name-label separation: projected bounds, controlled/owner
+priority, bounded vertical lanes, no hidden names, unchanged models. Impeccable
+guided hierarchy. Baseline1788718876272-n9oblU one overlap; final
+.gaming/map-focus/1788718989999-ufdoKq zero +stable/all/controlled/off checks.
+Opening images inspected; passing1788718955750-SeTNYS passes/capture inspected.
+Gates1788718919231-dVHKOO build/191 tests/bot pass. Self-review prefers separated
+labels; dynamic clusters/jitter/GPU cost unverified. Next: moving-cluster evidence.
+
 Completed last-attacker safeguards: Fight Night3fights can bench entire roster;
 no offers with<=1 attacker on either team, no recall of sole pulled goalie.
 Three red-before tests cover both-team repeated settlement and compounded pull;

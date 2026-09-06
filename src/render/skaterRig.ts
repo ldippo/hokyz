@@ -235,6 +235,21 @@ export class SkaterRig {
   tagVisible(on: boolean): void {
     if (this.tag) this.tag.visible = on;
   }
+  /** A small vertical lane keeps nearby labels distinct without hiding names. */
+  tagLane(lane: number): void {
+    if (this.tag) this.tag.position.y = 2.35 + lane * 0.8;
+  }
+  tagBounds(camera: THREE.PerspectiveCamera): { left: number; right: number; top: number; bottom: number } | null {
+    if (!this.tag?.visible) return null;
+    const center = this.tag.getWorldPosition(new THREE.Vector3());
+    const depth = -center.clone().applyMatrix4(camera.matrixWorldInverse).z;
+    if (depth <= 0) return null;
+    const scale = this.tag.getWorldScale(new THREE.Vector3());
+    center.project(camera);
+    const halfWidth = scale.x * camera.projectionMatrix.elements[0] / (2 * depth);
+    const halfHeight = scale.y * camera.projectionMatrix.elements[5] / (2 * depth);
+    return { left: center.x - halfWidth, right: center.x + halfWidth, top: center.y + halfHeight, bottom: center.y - halfHeight };
+  }
   punch(high: boolean): void {
     this.punchT = 0.32;
     this.punchHigh = high;

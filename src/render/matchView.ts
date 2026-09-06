@@ -296,6 +296,27 @@ export class MatchView {
     }
   }
 
+  private layoutNameTags(): void {
+    const st = this.sim.st, camera = this.rig.camera;
+    camera.updateMatrixWorld();
+    const placed: NonNullable<ReturnType<SkaterRig['tagBounds']>>[] = [];
+    const priority = (id: string) => (st.skaters[id].controlled ? 2 : 0) + (st.puck.owner === id ? 1 : 0);
+    const ids = [...st.order].sort((a, b) => priority(b) - priority(a));
+    for (const id of ids) {
+      const mesh = this.skaters.get(id);
+      if (!(mesh instanceof SkaterRig)) continue;
+      mesh.tagLane(0);
+      if (this.director.active || this.replay) continue;
+      for (let lane = 0; lane <= 3; lane++) {
+        mesh.tagLane(lane);
+        const box = mesh.tagBounds(camera);
+        if (!box || box.right < -1 || box.left > 1 || box.top < -1 || box.bottom > 1) break;
+        const overlaps = placed.some(b => box.left < b.right + 0.004 && box.right > b.left - 0.004 && box.bottom < b.top + 0.004 && box.top > b.bottom - 0.004);
+        if (!overlaps || lane === 3) { placed.push(box); break; }
+      }
+    }
+  }
+
   private handleEvent(e: MatchEvent, st: MatchState): void {
     const sfx = this.silent ? SILENT : realSfx;
     switch (e.type) {
@@ -900,6 +921,7 @@ export class MatchView {
     // The pulled-back play camera can sit above the roof geometry. Never let
     // rafters or the suspended scoreboard obscure possession and passing lanes.
     this.rink.arena.overhead.visible = this.director.active && this.rig.camera.position.y < 10;
+    this.layoutNameTags();
     this.rig.render(dt);
   }
 }

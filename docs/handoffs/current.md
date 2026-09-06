@@ -39,6 +39,25 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest visual fix: SkaterRig exposes projected sprite bounds/vertical tag lanes;
+MatchView lays out visible gameplay tags after camera update, prioritizing
+controlled player then puck owner. Nearby overlaps get up to3 upward0.8m lanes;
+names never hidden, normal position retained when free. Cinematic/replay lanes
+reset to0. Impeccable informed readable hierarchy; detailed models unchanged.
+Baseline .gaming/map-focus/1788718876272-n9oblU reports one center-label overlap;
+after1788718941026-hbyMNQ and final1788718989999-ufdoKq zero. Before/after
+opening captures inspected; controlled label stays low, opponent shifted clear.
+Final --name-tags checks repeated-frame stability and all/controlled/off settings
+restore correctly. Gates .gaming/runs/1788718919231-dVHKOO build/191 tests/bot
+pass; baseline1788718866247-UmzWV6. Browser controls/passing
+.gaming/playtests/1788718955750-SeTNYS passes; receiver capture inspected.
+Self-review prefers distinct labels, abstains on dense dynamic-cluster jitter and
+GPU cost. Bounded layout may still overlap in crowds requiring>3 lanes; no claim
+of universal collision-free labels. Next precise action: capture seeded moving
+player clusters at desktop/narrow, quantify label overlap/lane changes and inspect
+whether labels remain associated with correct players. Avoid unbounded stacking
+or hiding user-selected all-tags mode. Full goal active; unrelated edits retained.
+
 Latest last-skater guard: Fight Night is reachable3fights/period, so three losses
 could empty a team. offerFight now refuses when either side has<=1 attacker.
 Also togglePull refuses recalling the sole active attacker (pulled goalie after

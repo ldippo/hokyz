@@ -130,6 +130,9 @@ attachment/visibility/position, and model identity remains stable over ten ticks
 `--hud-layout` captures desktop,390px and390px/150%-text match HUD, checks core
 score/name/clock/meter bounds and player-panel separation. Decorative fire-icon
 skew is excluded from text-overflow checks. This is not all fight/shootout HUD.
+`--name-tags` with Outnumbered checks projected opening label bounds, no overlap,
+stable repeated render, and all/controlled/off visibility restoration. It does
+not establish dense moving-cluster legibility or target-GPU performance.
 
 `node scripts/harness/route.mjs` exercises event -> shop -> rest in one run,
 reloading between encounters. It preserves generated links while preparing the
