@@ -89,6 +89,11 @@ Date.now input. It does not drive the full human run or pretend to implement the
 source harness's enemy/kills/upgrades bot contract. Frame p95 is diagnostic,
 especially on software rendering; it is not a calibrated hardware performance gate.
 
+Capture option `--arena` adds a restarted, seeded 360-step attract screenshot
+with reduced motion and high quality; `--arena --low` uses low quality for
+software-renderer comparisons. The regular live captures/telemetry still run.
+High-quality capture can time out on software rendering; report that separately.
+
 ## Porting choices
 
 Claude rules become AGENTS.md plus task-specific design/workflow documents; slash

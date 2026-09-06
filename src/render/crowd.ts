@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { positionLocal, vec3, float, uniform, instancedBufferAttribute, time, sin, abs, max, pow } from 'three/tsl';
+import { positionLocal, vec3, float, uniform, instancedBufferAttribute, time, sin, abs, max, pow, attribute, mix } from 'three/tsl';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { RINK } from '../sim/constants';
 import { roundedRectPath } from './rinkMesh';
@@ -7,39 +7,39 @@ import { roundedRectPath } from './rinkMesh';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type N = any;
 
-/** Low-poly fan variants built from primitives. Origin at seat level, facing -x (toward rink) after per-instance yaw. */
+/** Rounded, instanced spectator silhouettes with separate apparel and skin. */
 function fanGeometry(variant: number): THREE.BufferGeometry {
   const parts: THREE.BufferGeometry[] = [];
-  const add = (g: THREE.BufferGeometry, x: number, y: number, z: number, rz = 0) => {
+  const add = (g: THREE.BufferGeometry, x: number, y: number, z: number, color: number, clothing = false, rz = 0) => {
     g.rotateZ(rz);
     g.translate(x, y, z);
+    const n = g.getAttribute('position').count, c = new THREE.Color(color);
+    const colors = new Float32Array(n * 3), mask = new Float32Array(n);
+    for (let i = 0; i < n; i++) { c.toArray(colors, i * 3); mask[i] = clothing ? 1 : 0; }
+    g.setAttribute('fanColor', new THREE.BufferAttribute(colors, 3));
+    g.setAttribute('apparel', new THREE.BufferAttribute(mask, 1));
     parts.push(g);
   };
   const seated = variant === 0;
-  const torsoH = seated ? 0.55 : 0.7;
-  const base = seated ? 0.45 : 0.0;
-  // legs
-  if (seated) {
-    add(new THREE.BoxGeometry(0.42, 0.18, 0.5), 0.12, base - 0.08, 0);
-  } else {
-    add(new THREE.BoxGeometry(0.16, 0.8, 0.18), 0, 0.4, -0.11);
-    add(new THREE.BoxGeometry(0.16, 0.8, 0.18), 0, 0.4, 0.11);
+  const skin = [0xaf8064, 0x76503c, 0xd1a087][variant];
+  const hip = seated ? 0.5 : 0.8, shoulder = hip + 0.48;
+  const capsule = (r: number, length: number) => new THREE.CapsuleGeometry(r, length, 3, 8);
+  for (const side of [-1, 1]) {
+    if (seated) {
+      add(capsule(0.09, 0.26), -0.14, hip, side * 0.11, 0x202635, false, Math.PI / 2);
+      add(capsule(0.075, 0.3), -0.3, 0.26, side * 0.11, 0x202635);
+    } else add(capsule(0.085, 0.61), 0, 0.4, side * 0.11, 0x202635);
+    add(new THREE.SphereGeometry(0.1, 8, 6).scale(1.5, 0.65, 0.85), seated ? -0.35 : -0.04, 0.07, side * 0.11, 0x10151e);
+    const raised = variant === 2;
+    add(capsule(0.075, 0.34), 0, shoulder + (raised ? 0.14 : -0.18), side * 0.25, 0xffffff, true);
+    add(new THREE.SphereGeometry(0.075, 8, 6), 0, shoulder + (raised ? 0.39 : -0.43), side * 0.25, skin);
   }
-  // torso
-  add(new THREE.BoxGeometry(0.3, torsoH, 0.46), 0, base + torsoH / 2 + (seated ? 0.05 : 0.8), 0);
-  // head
-  add(new THREE.SphereGeometry(0.16, 8, 6), 0, base + torsoH + (seated ? 0.25 : 1.0), 0);
-  // arms
-  const shoulderY = base + torsoH + (seated ? 0.0 : 0.72);
-  if (variant === 2) {
-    add(new THREE.BoxGeometry(0.12, 0.55, 0.12), 0, shoulderY + 0.25, -0.3, 0);
-    add(new THREE.BoxGeometry(0.12, 0.55, 0.12), 0, shoulderY + 0.25, 0.3, 0);
-  } else {
-    add(new THREE.BoxGeometry(0.12, 0.5, 0.12), 0.05, shoulderY - 0.2, -0.3, 0);
-    add(new THREE.BoxGeometry(0.12, 0.5, 0.12), 0.05, shoulderY - 0.2, 0.3, 0);
-  }
+  add(new THREE.SphereGeometry(1, 10, 8).scale(0.19, 0.34, 0.25), 0, hip + 0.25, 0, 0xffffff, true);
+  add(capsule(0.07, 0.08), 0, shoulder + 0.13, 0, skin);
+  add(new THREE.SphereGeometry(0.15, 10, 8).scale(0.9, 1.15, 1), 0, shoulder + 0.3, 0, skin);
+  add(new THREE.SphereGeometry(0.153, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2).scale(0.9, 1.15, 1), 0, shoulder + 0.33, 0, 0x30261f);
   const merged = mergeGeometries(parts, false)!;
-  merged.computeVertexNormals();
+  parts.forEach(part => part.dispose());
   return merged;
 }
 
@@ -88,6 +88,8 @@ export class Crowd {
       mat.roughness = 0.95;
       mat.metalness = 0;
       const phaseAttr = new THREE.InstancedBufferAttribute(new Float32Array(idxs.length), 1);
+      const tintAttr = new THREE.InstancedBufferAttribute(new Float32Array(idxs.length * 3), 3);
+      mat.colorNode = mix(attribute('fanColor', 'vec3'), instancedBufferAttribute(tintAttr, 'vec3'), attribute('apparel', 'float'));
       const angleAttr = new THREE.InstancedBufferAttribute(new Float32Array(idxs.length), 1);
       const mesh = new THREE.InstancedMesh(geos[variant], mat, idxs.length);
       idxs.forEach((si, k) => {
@@ -98,8 +100,8 @@ export class Crowd {
         tmp.updateMatrix();
         mesh.setMatrixAt(k, tmp.matrix);
         const c = new THREE.Color(palette[Math.floor(Math.random() * palette.length)]);
-        c.multiplyScalar(0.55 + Math.random() * 0.35);
-        mesh.setColorAt(k, c);
+        c.lerp(new THREE.Color(0x344052), 0.55).multiplyScalar(0.45 + Math.random() * 0.3);
+        tintAttr.setXYZ(k, c.r, c.g, c.b);
         phaseAttr.setX(k, Math.random());
         angleAttr.setX(k, s.angle);
       });

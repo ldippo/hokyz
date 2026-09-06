@@ -102,6 +102,19 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed crowd presentation pass: rounded connected silhouettes, bent seated
+legs, hair/skin/trousers separated from muted apparel using per-vertex and
+per-instance shader attributes. Retains three instanced meshes, no sim edits.
+Before `.gaming/captures/1788709240924-js6IQ3/`, after
+`.gaming/captures/1788709325766-P0iDN1/`: inspected low1280x720 attract scenes,
+not frame-identical. Capture restart helper corrected afterward; final seeded
+capture `.gaming/captures/1788709438559-xA8rJC/` passes and was inspected.
+Gates `.gaming/runs/1788709308602-dEBySB/`: build/141 tests/bot pass after one
+shader typing repair. High baseline `.gaming/captures/1788709090435-Yefhkc/`
+timed out on software rendering. Self-review prefers rounded spectators and
+reduced color distraction; high-tier/animated appearance and hardware cost remain
+unverified. Extra geometry preserves draw-call count, not necessarily frame rate.
+
 Completed on-ice controller contract validation: playtest.mjs --gamepad reuses
 the production match fixtures with synthetic analog sticks/A/B/Start. Also checks
 dead zone, analog magnitude, independent aim, turbo/deke/special edges and

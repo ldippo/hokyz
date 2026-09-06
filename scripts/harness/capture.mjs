@@ -9,6 +9,7 @@ process.chdir(fileURLToPath(new URL('../../', import.meta.url)));
 mkdirSync('.gaming/captures', { recursive: true });
 const dir = mkdtempSync(resolve('.gaming/captures', `${Date.now()}-`));
 const errors = [];
+const arena = process.argv.includes('--arena');
 let server, browser;
 let telemetry;
 let build;
@@ -26,6 +27,7 @@ try {
   page.on('pageerror', (error) => errors.push(String(error)));
   page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
   await page.addInitScript(() => { Date.now = () => 1700000000000; });
+  if (arena) await page.addInitScript(quality => localStorage.setItem('hokyz.meta.v1', JSON.stringify({ quality, music: false, cinematics: false, reducedMotion: true })), process.argv.includes('--low') ? 'low' : 'high');
   await page.goto(`http://127.0.0.1:${address.port}/`, { waitUntil: 'load' });
   await page.waitForFunction(() => window.__hokyz?.assetsLoaded && window.__hokyz?.view?.sim.st.t > 2, null, { timeout: 60_000 });
   await page.screenshot({ path: join(dir, 'title.png') });
@@ -54,11 +56,25 @@ try {
   if (telemetry.frames < 2) errors.push('Insufficient rendered frames during sampling');
   if (!(telemetry.simTime > telemetry.initialSimTime)) errors.push('Rendered simulation did not advance');
   await page.screenshot({ path: join(dir, 'rink.png') });
+  if (arena) {
+    await page.evaluate(() => {
+      const app = window.__hokyz; app.loop.stop();
+      const originalRandom = Math.random;
+      let seed = 42;
+      Math.random = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
+      try { app.disposeView(); app.attract(); } finally { Math.random = originalRandom; }
+      app.showScreen(null);
+      app.view.hud.root.style.display = '';
+      for (let i = 0; i < 360; i++) app.view.afterStep(app.view.sim.step());
+      app.view.render(1, 0);
+    });
+    await page.screenshot({ path: join(dir, 'arena-fixed.png') });
+  }
 } catch (error) { errors.push(String(error)); }
 finally {
   await browser?.close();
   if (server) await new Promise((resolve, reject) => server.httpServer.close((error) => error ? reject(error) : resolve()));
 }
-writeFileSync(join(dir, 'capture.json'), JSON.stringify({ pass: errors.length === 0, scenario: 'AI attract match', build, viewport: [1280, 720], telemetry, errors }, null, 2) + '\n');
+writeFileSync(join(dir, 'capture.json'), JSON.stringify({ pass: errors.length === 0, scenario: 'AI attract match', fixedArena: arena ? { seed: 42, simSteps: 360, reducedMotion: true } : null, build, viewport: [1280, 720], telemetry, errors }, null, 2) + '\n');
 console.log(`${errors.length ? 'FAIL' : 'PASS'} capture: ${dir}`);
 if (errors.length) { console.error(errors.join('\n')); process.exitCode = 1; }

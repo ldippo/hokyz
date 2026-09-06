@@ -39,6 +39,27 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest graphics pass: src/render/crowd.ts replaces box bodies with rounded
+torso/limbs, bent seated legs, shoes, neck/head/hair and separated skin/apparel/
+trouser colors. Custom colorNode mixes vertex fanColor with per-instance muted
+apparel through a mask, retaining three instanced meshes. No simulation edits.
+First build failed generic TSL type inference; explicit vec3 repaired it.
+Final gates .gaming/runs/1788709308602-dEBySB/ pass build/141 tests/bot.
+High-quality baseline .gaming/captures/1788709090435-Yefhkc/ timed out on software
+renderer screenshot. Low before .gaming/captures/1788709240924-js6IQ3/ and after
+.gaming/captures/1788709325766-P0iDN1/ were inspected: rounded spectators,
+separate colors and reduced crowd distraction. These are matching quality/
+viewport/scenario, NOT frame-identical: first helper did not reset attract due
+its early return. Fixed helper calls disposeView before attract; final seeded
+360-step capture .gaming/captures/1788709438559-xA8rJC/ passes and inspected.
+Command pnpm harness:capture --arena --low (high default without --low).
+Self-review prefers crowd readability; no high-tier/animated-crowd or hardware
+performance claim. More geometry keeps three draw calls but may add GPU cost.
+Next precise action: verify animated crowd shader and reduced-motion behavior;
+source wave uniform starts at zero and sine lift seems active even without a
+goal, so inspect that contract before tuning. Full-run/hardware, match/skills
+narrow result layouts remain open. Preserve unrelated README/roadmap edits.
+
 Latest P3 evidence: playtest.mjs --gamepad drives existing fixed-step match
 fixtures via synthetic standard pad and production polling. Checks analog
 movement/right-stick aim, pass->moving receiver->control switch->shot, far aim
