@@ -3,6 +3,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { preview } from 'vite';
 import { chromium } from 'playwright';
+import { resultProbe } from './result-probe.mjs';
 
 mkdirSync('.gaming/rewards', { recursive: true });
 const out = mkdtempSync(resolve('.gaming/rewards', `${Date.now()}-`));
@@ -44,6 +45,7 @@ try {
     await page.evaluate(() => { const app = window.__hokyz; app.input.poll(); app.onTick(); });
     if (!skills) assert.equal(await page.getByRole('button', { name: 'Draft a Perk', exact: true }).count(), 1);
     else assert.equal(await page.locator('.result h2').textContent(), 'CHALLENGE CLEARED');
+    if (process.argv.includes('--layout') && choice === 'pick') writeFileSync(join(out, 'layout.json'), JSON.stringify(await resultProbe(page, out, 'result'), null, 2));
     const pending = await page.evaluate(() => window.__hokyz.run.pendingDraft);
     assert.ok(pending?.perkIds.length, 'Result did not persist earned reward');
     await page.reload(); await ready();

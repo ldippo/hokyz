@@ -3,6 +3,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { preview } from 'vite';
 import { chromium } from 'playwright';
+import { resultProbe } from './result-probe.mjs';
 
 mkdirSync('.gaming/hit-parade-full', { recursive: true });
 const out = mkdtempSync(resolve('.gaming/hit-parade-full', `${Date.now()}-`));
@@ -55,7 +56,8 @@ try {
     }, mode);
     const heading = await page.locator('.result h2').textContent();
     const score = await page.locator('.score-line').textContent();
-    results.push({ mode, heading, score, ...evidence });
+    const layout = process.argv.includes('--layout') ? await resultProbe(page, out, mode) : null;
+    results.push({ mode, heading, score, ...evidence, layout });
     await page.screenshot({ path: join(out, `${mode}-result.png`) });
     assert.ok(evidence.ticks >= 3600 && evidence.ticks <= 3602, 'Challenge did not expire naturally at 60 seconds');
     if (mode === 'idle') {

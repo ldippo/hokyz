@@ -74,6 +74,11 @@ Evidence: `.gaming/hit-parade-full/`. Only the reachable node is prepared; no hi
 events, score or terminal outcome are injected. Scripted pursuit is not human
 difficulty or real-time performance evidence.
 
+Add `--layout --assert-layout` to `rewards.mjs` or `hit-parade-full.mjs` for
+desktop/narrow/150%-text result captures and checks of all choices/stat cells.
+The match stats region also checks native keyboard horizontal scrolling.
+Omit `--assert-layout` to collect baseline clipping/overflow findings.
+
 `node scripts/harness/championship.mjs` checks boss draft -> saved league offer ->
 bank, and boss draft -> extend Act 4 -> save/reload -> league loss -> champion
 summary. It prepares the last-boss checkpoint and terminal outcomes; actual UI,

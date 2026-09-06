@@ -39,6 +39,26 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest UI pass: src/ui/screens/match.ts wraps match box score in labelled focusable
+match-stats region. Arrow keys stop propagation to gameplay input and scroll
+natively; CSS preserves460px table/name widths and whole headers, adds narrow
+scroll hint. Baseline at390/150% fit but fragmented SOG/HITS/BIG labels; skills
+cards already fit and were left alone. Impeccable guided readable tabular content.
+New result-probe.mjs shared by rewards.mjs/hit-parade-full.mjs --layout
+--assert-layout checks desktop720,390x844,390x844/150% all actions/cells and page
+overflow; also keyboard scroll and nowrap headers when match region overflows.
+Baselines .gaming/rewards/1788710708232-xLvk3L/ and
+.gaming/hit-parade-full/1788710706937-XQXRV0/ inspected. Final
+.gaming/rewards/1788710827030-56FDCK/ and
+.gaming/hit-parade-full/1788710828274-iwAQzu/ pass layout/reward/full-challenge
+checks. Final narrow match screenshot inspected. Build/147 tests/bot gates
+.gaming/runs/1788710803701-HycEyF/ pass. Self-review prefers readable labels;
+horizontal scrolling is an explicit tradeoff, not simultaneous visibility of
+all columns. Controller table scrolling and physical hardware remain unverified.
+Next precise action: evaluate broader run progression across successive actual
+nodes, including noncombat choices and act advancement, not only terminal
+fixtures. Keep human game feel/hardware as open evidence gaps; full goal active.
+
 Latest evidence: scripts/harness/hit-parade-full.mjs exercises idle and chase
 through 60 actual simulated seconds with DOM key events (WASD/Shift/K), nearest
 standing dummy pursuit and natural timer expiry. Only reachable node is prepared;

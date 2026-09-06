@@ -203,7 +203,10 @@ export function matchResultScreen(app: App, node: MapNode, outcome: MatchOutcome
       res.usedLife ? h('p', { class: 'screen-sub' }, 'Second Wind burned. You live to skate again.') : null,
       injured.length ? h('p', { class: 'screen-sub', style: 'color:#f66' }, `INJURED: ${injured.map((s) => s.name).join(', ')} — out until healed`) : null,
       mvp ? h('div', { class: 'mvp-card' }, h('div', { class: 'rarity' }, 'PLAYER OF THE GAME'), h('div', { class: 'cname' }, `${mvp.team === 0 ? '🔵' : '🔴'} ${mvp.name}`), h('div', { class: 'desc' }, mvp.isGoalie ? `${mvp.saves} saves` : `${mvp.goals} G · ${mvp.assists} A · ${mvp.hits} hits · ${mvp.bigHits} big${(mvp.blocks ?? 0) > 0 ? ` · ${mvp.blocks} blk` : ''}`)) : null,
-      h('table', { class: 'box' }, h('thead', {}, h('tr', {}, h('th', {}, 'PLAYER'), h('th', {}, 'G'), h('th', {}, 'A'), h('th', {}, 'SOG'), h('th', {}, 'HITS'), h('th', {}, 'BIG'), h('th', { title: 'Saves for goalies, blocked shots for skaters' }, 'SV/BLK'))), h('tbody', {}, ...rows)),
+      h('p', { class: 'stats-scroll-hint' }, 'Player stats: scroll sideways for all columns.'),
+      h('div', { class: 'match-stats', role: 'region', 'aria-label': 'Player statistics', tabindex: 0,
+        onKeydown: e => { if (e instanceof KeyboardEvent && e.key.startsWith('Arrow')) e.stopPropagation(); },
+      }, h('table', { class: 'box' }, h('thead', {}, h('tr', {}, h('th', {}, 'PLAYER'), h('th', {}, 'G'), h('th', {}, 'A'), h('th', {}, 'SOG'), h('th', {}, 'HITS'), h('th', {}, 'BIG'), h('th', { title: 'Saves for goalies, blocked shots for skaters' }, 'SV/BLK'))), h('tbody', {}, ...rows))),
       h('div', { class: 'menu' },
         btn(res.ended ? 'See Run Summary' : outcome.won ? 'Draft a Perk' : 'Back to Map', () => {
           if (res.ended) runOverScreen(app);

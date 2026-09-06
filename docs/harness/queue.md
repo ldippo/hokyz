@@ -102,6 +102,20 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed result-table readability pass: baseline match table fit only by wrapping
+SOG/HITS/BIG into broken labels at390/150%. Skills cards already fit; preserved.
+Match stats now use a labelled focusable horizontal-scroll region with whole
+headers/name widths, narrow scroll hint and arrow-key native scrolling.
+Baseline `.gaming/rewards/1788710708232-xLvk3L/` and
+`.gaming/hit-parade-full/1788710706937-XQXRV0/` inspected. Final match
+`.gaming/rewards/1788710827030-56FDCK/` and skills
+`.gaming/hit-parade-full/1788710828274-iwAQzu/` pass nine layout cases, all
+actions/cells reachable, no page overflow, plus native keyboard scroll and reward
+regressions. Final narrow match capture inspected. Build/147 tests/bot gates
+`.gaming/runs/1788710803701-HycEyF/` pass. Impeccable informed preservation of
+legible tabular labels over compressed columns. Self-review prefers legibility;
+no game-feel/hardware claim. Full-run progression remains the broader gap.
+
 Completed full Hit Parade browser play evidence. New hit-parade-full.mjs prepares
 only the reachable node, then plays 60 simulated seconds via DOM movement/check
 keys and natural timer expiry. Idle loses0/8 without reward; seeded nearest-target

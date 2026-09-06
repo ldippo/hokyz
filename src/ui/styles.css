@@ -177,7 +177,15 @@ table.box td.num { text-align: right; }
 .result table.box th { color: oklch(81% 0.015 265); letter-spacing: 0.03em; }
 .result table.box td, .result table.box th { padding: 10px 8px; }
 .result .cards { flex-wrap: wrap; }
+.result .match-stats { width: 100%; overflow-x: auto; margin-top: 24px; }
+.result .match-stats:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.result .match-stats table.box { min-width: 460px; margin-top: 0; overflow-wrap: normal; }
+.result .match-stats th { white-space: nowrap; }
+.result .match-stats td:first-child { min-width: 140px; text-align: left; }
+.result .stats-scroll-hint { display: none; }
 @media (max-width: 600px) {
+  .result .stats-scroll-hint { display: block; margin: 24px 0 8px; color: oklch(81% .015 265); font-size: .875rem; line-height: 1.5; }
+  .result .match-stats { margin-top: 8px; }
   .screen:has(> .result) { padding: 24px 16px; }
   .result h2 { font-size: 2rem; }
   .result .result-description { font-size: 1.0625rem; }
