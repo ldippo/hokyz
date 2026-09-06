@@ -102,6 +102,16 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed connected natural-combat evidence: route.mjs --combat prepares the
+fourth row as a normal match, keeps actual run roster/modifiers and lets both
+teams use production AI. No score/winner/clock changes. Final
+`.gaming/route/1788711810087-KuK8hh/` passes noncombat route plus natural3-1 win,
+three periods/413.38sim seconds, once-only counters and earned draft reload/skip.
+Match result capture inspected. Build/151 tests/bot
+`.gaming/runs/1788711811092-7y2kkQ/` pass. No game-code edits. Self-review confirms
+connected combat/progression, not human game feel or full-run victory. Next:
+pending level-up choices, remaining Act1 route and natural boss/act transition.
+
 Completed connected noncombat route evidence: route.mjs preserves generated map
 links, prepares event/shop/rest types and injuries, then uses real event +45cash,
 doctor -45/heal, rest +2training and reloads between every stage. Final

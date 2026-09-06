@@ -39,6 +39,22 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest evidence: route.mjs --combat extends event/shop/rest into a normal match
+on row3 (types prepared, original links and actual roster/modifiers preserved).
+Home team is switched to production AI for the test; simulation runs full-length
+without editing score/phase/winner/clocks/stats. Final
+.gaming/route/1788711810087-KuK8hh/ passes: natural3-1 win in period3 at413.38sim
+seconds, team shots34/15, hits55/21, bigHits15/12; matchesPlayed/Won count once,
+earned draft survives reload and skip clears it. Result screenshot inspected.
+Build/151 tests/bot .gaming/runs/1788711811092-7y2kkQ/ pass. No game-code edits.
+Self-review supports connected combat/progression, not human feel/full-run win.
+The --combat harness handles natural loss too, but this run only verified its win
+branch; earlier terminal-loss fixtures remain distinct evidence.
+Next precise action: extend through any pending level-ups after draft, remaining
+Act1 rest/encounter, and natural boss outcome/act transition. Preserve actual
+match difficulty and clocks; report losses instead of injecting victories. Save
+full checkpoint artifacts if future continuation should reuse a natural run.
+
 Latest evidence: scripts/harness/route.mjs runs connected event->shop->rest with
 reloads in one run. Generated links untouched; first three row types and initial
 injuries prepared. Actual event +45cash funds doctor -45/full heal, rest trains

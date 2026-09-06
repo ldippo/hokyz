@@ -81,6 +81,10 @@ reloading between encounters. It preserves generated links while preparing the
 first three encounter types/injuries. Checks cash, healing, training, pending
 state cleanup and connected path. Evidence: `.gaming/route/`. Save-migration
 zero defaults are normalized in comparisons; substantive state remains strict.
+Add `--combat` to prepare a normal match on the next row and let both teams use
+production AI through a natural full-length outcome. Verifies match counters and
+reward reload or loss settlement. No score/winner/clock edits; AI control is not
+human gameplay evidence and this does not certify a complete run.
 
 `node scripts/harness/hit-parade-full.mjs` runs idle and scripted pursuit through
 all 60 simulated seconds, using DOM movement/check keys and natural timer expiry.
