@@ -69,7 +69,7 @@ function startRunMatch(app: App, node: MapNode, bundle: ReturnType<typeof buildM
 export function playMatch(app: App, sim: MatchSim, perkNames: string[], done: (o: MatchOutcome) => void): void {
   app.showScreen(null);
   const view = app.startView(sim, true, perkNames);
-  view.shakeMul = app.meta.screenShake === false ? 0 : 1;
+  view.shakeMul = app.meta.screenShake === false || app.meta.reducedMotion === true ? 0 : 1;
   if (app.meta.cinematics !== false) view.enablePresentation();
   let finished = false;
   let pauseEl: HTMLElement | null = null;

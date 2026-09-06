@@ -25,6 +25,33 @@ function sim(seed = 3) {
 const inp = (o: Partial<Input>): Input => ({ ...EMPTY_INPUT, move: { x: 0, y: 0 }, aim: { x: 0, y: 0 }, ...o });
 
 describe('aim zones', () => {
+  it('uses the aim controls independently of skating direction on release', () => {
+    for (const direction of [-1, 1]) {
+      const s = sim();
+      const sk = s.st.skaters['A1'];
+      sk.pos = { x: 12, y: 0 };
+      sk.facing = 0;
+      givePuck(s.st, sk, []);
+      const ev: MatchEvent[] = [];
+      stepCarrier(s.st, sk, inp({ move: { x: 0, y: -direction }, aim: { x: 0, y: direction }, shootRelease: true }), s.st.dt, new Rng(1), ev);
+      const shot = ev.find((e) => e.type === 'shot') as Extract<MatchEvent, { type: 'shot' }>;
+      expect(shot.zone.startsWith(direction < 0 ? 'far-' : 'near-')).toBe(true);
+    }
+  });
+
+  it('keeps automatic far-side aiming when only movement is held', () => {
+    const s = sim();
+    const sk = s.st.skaters['A1'];
+    sk.pos = { x: 12, y: 0 };
+    sk.facing = 0;
+    s.st.skaters[s.st.teams[1].goalie!].pos.y = 0.5;
+    givePuck(s.st, sk, []);
+    const ev: MatchEvent[] = [];
+    stepCarrier(s.st, sk, inp({ move: { x: 0, y: 1 }, shootRelease: true }), s.st.dt, new Rng(1), ev);
+    const shot = ev.find((e) => e.type === 'shot') as Extract<MatchEvent, { type: 'shot' }>;
+    expect(shot.zone.startsWith('far-')).toBe(true);
+  });
+
   it('aim up targets the far post, charge lifts to the top corner', () => {
     const s = sim();
     const sk = s.st.skaters['A1'];

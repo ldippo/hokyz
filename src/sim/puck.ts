@@ -302,6 +302,6 @@ export function stepCarrier(st: MatchState, sk: Skater, input: Input, dt: number
   }
   if (input.shootRelease || (sk.charging && !input.shoot)) {
     const charge = sk.charging ? sk.shotCharge : 0.3;
-    doShot(st, sk, input.move, charge, rng, events);
+    doShot(st, sk, input.aim, charge, rng, events);
   }
 }

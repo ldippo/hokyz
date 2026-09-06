@@ -6,6 +6,7 @@ import { makeIceMaterial, makeScratchTextures, type IceMaterial } from './iceMat
 import { Crowd } from './crowd';
 import { Arena } from './arena';
 import { RINK_THEMES } from '../run/meta';
+import { Rng } from '../core/rng';
 
 export function roundedRectPath(hx: number, hy: number, r: number, segs = 10): THREE.Vector2[] {
   const pts: THREE.Vector2[] = [];
@@ -36,6 +37,16 @@ function makeIceTexture(): THREE.CanvasTexture {
   grad.addColorStop(1, '#e6f0fb');
   g.fillStyle = grad;
   g.fillRect(0, 0, W, H);
+  // Baked resurfacing grain stays visible on Low without another render pass.
+  const rng = new Rng(7301);
+  for (let i = 0; i < 1800; i++) {
+    const x = rng.range(0, W), y = rng.range(0, H);
+    g.strokeStyle = i % 3 ? 'rgba(82,124,157,0.045)' : 'rgba(246,251,255,0.28)';
+    g.lineWidth = rng.range(0.5, 1.6);
+    g.beginPath(); g.moveTo(x, y);
+    g.quadraticCurveTo(x + 35, y + rng.range(-14, 14), x + rng.range(60, 210), y + rng.range(-20, 20));
+    g.stroke();
+  }
   const cx = W / 2,
     cy = H / 2;
   const X = (m: number) => cx + m * s;
@@ -83,11 +94,14 @@ function makeIceTexture(): THREE.CanvasTexture {
   }
   g.save();
   g.translate(cx, cy);
-  g.font = 'bold 150px Impact, "Arial Black", sans-serif';
+  g.font = 'italic bold 190px Impact, "Arial Black", sans-serif';
   g.textAlign = 'center';
   g.textBaseline = 'middle';
-  g.fillStyle = 'rgba(28,79,214,0.22)';
-  g.fillText('HOKYZ', 0, 0);
+  g.fillStyle = 'rgba(28,66,121,0.16)';
+  g.fillText('H', 0, 4);
+  g.strokeStyle = 'rgba(28,66,121,0.16)';
+  g.lineWidth = 3;
+  g.beginPath(); g.arc(0, 0, 140, 0, Math.PI * 2); g.stroke();
   g.restore();
   g.font = 'bold 64px Impact, "Arial Black", sans-serif';
   g.fillStyle = 'rgba(216,38,47,0.18)';
@@ -256,7 +270,23 @@ export class RinkMesh {
 
     // --- nets ---
     const postMat = new THREE.MeshStandardMaterial({ color: 0xe03030, roughness: 0.35, metalness: 0.4 });
-    const netMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.28, side: THREE.DoubleSide, roughness: 1 });
+    // Cutout cord mesh, with an open mouth, instead of a translucent solid box.
+    const netCanvas = document.createElement('canvas');
+    netCanvas.width = netCanvas.height = 64;
+    const ng = netCanvas.getContext('2d')!;
+    ng.strokeStyle = '#dce8ee'; ng.lineWidth = 4;
+    ng.strokeRect(0, 0, 64, 64);
+    const netTexture = new THREE.CanvasTexture(netCanvas);
+    netTexture.colorSpace = THREE.SRGBColorSpace;
+    netTexture.wrapS = netTexture.wrapT = THREE.RepeatWrapping;
+    netTexture.anisotropy = 4;
+    const netMat = new THREE.MeshStandardMaterial({ map: netTexture, alphaTest: 0.25, side: THREE.DoubleSide, roughness: 0.85 });
+    const netPanel = (w: number, h: number) => {
+      const geo = new THREE.PlaneGeometry(w, h);
+      const uv = geo.getAttribute('uv');
+      for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * w / 0.14, uv.getY(i) * h / 0.14);
+      return new THREE.Mesh(geo, netMat);
+    };
     for (const gl of GOALS) {
       const postGeo = new THREE.CylinderGeometry(0.06, 0.06, 1.25, 10);
       for (const p of gl.posts) {
@@ -269,11 +299,21 @@ export class RinkMesh {
       bar.rotation.x = Math.PI / 2;
       bar.position.set(gl.lineX, 1.22, 0);
       this.group.add(bar);
-      const net = new THREE.Mesh(new THREE.BoxGeometry(RINK.goalDepth, 1.2, RINK.goalWidth), netMat);
-      net.position.set((gl.lineX + gl.backX) / 2, 0.6, 0);
-      this.group.add(net);
-      const edges = new THREE.LineSegments(new THREE.EdgesGeometry(net.geometry), new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 }));
-      edges.position.copy(net.position);
+      const centerX = (gl.lineX + gl.backX) / 2;
+      const back = netPanel(RINK.goalWidth, 1.2);
+      back.rotation.y = Math.PI / 2;
+      back.position.set(gl.backX, 0.6, 0);
+      const roof = netPanel(RINK.goalDepth, RINK.goalWidth);
+      roof.rotation.x = -Math.PI / 2;
+      roof.position.set(centerX, 1.2, 0);
+      this.group.add(back, roof);
+      for (const side of [-1, 1]) {
+        const panel = netPanel(RINK.goalDepth, 1.2);
+        panel.position.set(centerX, 0.6, side * RINK.goalWidth / 2);
+        this.group.add(panel);
+      }
+      const edges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(RINK.goalDepth, 1.2, RINK.goalWidth)), new THREE.LineBasicMaterial({ color: 0xdce8ee, transparent: true, opacity: 0.65 }));
+      edges.position.set(centerX, 0.6, 0);
       this.group.add(edges);
       const light = new THREE.PointLight(0xff2020, 0, 14, 2);
       light.position.set(gl.backX + gl.dir * 1.2, 1.8, 0);

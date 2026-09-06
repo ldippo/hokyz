@@ -87,6 +87,10 @@ export class InputManager {
         cb(e.code);
         return;
       }
+      // Team names and seed fields own typing; gameplay shortcuts must not eat
+      // letters, spaces or cursor keys. Explicit rebinding capture above still wins.
+      const target = e.target;
+      if (target instanceof HTMLElement && (target.matches('input, textarea, select') || target.isContentEditable)) return;
       const a = this.keymap[e.code];
       if (a) {
         if (!this.keyHeld.has(a)) this.pressedThisFrame.add(a);

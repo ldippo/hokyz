@@ -118,6 +118,7 @@ export function thinkSkater(st: MatchState, sk: Skater, brain: Brain, dt: number
       const g = oppGoalieId ? st.skaters[oppGoalieId] : null;
       input.move.y = g ? -Math.sign(g.pos.y || (rng.next() - 0.5)) * 0.8 : (rng.next() - 0.5) * 1.2;
       input.move.x = dir * 0.3;
+      input.aim = { ...input.move };
       if (brain.shootHold <= 0) {
         input.shootRelease = true;
         input.shoot = false;

@@ -9,6 +9,8 @@ type N = any;
 /** Jumbotron, spotlights with volumetric cones, rafters and banners. */
 export class Arena {
   group = new THREE.Group();
+  /** Roof and suspended scoreboard appear only in low cinematic camera views. */
+  overhead = new THREE.Group();
   private screenTex: THREE.CanvasTexture;
   private screenCanvas: HTMLCanvasElement;
   private lastDraw = -1;
@@ -22,17 +24,18 @@ export class Arena {
   private flashColor = new THREE.Color(0xffffff);
 
   constructor(theme: RinkTheme) {
+    this.group.add(this.overhead);
     // --- rafters ---
     const rafterMat = new THREE.MeshStandardMaterial({ color: 0x1a1d28, roughness: 0.9, metalness: 0.3 });
     for (let i = -2; i <= 2; i++) {
       const beam = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.8, RINK.width + 26), rafterMat);
       beam.position.set(i * 12, 17, 0);
-      this.group.add(beam);
+      this.overhead.add(beam);
     }
     for (const z of [-14, 14]) {
       const beam = new THREE.Mesh(new THREE.BoxGeometry(RINK.length + 30, 0.8, 0.5), rafterMat);
       beam.position.set(0, 17, z);
-      this.group.add(beam);
+      this.overhead.add(beam);
     }
     // --- jumbotron ---
     this.screenCanvas = document.createElement('canvas');
@@ -42,18 +45,18 @@ export class Arena {
     this.screenTex.colorSpace = THREE.SRGBColorSpace;
     const frame = new THREE.Mesh(new THREE.BoxGeometry(7, 3.6, 7), new THREE.MeshStandardMaterial({ color: 0x0c0e16, roughness: 0.6, metalness: 0.5 }));
     frame.position.set(0, 12.5, 0);
-    this.group.add(frame);
+    this.overhead.add(frame);
     const screenMat = new THREE.MeshStandardMaterial({ map: this.screenTex, emissiveMap: this.screenTex, emissive: 0xffffff, emissiveIntensity: 1.6, color: 0x000000, roughness: 0.4 });
     for (let i = 0; i < 4; i++) {
       const s = new THREE.Mesh(new THREE.PlaneGeometry(6.2, 3.1), screenMat);
       const ang = (i / 4) * Math.PI * 2;
       s.position.set(Math.sin(ang) * 3.52, 12.5, Math.cos(ang) * 3.52);
       s.rotation.y = ang;
-      this.group.add(s);
+      this.overhead.add(s);
     }
     const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 3, 6), rafterMat);
     cable.position.set(0, 15.8, 0);
-    this.group.add(cable);
+    this.overhead.add(cable);
     // --- banners ---
     const texts: string[] = theme.banners;
     texts.forEach((t: string, i: number) => {

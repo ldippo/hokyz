@@ -31,7 +31,7 @@ export function settingsScreen(app: App): void {
     refresh();
     return h('div', { class: 'settings-row' }, h('span', {}, label), h('div', { style: 'display:flex;gap:8px;align-items:center' }, btn('‹', () => { app.meta[key] = app.meta[key] === false; app.saveMeta(); refresh(); onChange?.(); }), lbl, btn('›', () => { app.meta[key] = app.meta[key] === false; app.saveMeta(); refresh(); onChange?.(); })));
   };
-  const el = h('div', { class: 'screen transparent' },
+  const el = h('div', { class: 'screen transparent settings-screen' },
     h('h2', { class: 'screen-title' }, 'SETTINGS'),
     h('div', { style: 'margin:20px 0' },
       h('div', { class: 'settings-row' }, h('span', {}, 'Volume'), vol),

@@ -890,6 +890,9 @@ export class MatchView {
     let turbo = 0;
     for (const t of st.teams) if (t.isHuman && t.controlledId) turbo = st.skaters[t.controlledId].turboActive ? 1 : 0;
     this.rig.setTurbo(turbo);
+    // The pulled-back play camera can sit above the roof geometry. Never let
+    // rafters or the suspended scoreboard obscure possession and passing lanes.
+    this.rink.arena.overhead.visible = this.director.active && this.rig.camera.position.y < 10;
     this.rig.render(dt);
   }
 }
