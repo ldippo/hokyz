@@ -216,6 +216,8 @@ try {
             return {time:st.t,phase:st.phase,labels,overlaps};
           });
           frames.push(sample);
+          assert.ok(sample.labels.every(l=>l.lane>=0&&l.lane<=3),'Label exceeded bounded height');
+          assert.ok(sample.labels.every(l=>!l.controlled||l.lane===0),'Controlled label lost priority');
           if(sample.overlaps.length>worst){worst=sample.overlaps.length;await page.screenshot({path:join(out,'name-motion-worst.png')});}
           if(frame%30===0) {await page.screenshot({path:join(out,`name-motion-${frame}.png`)});console.log(`Name motion sample ${frame}/90`);}
         }

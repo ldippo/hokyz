@@ -102,6 +102,16 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed bounded label release hysteresis: keep a valid raised lane until lower
+space remains available for300ms; resolve collisions/control priority immediately.
+Desktop1788719900911-uvAcDr changes41->35/displacement47.2->44m; narrow
+1788719902247-klWzcn changes23->21/displacement28->26.4m. Overlap frames remain
+2/1, controlled labels remain0, opening/preferences pass. Captures inspected;
+mean raise increases about5cm/4cm. Self-review prefers modest sampled stability
+gain; no real-time smoothness or collision-free claim. Impeccable informed
+reduced unnecessary motion. Gates1788719912036-76XuTc pass191 tests/build/bot;
+baseline1788719861881-seof1A. Human browser1788720021020-IuxHWU passes.
+
 Rejected finer-label-grid experiment: desktop overlap frames2->1 but lane
 changes41->69; narrow overlap unchanged1, changes23->41. Summed displacement
 fell47.2->39.8m /28->24.2m; insufficient evidence of net readability/stability

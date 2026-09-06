@@ -39,6 +39,29 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest visual change: MatchView retains a valid raised name-tag lane until lower
+space has remained clear300ms. Collision resolution and controlled priority stay
+immediate. Hidden/offscreen/cinematic/replay tags clear placement history.
+Desktop .gaming/map-focus/1788719900911-uvAcDr changes41->35, summed vertical
+movement47.2->44m; narrow1788719902247-klWzcn changes23->21,28->26.4m.
+Overlap frames unchanged2/1; max jump2.4m unchanged; mean raise .142->.192m /
+.157->.194m. Controlled labels stay0; opening stability/preferences pass.
+Desktop worst and narrow frame30 before/after inspected: existing overlap remains,
+raised tags linger briefly, no new overlap count. Cosmetic team names/animation
+poses vary, but simulation scenario/times and projected layout are comparable.
+Self-review prefers modest sampled stability improvement; abstains on real-time
+feel/GPU performance, no collision-free claim. Impeccable informed less needless
+motion. Full gates .gaming/runs/1788719912036-76XuTc pass build/191 tests/bot;
+baseline1788719861881-seof1A. Human controls/passing browser
+.gaming/playtests/1788720021020-IuxHWU passes. Added moving-trace assertions for
+bounded height and controlled-label priority. Full goal remains active.
+Final assertion-enabled desktop1788720020808-iVlS3F passes with identical35
+changes/44m displacement/2 overlap frames; final worst capture inspected.
+Next precise action: return to player presentation, inspect skating/knockdown
+animation and control-ring association across render frame rates using identical
+simulation poses. Avoid further small label tuning without broader play feedback.
+Unrelated README.md and docs/ROADMAP-v4.md edits remain untouched.
+
 Latest experiment rejected: quarter-lane (0.2m) label positions within the same
 2.4m cap. Desktop candidate .gaming/map-focus/1788719391102-c5NgRB reduced overlap
 frames2->1 and summed vertical displacement47.2->39.8m, but changes41->69.

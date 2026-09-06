@@ -296,6 +296,8 @@ export class MatchView {
     }
   }
 
+  private tagPlacement = new Map<string, { lane: number; lowerSince: number | null }>();
+
   private layoutNameTags(): void {
     const st = this.sim.st, camera = this.rig.camera;
     camera.updateMatrixWorld();
@@ -306,13 +308,29 @@ export class MatchView {
       const mesh = this.skaters.get(id);
       if (!(mesh instanceof SkaterRig)) continue;
       mesh.tagLane(0);
-      if (this.director.active || this.replay) continue;
+      if (this.director.active || this.replay) { this.tagPlacement.delete(id); continue; }
+      const overlapsPlaced = (box: NonNullable<ReturnType<SkaterRig['tagBounds']>>) => placed.some(b => box.left < b.right + 0.004 && box.right > b.left - 0.004 && box.bottom < b.top + 0.004 && box.top > b.bottom - 0.004);
       for (let lane = 0; lane <= 3; lane++) {
         mesh.tagLane(lane);
         const box = mesh.tagBounds(camera);
-        if (!box || box.right < -1 || box.left > 1 || box.top < -1 || box.bottom > 1) break;
-        const overlaps = placed.some(b => box.left < b.right + 0.004 && box.right > b.left - 0.004 && box.bottom < b.top + 0.004 && box.top > b.bottom - 0.004);
-        if (!overlaps || lane === 3) { placed.push(box); break; }
+        if (!box || box.right < -1 || box.left > 1 || box.top < -1 || box.bottom > 1) { this.tagPlacement.delete(id); break; }
+        if (!overlapsPlaced(box) || lane === 3) {
+          const previous = this.tagPlacement.get(id);
+          // Resolve collisions immediately, but require 300ms of lower clearance
+          // before dropping a valid raised tag. Never delay controlled labels.
+          if (previous && previous.lane > lane && !st.skaters[id].controlled) {
+            mesh.tagLane(previous.lane);
+            const held = mesh.tagBounds(camera);
+            if (held && held.bottom <= 1 && held.top >= -1 && !overlapsPlaced(held)) {
+              previous.lowerSince ??= this.time;
+              if (this.time - previous.lowerSince < 0.3) { placed.push(held); break; }
+            }
+            mesh.tagLane(lane);
+          }
+          this.tagPlacement.set(id, { lane, lowerSince: null });
+          placed.push(box);
+          break;
+        }
       }
     }
   }
