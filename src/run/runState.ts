@@ -34,6 +34,7 @@ export interface RunState {
   perks: string[];
   /** Earned reward survives reloads until explicitly picked or skipped. */
   pendingDraft?: { id: string; type: MapNode['type']; perkIds: string[]; offeredLogged?: boolean };
+  pendingShop?: { id: string; perkIds: string[]; hire: SkaterDef; hired: boolean; rerolls: number };
   cash: number;
   livesUsed: number;
   matchesWon: number;
@@ -377,6 +378,7 @@ export function applyMatchOutcome(run: RunState, node: MapNode, outcome: MatchOu
 
 /** Mark node complete and advance row; handles act transitions and run win. */
 export function completeNode(run: RunState, node: MapNode): void {
+  if (run.pendingShop?.id === node.id) delete run.pendingShop;
   node.done = true;
   run.currentNodeId = node.id;
   run.path.push(node.id);
@@ -509,6 +511,15 @@ export function pendingLevelUps(run: RunState): SkaterDef[] {
 
 export function captainOf(run: RunState): Captain {
   return CAPTAINS.find((c) => c.id === run.captainId) ?? CAPTAINS[0];
+}
+
+export function prepareShop(run: RunState, node: Pick<MapNode, 'id'>): NonNullable<RunState['pendingShop']> {
+  if (run.pendingShop?.id === node.id) return run.pendingShop;
+  const perkIds = draftPerks(run, 3, 0.3).map(perk => perk.id);
+  const rng = runRng(run);
+  const hire = generateSkater(rng, randomArchetype(rng), Math.max(0, run.act - 1));
+  commitRng(run, rng);
+  return run.pendingShop = { id: node.id, perkIds, hire, hired: false, rerolls: 0 };
 }
 
 export function serializeRun(run: RunState): string {

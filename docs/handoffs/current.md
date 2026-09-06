@@ -39,6 +39,24 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest progression fix: runState.pendingShop/prepareShop retains shop offers,
+free-agent definition, hired flag and reroll count. shopScreen saves on entry and
+mutates saved state on purchases/hire/reroll; prices recompute on render so Haggler
+applies immediately. Perk purchase checks affordability/remaining offer/ownership;
+hire guards duplicate purchase. runMap routes pending shop before other map work;
+completeNode clears matching shop on departure. Optional field preserves old saves.
+Unit tests/run/shop.test.ts covers serialize/reopen/RNG retention and clear.
+Gates .gaming/runs/1788711047667-d6aiY1/ pass build/148 tests/bot. New
+scripts/harness/shop.mjs prepares node/funds, uses real UI entry/reload/purchase/
+hire/reroll/reload/leave/reload. .gaming/shop/1788711107764-m2KFGx/ passes identical
+state/RNG/cash, persistent reroll price, no second hire and row1 after leave.
+Resumed shop capture inspected; self-review prefers stable economy, not full-run
+or narrow-layout claim. Next precise action: restScreen generates training offers
+on entry then commits RNG but keeps offers only locally. Save & Quit from rest can
+therefore reroll offers; persist active rest training/Continue route analogously,
+check healing/training/skip once and ascension4 no-heal policy. Event choices
+already save effects before Continue, but still need successive-node evidence.
+
 Latest UI pass: src/ui/screens/match.ts wraps match box score in labelled focusable
 match-stats region. Arrow keys stop propagation to gameplay input and scroll
 natively; CSS preserves460px table/name widths and whole headers, adds narrow

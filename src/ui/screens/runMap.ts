@@ -89,6 +89,11 @@ export function runMapScreen(app: App): void {
     draftScreen(app, run.pendingDraft);
     return;
   }
+  if (run.pendingShop) {
+    const node = run.maps.flatMap(map => map.rows.flat()).find(node => node.id === run.pendingShop!.id && !node.done);
+    if (node) { shopScreen(app, node); return; }
+    delete run.pendingShop;
+  }
   if (run.leagueOffer) {
     leagueOfferScreen(app);
     return;

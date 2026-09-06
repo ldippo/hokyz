@@ -67,6 +67,11 @@ hit event, then tests real pause/menu input: frozen simulation/save/timer, no
 duplicate hit on Resume, Escape/P controls and explicit End challenge settlement.
 Evidence: `.gaming/hit-parade/`. It does not prove a human challenge victory.
 
+`node scripts/harness/shop.mjs` prepares a shop node/funds, then checks entry,
+purchase, hire, reroll, reload and Leave Shop through the UI. Offers, cash, RNG,
+roster and escalating reroll price must survive reload; leaving advances once.
+Evidence: `.gaming/shop/`. This is shop persistence coverage, not full-run play.
+
 `node scripts/harness/hit-parade-full.mjs` runs idle and scripted pursuit through
 all 60 simulated seconds, using DOM movement/check keys and natural timer expiry.
 Requires idle loss/no reward and pursuit victory/cash/draft/zero-cash skip.

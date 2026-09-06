@@ -102,6 +102,16 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed shop persistence fix: optional pendingShop caches inventory/free agent,
+hire flag and reroll count. Entry saves; Continue resumes shop; purchases/rerolls
+save retained state; completeNode clears it on departure. Discounts recompute on
+render, so bought shop-discount perks apply without needing reload. Build/148
+tests/bot `.gaming/runs/1788711047667-d6aiY1/` pass. Browser
+`.gaming/shop/1788711107764-m2KFGx/` passes stable opening offers, purchase/hire/
+reroll reload, cash/RNG equality, no repeated hire, Leave/reload advances once.
+Resumed shop screenshot inspected. Self-review prefers stable economy/choices;
+not full-run evidence. Next: rest training offers across Save & Quit/reload.
+
 Completed result-table readability pass: baseline match table fit only by wrapping
 SOG/HITS/BIG into broken labels at390/150%. Skills cards already fit; preserved.
 Match stats now use a labelled focusable horizontal-scroll region with whole
