@@ -78,3 +78,42 @@ describe('AI passing decisions', () => {
     });
   }
 });
+
+describe('receiving an incoming pass', () => {
+  function setup() {
+    const teams = ['A', 'B'].map(name => ({ ...quickTeam(name), name, short: name,
+      color: '#f00', isHuman: false, difficulty: 1 }));
+    const st = new MatchSim([teams[0], teams[1]], defaultMatchMods(), 12).st;
+    st.phase = 'play';
+    st.skaters.A1.pos = { x: -10, y: 0 };
+    st.skaters.A2.pos = { x: 0, y: 1 };
+    st.skaters.A3.pos = { x: 8, y: -5 };
+    Object.assign(st.puck, { owner: null, passTarget: 'A2', lastTouchTeam: 0,
+      pos: { x: -8, y: 0 }, vel: { x: 20, y: 0 }, freeTime: 0.1, isShot: false });
+    return { st, brains: new TeamBrains() };
+  }
+
+  it('gives the intended receiver a receiving role instead of chasing with the passer', () => {
+    const { st, brains } = setup();
+    brains.assignRoles(st, 0);
+    expect(brains.brain('A2').role).toBe('receive');
+    expect(brains.brain('A1').role).not.toBe('chase');
+    const input = brains.think(st, st.skaters.A2, st.dt, new Rng(1));
+    expect(brains.brain('A2').target.x).toBeCloseTo(0);
+    expect(brains.brain('A2').target.y).toBeCloseTo(0);
+    expect(input.move.y).toBeLessThan(0);
+    expect(Math.abs(input.move.x)).toBeLessThan(0.1);
+    brains.assignRoles(st, 1);
+    expect(st.teams[1].skaters.some(id => brains.brain(id).role === 'chase')).toBe(true);
+  });
+
+  it.each(['knocked', 'expired', 'shot'] as const)('returns to loose-puck pursuit when the pass is %s', reason => {
+    const { st, brains } = setup();
+    if (reason === 'knocked') st.skaters.A2.knockdown = 1;
+    if (reason === 'expired') st.puck.freeTime = 2;
+    if (reason === 'shot') st.puck.isShot = true;
+    brains.assignRoles(st, 0);
+    expect(brains.brain('A2').role).not.toBe('receive');
+    expect(brains.brain('A1').role).toBe('chase');
+  });
+});

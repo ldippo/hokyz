@@ -6,7 +6,7 @@ import { arrive, predict, seek } from './steering';
 import type { Rng } from '../../core/rng';
 import { laneBlocked, pickPassTarget } from '../puck';
 
-export type Role = 'carrier' | 'supportHigh' | 'supportLow' | 'chase' | 'pressure' | 'mark' | 'back';
+export type Role = 'carrier' | 'supportHigh' | 'supportLow' | 'receive' | 'chase' | 'pressure' | 'mark' | 'back';
 
 export interface Brain {
   role: Role;
@@ -240,7 +240,15 @@ export function thinkSkater(st: MatchState, sk: Skater, brain: Brain, dt: number
       }
     } else {
       // free puck
-      if (brain.role === 'chase') {
+      if (brain.role === 'receive') {
+        // Meet the pass on its trajectory near our current position, rather
+        // than leaving the receiving lane to chase its present location.
+        const speedSq = p.vel.x * p.vel.x + p.vel.y * p.vel.y;
+        const toReceiver = sub(sk.pos, p.pos);
+        const meetTime = speedSq > 1 ? clamp((toReceiver.x * p.vel.x + toReceiver.y * p.vel.y) / speedSq, 0, 0.65) : 0;
+        brain.target = keepInRink(predict(p.pos, p.vel, meetTime));
+        brain.timer = Math.min(brain.timer, 0.08);
+      } else if (brain.role === 'chase') {
         brain.target = predict(p.pos, p.vel, clamp(dist(sk.pos, p.pos) / 12, 0.05, 0.5));
         brain.turbo = rng.next() < diff(st, sk, 'turboUse') && dist(sk.pos, p.pos) > 4;
       } else if (brain.role === 'supportHigh') {

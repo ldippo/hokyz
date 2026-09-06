@@ -30,6 +30,20 @@ frame-rate and gamepad play are not established by these software-renderer check
 
 ## P2: On-ice responsiveness and decision-making (in-progress, depends on P0)
 
+Completed iteration: intentional pass reception. Intended receivers previously
+became generic support while the passer chased the puck. Added a receive role
+that meets the flight path; teammates retain support. Expired passes, shots and
+knocked receivers return to normal pursuit. Four new cases cover these contracts.
+Baseline `.gaming/runs/1788706012059-0wqvUk/`; final
+`.gaming/runs/1788706128182-2IW4bQ/`: build, 132 tests, eight hockey gates pass.
+Completion 35.6% -> 46.1%, completed passes 377 -> 479, attempts 1059 -> 1040;
+goals 6.25 -> 6.375. Extended 40-match means: 6.1/6.6/7.9/7.9 by difficulty.
+Browser flow `.gaming/playtests/1788706140087-ADmTHc/` passes.
+One focused repair decoupled boss-roster assertions from legal goalie pulling;
+it still checks the exact original roster plus exactly one boss addition.
+Self-review prefers improved reception evidence; no real-time human feel claim.
+Next: human pass/receive/control-switch browser evidence, then P3 run progression.
+
 Completed iteration: AI pass-lane awareness. Two fixtures reproduced unsafe
 passes with/without pressure over 100 decision seeds each. AI now checks the lane
 and actual pass resolver, chooses an available outlet, or keeps skating. Both

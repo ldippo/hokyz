@@ -83,10 +83,15 @@ describe('boss phases', () => {
   }
   it('Wreckers add a fourth skater in the third period', () => {
     const s = bossSim('boss_wrecking');
+    const startingSkaters = [...s.st.teams[1].skaters];
+    const startingGoalie = s.st.teams[1].goalie;
     let phases = 0;
     for (let i = 0; i < 60 * 60 && s.st.phase !== 'over'; i++) for (const e of s.step()) if (e.type === 'bossPhase') phases++;
     expect(phases).toBe(1);
-    expect(s.st.teams[1].skaters.length).toBe(4);
+    // Late-game AI may pull the goalie as an attacker. Assert the exact boss
+    // roster addition independently of that score-dependent tactical decision.
+    expect(s.st.teams[1].skaters.filter(id => id !== startingGoalie).sort())
+      .toEqual([...startingSkaters, 'extra1'].sort());
     expect(s.st.skaters['extra1']).toBeDefined();
   });
   it('Blur turns the ice slick in period 2 and infinite turbo in period 3', () => {

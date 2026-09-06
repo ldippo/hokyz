@@ -39,6 +39,24 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest P2 iteration: added `receive` role in teamAI/skaterAI. Intended receiver
+meets the puck trajectory near their position; passer/third skater retain support
+instead of chasing. Four tests cover receiver assignment/steering and fallback
+for knocked receiver, expired pass or shot. Baseline:
+.gaming/runs/1788706012059-0wqvUk/. First candidate:
+.gaming/runs/1788706070156-aBTMT6/ failed one boss roster test because a legal
+goalie pull added a fifth attacker. Focused repair in tests/run/depth.test.ts
+asserts exact starting skaters plus extra1, excluding original goalie. Final:
+.gaming/runs/1788706128182-2IW4bQ/ passes build, 132 tests and bot gates;
+.gaming/playtests/1788706140087-ADmTHc/ passes browser flow. Completion improves
+35.6% -> 46.1%; attempts 1059 -> 1040; completions 377 -> 479; interceptions
+569 -> 509; goals 6.25 -> 6.375. Extra 40-game diagnostics in first candidate's
+extended-balance.log: means 6.1/6.6/7.9/7.9 goals, zero own goals, no cap reached.
+Self-review prefers actual reception improvement; real-time human feel unproven.
+Next precise action: exercise real keyboard passing, sustained receiver movement,
+automatic control switch on reception and subsequent shot in browser fixtures;
+then move to full-run progression and accessibility checks (P3).
+
 Latest P2 gameplay iteration: AI now checks `laneBlocked` and `pickPassTarget`
 before pressured/outlet passes, skips knocked-down recipients, and keeps skating
 when no lane is available. Changes: src/sim/ai/skaterAI.ts and two new cases in

@@ -44,6 +44,16 @@ export class TeamBrains {
       const sorted = byDistTo(ownerSk.pos);
       sorted.forEach((s, i) => set(s, i === 0 ? 'pressure' : i === 1 ? 'mark' : 'back'));
     } else {
+      const receiver = p.passTarget ? st.skaters[p.passTarget] : null;
+      if (receiver && receiver.team === teamId && !receiver.isGoalie &&
+          receiver.knockdown <= 0 && p.lastTouchTeam === teamId && !p.isShot && p.freeTime < 1.5) {
+        // A deliberate pass is not a loose-puck scramble. Let the recipient
+        // meet it while the passer and third skater retain supporting positions.
+        set(receiver, 'receive');
+        byDistTo(p.pos).filter(s => s.id !== receiver.id)
+          .forEach((s, i) => set(s, i === 0 ? 'back' : 'supportHigh'));
+        return;
+      }
       const sorted = byDistTo(p.pos);
       sorted.forEach((s, i) => set(s, i === 0 ? 'chase' : i === 1 ? 'supportHigh' : 'back'));
     }
