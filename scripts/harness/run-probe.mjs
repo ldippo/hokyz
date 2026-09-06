@@ -1,5 +1,6 @@
 import { join } from 'node:path';
 import assert from 'node:assert/strict';
+import { writeFileSync } from 'node:fs';
 
 export async function runProbe(page, out, prefix) {
   const findings = [];
@@ -29,6 +30,11 @@ export async function runProbe(page, out, prefix) {
 }
 
 async function navigationProbe(page, out, prefix, device, width, height) {
+  const downKey = await page.evaluate(() => {
+    const code = Object.keys(window.__hokyz.input.keymap).find(code => window.__hokyz.input.keymap[code] === 'down');
+    if (!code) throw new Error('No menu-down movement binding');
+    return code.startsWith('Key') ? code.slice(3).toLowerCase() : code;
+  });
   if (device === 'gamepad') await page.evaluate(() => {
     window.__runPad = { connected: true, axes: [0,0,0,0], buttons: Array.from({ length: 16 }, () => ({ pressed: false, value: 0 })) };
     navigator.getGamepads = () => [window.__runPad];
@@ -36,16 +42,25 @@ async function navigationProbe(page, out, prefix, device, width, height) {
   const press = async (key, button) => {
     if (device === 'keyboard') await page.keyboard.down(key);
     else await page.evaluate(button => { window.__runPad.buttons[button] = { pressed: true, value: 1 }; }, button);
-    await page.evaluate(() => window.__hokyz.simStep());
+    const downEdge = await page.evaluate(() => { const app=window.__hokyz; app.simStep(); return app.input.justPressed('down'); });
+    if (button === 13) assert.ok(downEdge, `${device}: menu-down input edge missing`);
     if (device === 'keyboard') await page.keyboard.up(key);
     else await page.evaluate(button => { window.__runPad.buttons[button] = { pressed: false, value: 0 }; }, button);
     await page.evaluate(() => window.__hokyz.simStep());
   };
   const count = await page.evaluate(() => window.__hokyz.nav.items().length);
+  await page.evaluate(() => {
+    const nav = window.__hokyz.nav, original = nav.setFocus;
+    window.__navTrace = [];
+    nav.setFocus = function(index, sound = true) {
+      original.call(this, index, sound);
+      window.__navTrace.push({ index, sound, label:this.items()[this.idx]?.textContent });
+    };
+  });
   assert.ok(count > 1);
   const visited = new Set();
   for (let i = 0; i < count; i++) {
-    await press('ArrowDown', 13);
+    await press(downKey, 13);
     const focus = page.locator('.run-shell [data-nav].focus');
     assert.equal(await focus.count(), 1);
     const idx = await page.evaluate(() => window.__hokyz.nav.items().findIndex(el => el.classList.contains('focus')));
@@ -55,13 +70,14 @@ async function navigationProbe(page, out, prefix, device, width, height) {
     if (!visible) await page.screenshot({ path: join(out, `${prefix}-${device}-focus-failure.png`) });
     assert.ok(visible, `${prefix}/${device}: focused action clipped: ${await focus.textContent()} ${JSON.stringify(r)}`);
   }
+  writeFileSync(join(out, `${prefix}-${device}-focus-trace.json`), JSON.stringify(await page.evaluate(() => window.__navTrace), null, 2));
   assert.equal(visited.size, count, `${device}: navigation failed to visit every action`);
   const select = async text => {
     const n = await page.evaluate(() => window.__hokyz.nav.items().length);
     for (let i = 0; i <= n; i++) {
       const focused = await page.locator('[data-nav].focus').textContent();
       if (focused === text) { await press('Enter', 0); return; }
-      await press('ArrowDown', 13);
+      await press(downKey, 13);
     }
     assert.fail(`${device}: could not select ${text}`);
   };

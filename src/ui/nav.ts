@@ -6,9 +6,17 @@ export class Nav {
   private idx = -1;
   onBack: (() => void) | null = null;
   constructor(private root: HTMLElement) {
-    root.addEventListener('mouseover', (e) => {
+    let pointerX: number | undefined, pointerY: number | undefined;
+    root.addEventListener('mousemove', (e) => {
+      // Scroll can move a card under a stationary cursor. Only actual pointer
+      // movement should replace keyboard/controller selection.
+      if (e.clientX === pointerX && e.clientY === pointerY) return;
+      pointerX = e.clientX; pointerY = e.clientY;
       const t = (e.target as HTMLElement).closest<HTMLElement>('[data-nav]');
-      if (t) this.setFocus(this.items().indexOf(t), false);
+      if (t) {
+        const i = this.items().indexOf(t);
+        if (i >= 0 && i !== this.idx) this.setFocus(i, false);
+      }
     });
   }
   items(): HTMLElement[] {

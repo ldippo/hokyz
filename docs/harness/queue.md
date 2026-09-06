@@ -102,6 +102,19 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Resolved focus investigation: prior probe used ArrowDown (aimDown), not menu-down.
+Probe now reads actual movement binding and asserts input edge. Corrected baseline
+rest1788714111297-IzWPke trace proves genuine hover stealing: keyboard selects
+Save/Quit, scroll-triggered mouseover selects card1; only6/7 visited. Nav now uses
+coordinate-changing mousemove, no scroll-alignment changes. Final
+.gaming/rest/1788714168526-X4ZPlU/ and .gaming/shop/1788714169827-IVkimd/ pass all
+keyboard/synthetic-pad actions and Save/Continue at150%, nine layouts and original
+persistence checks. Controls1788714171116-QEQuk7 passes. Build/152 tests/bot
+.gaming/runs/1788714145662-Cs6OR3/ pass. Self-review prefers stable input selection;
+earlier clipping diagnosis invalidated, not a hardware or human-feel claim.
+Next: inspect map node focus appearance: CSS defines available/hover but no
+distinct .node.focus cue, so selection may remain visually ambiguous.
+
 Focus-navigation investigation (open, candidate reverted): run-probe --nav uses
 real keyboard/synthetic pad polling to cycle choices and Save/Continue at150%.
 Baseline .gaming/rest/1788713787826-LRJeS4/ selected map node x=-168.5,y8,w108,h108;

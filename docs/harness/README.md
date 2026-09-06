@@ -93,9 +93,9 @@ Add `--layout` to `rest.mjs` (map and rest) or `shop.mjs` (resumed shop) to capt
 after scrolling and no outer overflow. `--baseline` records without asserting.
 These are geometry/pointer persistence checks, not full keyboard/gamepad traversal.
 Optional `--nav` adds narrow150% keyboard/synthetic-pad traversal and Save/Continue
-checks. This diagnostic currently fails on run-shell focus visibility/traversal;
-it is not part of the passing default gate. Failure captures retain selected-action
-bounds. Pad and activation checks may not be reached after a keyboard failure.
+checks. Keyboard uses the actual movement-down binding, not aim ArrowDown; each
+press asserts its menu input edge. Focus traces and failure captures retain
+selected-action evidence. Synthetic pads do not prove physical hardware support.
 
 `node scripts/harness/route.mjs` exercises event -> shop -> rest in one run,
 reloading between encounters. It preserves generated links while preparing the

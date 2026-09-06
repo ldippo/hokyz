@@ -39,6 +39,28 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Resolved prior navigation investigation. Probe bug: ArrowDown maps to aimDown,
+not Nav down. Corrected run-probe reads movement binding (normallyS), asserts
+down edge, retains focus trace. Prior clipping/unchanged-focus claims are not
+valid evidence of bad scroll alignment. No centering change shipped.
+Corrected baseline .gaming/rest/1788714111297-IzWPke/ rest-keyboard-focus-trace
+proves genuine mouseover focus theft: keyboard Save/Quit then scroll-induced
+hover jumps to card1, total6/7 visited. Nav now listens to coordinate-changing
+mousemove and ignores redundant current selection; original nearest scrolling
+retained. Final .gaming/rest/1788714168526-X4ZPlU/ and
+.gaming/shop/1788714169827-IVkimd/ pass keyboard/synthetic-pad traversal and
+Save/Quit->Continue at150% on map/rest/shop, nine layout cases, and full original
+shop/rest persistence. Rest pad-continued capture inspected. Controls regression
+.gaming/controls-layout/1788714171116-QEQuk7/ passes. Gates
+.gaming/runs/1788714145662-Cs6OR3/ build/152 tests/bot pass; baseline
+.gaming/runs/1788714056639-3D3xsW/ pass. Self-review prefers stable navigation;
+no physical gamepad/human-feel claim. Changed nav.ts, run-probe and harness docs.
+Next precise action: inspect focused versus available map nodes with actual S/D-pad
+navigation. styles.css has no .node.focus rule, so selected node may be visually
+indistinguishable from other available nodes. Add a distinct non-color cue only
+after capturing baseline, then verify input activation and reduced-motion visuals.
+Preserve unrelated README.md/ROADMAP-v4.md edits. Full goal remains active.
+
 Latest investigation, NO navigation fix shipped: run-probe.mjs --nav adds full
 keyboard/synthetic-pad cycling at390x844/150%, focused-action bounds, and planned
 Save & Quit/Continue state checks. Baseline rest1788713751874-2LCq2c failed focus
