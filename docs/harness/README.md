@@ -55,6 +55,12 @@ a failed meta write leaves the run recoverable, and a stale ended save cannot
 duplicate payout/records. Evidence is under `.gaming/endings/`. This is settlement
 recovery coverage, not proof of playing through an entire run.
 
+`node scripts/harness/championship.mjs` checks boss draft -> saved league offer ->
+bank, and boss draft -> extend Act 4 -> save/reload -> league loss -> champion
+summary. It prepares the last-boss checkpoint and terminal outcomes; actual UI,
+reward/league transitions and settlement run normally. Evidence is under
+`.gaming/championship/`. It does not certify playing through the prior acts.
+
 After building, `pnpm harness:capture` starts its own Vite preview server on an
 ephemeral loopback port, uses Playwright Chromium, and writes title/rink screenshots
 and telemetry under `.gaming/captures/`. Install Chromium once with

@@ -102,6 +102,19 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed iteration: championship routing evidence. Prepare last-boss checkpoint
+and terminal outcomes, then use real UI to verify boss loot before league offer,
+offer reload, bank versus Act 4 extension, saved league resumption and championship
+settlement after league loss. No gameplay tuning. Acceptance requires saved state
+and rendered UI evidence for both branches, not a claim of three-act human play.
+`.gaming/championship/1788707458721-sj07JL/` passes both branches; offer and
+Act 4 loss/champion summary captures inspected. Baseline
+`.gaming/runs/1788707379630-yPuaDB/`; final
+`.gaming/runs/1788707619491-N8bTra/` passes build/137 tests/bot gates.
+No game-code changes. Self-review: confirmed roguelite routing, but summary copy
+is excessively wide and small supporting text has weak contrast. Next: result /
+league screen readability at desktop, narrow viewport and larger text.
+
 Completed iteration: retain ended runs until settlement. App previously deleted the
 save at the loss result screen, before runOver credited meta cash. Preserve ended
 save/Continue routing, record settlement receipts with meta, and clear the save

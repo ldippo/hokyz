@@ -39,6 +39,21 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest P3 validation: added node scripts/harness/championship.mjs. Starts a real
+new run, prepares last-boss checkpoint, supplies terminal outcomes, then uses real
+reward/league/save/reload/summary UI. Checks boss draft (four offers) before league
+choice, reload of that choice, Bank -> champion settlement, and Extend -> Act 4
+map -> Save & Quit -> reload -> loss -> champion settlement. Both branches verify
+one meta win and no active save after settlement. Evidence:
+.gaming/championship/1788707458721-sj07JL/ passes both; offer and Act 4 champion
+summary screenshots inspected. Baseline .gaming/runs/1788707379630-yPuaDB/;
+final .gaming/runs/1788707619491-N8bTra/ passes build, 137 tests and bot gates.
+No game-code changes; not proof of playing previous acts. Self-review confirms
+routing but identifies excessively wide summary copy and low-contrast small
+supporting text. Next precise action: improve result/league screens' bounded
+layout and readability, verify desktop/narrow/larger-text captures, then remapping
+and gamepad flows. Actual full-run/human feel/hardware performance remain open.
+
 Latest P3 fix: App saves/loads ended runs until summary settlement instead of
 deleting them at the loss result screen. runOver records a receipt keyed by saved
 seed/goalie/captain roster IDs in meta, skips already-settled rewards/records/feats,
