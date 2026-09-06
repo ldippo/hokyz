@@ -213,6 +213,7 @@ try {
         const loser=end?.loser?st.skaters[end.loser]:null;
         const bench={phase:st.phase,period:st.period,clock:st.clock,loser:loser?.id,ejected:loser?.ejected,inLineup:loser?st.teams[loser.team].skaters.includes(loser.id):null,lineups:st.teams.map(t=>t.skaters.length),position:loser?{...loser.pos}:null};
         app.view.render(1,0);
+        bench.manpower=document.querySelector('.manpower')?.textContent;
         window.__fightLifecycle={initialPeriod,initialClock,end,bench,events};
         return window.__fightLifecycle;
       });
@@ -221,16 +222,18 @@ try {
       assert.ok(lifecycle.bench.ejected&&!lifecycle.bench.inLineup);
       assert.equal(lifecycle.bench.clock,lifecycle.initialClock,'Fight consumed the hockey clock');
       assert.deepEqual(lifecycle.bench.lineups,[2,3]);
+      assert.ok(lifecycle.bench.manpower?.includes('1 sitting this period'));
       await page.screenshot({path:join(out,'fight-benched.png')});
       const restored=await page.evaluate(()=>{
         const app=window.__hokyz,sim=app.view.sim,old=window.__fightLifecycle;
         for(let i=0;i<20000&&sim.st.period===old.initialPeriod;i++){app.input.poll();app.view.afterStep(sim.step({0:app.input.simInput()}));}
         const st=sim.st,sk=st.skaters[old.end.loser];app.view.render(1,0);
-        return {period:st.period,ejected:sk.ejected,inLineup:st.teams[sk.team].skaters.includes(sk.id),lineups:st.teams.map(t=>t.skaters.length),position:{...sk.pos}};
+        return {period:st.period,ejected:sk.ejected,inLineup:st.teams[sk.team].skaters.includes(sk.id),lineups:st.teams.map(t=>t.skaters.length),position:{...sk.pos},manpower:document.querySelector('.manpower')?.textContent};
       });
       checks.push({fightRestored:restored});
       assert.equal(restored.period,lifecycle.initialPeriod+1);assert.ok(!restored.ejected&&restored.inLineup);
       assert.deepEqual(restored.lineups,[3,3]);
+      assert.equal(restored.manpower,'');
       await page.screenshot({path:join(out,'fight-restored.png')});
     } else {
     for(const [kind,key] of [['high',shotKey],['low','l'],['feint',passKey]]) {

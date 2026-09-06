@@ -149,6 +149,7 @@ try {
       });
       checks.push({renderedRoster:rendered});
       if(!process.argv.includes('--baseline')) {
+        assert.match(await page.locator('.manpower').textContent(),/3 · .* 4 skaters/);
         assert.equal(rendered.meshCount,rendered.simCount,'Simulation skater has no model');
         assert.ok(rendered.extraMesh&&rendered.attached&&rendered.visible,'Extra skater is not rendered');
         assert.ok(rendered.stableModels,'Model synchronization recreated or duplicated existing models');

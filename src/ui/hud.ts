@@ -1,5 +1,6 @@
 import type { MatchState, Skater } from '../sim/types';
 import { ONFIRE } from '../sim/constants';
+import { manpowerText } from './manpower';
 
 export class Hud {
   root: HTMLElement;
@@ -28,6 +29,11 @@ export class Hud {
       <div class="vignette-fire" data-el="vig"></div>
     `;
     this.root.querySelectorAll<HTMLElement>('[data-el]').forEach((e) => (this.els[e.dataset.el!] = e));
+    const manpower = document.createElement('div');
+    manpower.className = 'manpower';
+    manpower.hidden = true;
+    this.root.querySelector('.hud-feedback')!.prepend(manpower);
+    this.els.manpower = manpower;
     parent.appendChild(this.root);
     this.els.perks.innerHTML = perkNames.map((n) => `<span>${n}</span>`).join('');
     if (humanTeam === null) {
@@ -113,6 +119,9 @@ export class Hud {
 
   update(st: MatchState, dt: number): void {
     const [a, b] = st.teams;
+    const manpower = manpowerText(st);
+    this.els.manpower.textContent = manpower;
+    this.els.manpower.hidden = !manpower;
     this.els.name0.textContent = a.short;
     this.els.name1.textContent = b.short;
     this.els.badge0.style.background = a.color;

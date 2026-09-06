@@ -102,6 +102,14 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed durable manpower readout: actual counts with sitting/empty-net reasons,
+hidden normal3v3/fight/shootout/end, seven tests. Impeccable guided compact wording.
+Gates1788717922038-3i5tND build/184 tests/bot pass. Full fight browser
+1788717938434-5Xx0fc verifies2v3 text/restoration clears; Outnumbered
+1788717939749-5FW6CW verifies3v4 and existing layout gates. Desktop/narrow150%
+captures inspected. Self-review prefers durable tactical context, not hardware
+approval. Next: actual goalie-pull/return input and empty-net state evidence.
+
 Completed full fight lifecycle evidence: --fight --fight-full prepared offer,
 actual accept then natural idle duel/RNG41, loser ejection/2v3 faceoff, full
 remaining period/3v3 restoration. .gaming/playtests/1788717757979-TxnJbW passes,

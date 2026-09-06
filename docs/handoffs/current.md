@@ -39,6 +39,23 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest manpower HUD: pure src/ui/manpower.ts formats actual skater counts and
+sitting-this-period/empty-net reasons. Hud.update displays compact persistent
+text first in feedback flow, hides normal3v3, fights, shootouts and terminal
+states. Seven tests cover restoration, reinforcement vs pull, equal counts with
+ejection/pull, and hidden phases. Impeccable informed compact non-color wording.
+Final .gaming/runs/1788717922038-3i5tND build/184 tests/bot pass. Browser full
+fight .gaming/playtests/1788717938434-5Xx0fc shows2v3 sitting status then clears
+atperiod2; Outnumbered .gaming/map-focus/1788717939749-5FW6CW shows3v4 and
+passes existing desktop/narrow HUD layout. Desktop bench and narrow150% images
+inspected, compared to prior lifecycle1788717757979-TxnJbW without status.
+Self-review prefers durable explanation of missing/extra skaters, abstains on
+physical readability/hardware. Empty-net combination currently unit-tested only.
+Next precise action: exercise real hold-Pass goalie pull/return in browser, verify
+actual lineup, goalie/model visibility and manpower text including equal-count
+ejection+pull case; inspect simulation restrictions first. Full goal active;
+unrelated README/ROADMAP edits preserved.
+
 Latest complete-fight evidence (no game edits): playtest --fight --fight-full
 uses prepared offer/opponent consent, actual keyboard decline/accept, then pins
 initial duel RNG41 and leaves human idle. No cue/health/outcome/clock edits.
