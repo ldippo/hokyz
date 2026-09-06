@@ -39,6 +39,25 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest crowd fix: waveActive uniform starts0, startWave sets1/reset phase, end
+sets0. Shader multiplies wave lift by active; previous sentinel -10 could not
+disable a periodic sine. Added tests/sim/crowd.test.ts lifecycle/restart and
+animation-disabled material tests. Gates .gaming/runs/1788709703768-0nP8H0/
+pass build/143 tests/bot. Capture --arena --low --crowd-motion records three
+stages, asserts motion meshes3 and active0/1/0. Initial fixture incorrectly set
+rig.overrides without applying; .gaming/captures/1788709621323-IXbCd7/ was STATIC,
+not valid animated baseline. Assertion caught same issue in candidate
+.gaming/captures/1788709722060-XMGpu9/. Repaired helper sets rig.settings.crowdAnim
+before constructing fixture. Final .gaming/captures/1788709803139-wBFPvJ/ passes;
+wave and settled screenshots inspected with visible return to idle. Self-review
+prefers bounded celebration; no hardware/high-tier quality claim. Forced animation
+is test-only; reduced-motion disabling remains unit-tested and untouched.
+Next precise action: src/ui/screens/skills.ts Hit Parade onTick calls finish() on
+pause, ending the challenge. Implement real pause/resume with an explicit abandon
+choice; verify clock/score/state freeze and resume, and deterministic dummy input
+(currently Math.random). Keep skills rewards/save integrity. Full-run/hardware
+and match/skills narrow results remain open.
+
 Latest graphics pass: src/render/crowd.ts replaces box bodies with rounded
 torso/limbs, bent seated legs, shoes, neck/head/hair and separated skin/apparel/
 trouser colors. Custom colorNode mixes vertex fanColor with per-instance muted

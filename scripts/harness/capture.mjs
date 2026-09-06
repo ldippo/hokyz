@@ -4,12 +4,14 @@ import { resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { preview } from 'vite';
 import { chromium } from 'playwright';
+import assert from 'node:assert/strict';
 
 process.chdir(fileURLToPath(new URL('../../', import.meta.url)));
 mkdirSync('.gaming/captures', { recursive: true });
 const dir = mkdtempSync(resolve('.gaming/captures', `${Date.now()}-`));
 const errors = [];
 const arena = process.argv.includes('--arena');
+const crowdMotion = process.argv.includes('--crowd-motion');
 let server, browser;
 let telemetry;
 let build;
@@ -57,8 +59,9 @@ try {
   if (!(telemetry.simTime > telemetry.initialSimTime)) errors.push('Rendered simulation did not advance');
   await page.screenshot({ path: join(dir, 'rink.png') });
   if (arena) {
-    await page.evaluate(() => {
+    await page.evaluate(crowdMotion => {
       const app = window.__hokyz; app.loop.stop();
+      if (crowdMotion) app.rig.settings.crowdAnim = true;
       const originalRandom = Math.random;
       let seed = 42;
       Math.random = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
@@ -67,14 +70,33 @@ try {
       app.view.hud.root.style.display = '';
       for (let i = 0; i < 360; i++) app.view.afterStep(app.view.sim.step());
       app.view.render(1, 0);
-    });
+    }, crowdMotion);
     await page.screenshot({ path: join(dir, 'arena-fixed.png') });
+    if (crowdMotion) {
+      const states = [];
+      for (const stage of ['idle', 'wave', 'settled']) {
+        states.push(await page.evaluate(stage => {
+          const app = window.__hokyz, crowd = app.view.rink.crowd;
+          if (stage === 'wave') { crowd.startWave(); crowd.update(2, 0); }
+          if (stage === 'settled') crowd.update(10, 0);
+          app.view.render(1, 0);
+          return { stage, wave: crowd.wave.value, active: crowd.waveActive?.value,
+            animatedMeshes: crowd.meshes.filter(mesh => mesh.material.positionNode).length };
+        }, stage));
+        await page.screenshot({ path: join(dir, `crowd-${stage}.png`) });
+      }
+      writeFileSync(join(dir, 'crowd-motion.json'), JSON.stringify(states, null, 2));
+      if (!process.argv.includes('--baseline')) {
+        assert.deepEqual(states.map(state => state.active), [0, 1, 0], 'Crowd wave must be idle, active, then idle');
+        assert.ok(states.every(state => state.animatedMeshes === 3), 'All three crowd variants must compile with motion');
+      }
+    }
   }
 } catch (error) { errors.push(String(error)); }
 finally {
   await browser?.close();
   if (server) await new Promise((resolve, reject) => server.httpServer.close((error) => error ? reject(error) : resolve()));
 }
-writeFileSync(join(dir, 'capture.json'), JSON.stringify({ pass: errors.length === 0, scenario: 'AI attract match', fixedArena: arena ? { seed: 42, simSteps: 360, reducedMotion: true } : null, build, viewport: [1280, 720], telemetry, errors }, null, 2) + '\n');
+writeFileSync(join(dir, 'capture.json'), JSON.stringify({ pass: errors.length === 0, scenario: 'AI attract match', fixedArena: arena ? { seed: 42, simSteps: 360, reducedMotion: true, crowdMotionOverride: crowdMotion } : null, build, viewport: [1280, 720], telemetry, errors }, null, 2) + '\n');
 console.log(`${errors.length ? 'FAIL' : 'PASS'} capture: ${dir}`);
 if (errors.length) { console.error(errors.join('\n')); process.exitCode = 1; }

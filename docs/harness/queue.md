@@ -102,6 +102,16 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed crowd-wave lifecycle fix: explicit active uniform gates periodic wave
+lift; idle/finished waves no longer deform spectators. Two tests cover lifecycle,
+no restart while active, restart after finish and disabled-animation materials.
+Build/143 tests/bot gates `.gaming/runs/1788709703768-0nP8H0/` pass. Corrected
+animated browser fixture `.gaming/captures/1788709803139-wBFPvJ/` passes three
+motion shaders and activity0/1/0; wave/settled captures inspected. Initial fixture
+mistakenly set unapplied overrides and was static; failed assertion preserved in
+`.gaming/captures/1788709722060-XMGpu9/`. Self-review prefers bounded celebration;
+no high-tier/hardware claim. Next: Hit Parade pause currently calls finish().
+
 Completed crowd presentation pass: rounded connected silhouettes, bent seated
 legs, hair/skin/trousers separated from muted apparel using per-vertex and
 per-instance shader attributes. Retains three instanced meshes, no sim edits.

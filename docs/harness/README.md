@@ -93,6 +93,10 @@ Capture option `--arena` adds a restarted, seeded 360-step attract screenshot
 with reduced motion and high quality; `--arena --low` uses low quality for
 software-renderer comparisons. The regular live captures/telemetry still run.
 High-quality capture can time out on software rendering; report that separately.
+`--arena --low --crowd-motion` explicitly enables only crowd animation on the
+low-tier fixture, records idle/wave/settled images and uniforms, and checks three
+animated meshes plus wave activity 0/1/0. This override is a shader exercise, not
+a claim that reduced-motion mode animates crowds. `--baseline` skips assertions.
 
 ## Porting choices
 

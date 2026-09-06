@@ -47,6 +47,7 @@ export class Crowd {
   group = new THREE.Group();
   excite = uniform(0);
   wave = uniform(0);
+  waveActive = uniform(0);
   private excitement = 0;
   private waveT = -1;
   meshes: THREE.InstancedMesh[] = [];
@@ -117,7 +118,7 @@ export class Crowd {
         const idle: N = sin(time.mul(1.6).add(phase.mul(6.283))).mul(0.015);
         const jump: N = abs(sin(time.mul(float(5.5)).add(phase.mul(6.283)))).mul(this.excite).mul(0.28);
         const wavePos: N = angle.sub(this.wave).mul(6.283);
-        const waveLift: N = pow(max(float(0), sin(wavePos.mul(2.0).add(1.57))), float(6)).mul(0.5);
+        const waveLift: N = pow(max(float(0), sin(wavePos.mul(2.0).add(1.57))), float(6)).mul(0.5).mul(this.waveActive);
         const lift: N = idle.add(jump).add(waveLift);
         mat.positionNode = positionLocal.add(vec3(float(0), lift.mul(positionLocal.y.mul(0.6).add(0.4)), float(0)));
       }
@@ -136,10 +137,15 @@ export class Crowd {
       if (this.waveT > 1.6) {
         this.waveT = -1;
         this.wave.value = -10;
+        this.waveActive.value = 0;
       }
     }
   }
   startWave(): void {
-    if (this.waveT < 0) this.waveT = 0;
+    if (this.waveT < 0) {
+      this.waveT = 0;
+      this.wave.value = 0;
+      this.waveActive.value = 1;
+    }
   }
 }
