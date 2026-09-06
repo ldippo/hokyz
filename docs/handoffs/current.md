@@ -39,6 +39,23 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest gameplay fix: src/ui/screens/skills.ts Hit Parade now pauses on P/Escape
+instead of finishing. Pause reuses existing menu with Resume/End challenge and
+score/time; finish clears pause/screen. lastTick gate prevents previous hit events
+being counted twice when Nav resumes after a skipped sim tick. Timer derives from
+actual sim advancement. Gates .gaming/runs/1788709992132-oxjbOB/ pass build/143
+tests/bot. New scripts/harness/hit-parade.mjs prepares reachable node and one big
+hit on pause tick, runs production simStep/input, asserts frozen state/save/cash,
+300paused ticks don't consume timer, resume doesn't duplicate hit, P/Escape work,
+explicit end settles2/8 with no unearned cash. Final
+.gaming/hit-parade/1788710099180-EMQPCu/ passes; prior pause screenshot inspected
+.gaming/hit-parade/1788710070619-zqiDL3/paused.png. Self-review prefers interruption
+safety; not evidence of human challenge victory or narrow layout accessibility.
+Next precise action: move Hit Parade dummy steering away from Math.random to a
+seeded simulation-independent controller, verify repeated seed/input yields same
+movement/score and pause doesn't consume RNG; then actual challenge difficulty,
+result layouts and full-run/hardware. Unrelated README/roadmap remain untouched.
+
 Latest crowd fix: waveActive uniform starts0, startWave sets1/reset phase, end
 sets0. Shader multiplies wave lift by active; previous sentinel -10 could not
 disable a periodic sine. Added tests/sim/crowd.test.ts lifecycle/restart and

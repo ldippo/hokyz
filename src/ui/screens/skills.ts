@@ -91,10 +91,26 @@ function startHitParade(app: App, node: MapNode, reward: number): void {
   let score = 0;
   let t = 0;
   let done = false;
+  let lastTick = st.t;
+  const resume = () => { app.showScreen(null); app.paused = false; };
+  const pause = () => {
+    app.paused = true;
+    const nav = app.showScreen(h('div', { class: 'pause' },
+      h('h2', { class: 'screen-title' }, 'HIT PARADE PAUSED'),
+      h('p', { class: 'screen-sub' }, `${score} / ${target} · ${Math.ceil(HIT_PARADE_TIME - t)}s remaining`),
+      h('div', { class: 'menu' },
+        btn('Resume', resume, 'primary'),
+        btn('End challenge', finish),
+      ),
+    ));
+    if (nav) nav.onBack = resume;
+  };
   const wander = new Map<string, { x: number; y: number; until: number }>();
   const finish = () => {
     if (done) return;
     done = true;
+    app.showScreen(null);
+    app.paused = false;
     app.onTick = null;
     const won = score >= target;
     app.disposeView();
@@ -102,11 +118,15 @@ function startHitParade(app: App, node: MapNode, reward: number): void {
   };
   app.onTick = () => {
     if (done) return;
-    t += 1 / 60;
-    if (app.input.justPressed('pause')) {
-      finish();
+    if (app.paused) {
+      if (app.input.justPressed('pause') || app.input.justPressed('back')) resume();
       return;
     }
+    // A menu Resume runs after the sim step was skipped. Don't recount its
+    // previous hit events or spend challenge time until simulation advances.
+    if (st.t === lastTick) return;
+    t += st.t - lastTick;
+    lastTick = st.t;
     // dummies wander; knocked-down ones get up and keep going
     for (const id of st.teams[1].skaters) {
       const d = st.skaters[id];
@@ -132,6 +152,7 @@ function startHitParade(app: App, node: MapNode, reward: number): void {
     const left = Math.max(0, HIT_PARADE_TIME - t);
     view.hud.prompt(`${score} / ${target}   ·   ${left.toFixed(0)}s`, 0.2, score >= target ? '' : 'quiet');
     if (left <= 0) finish();
+    else if (app.input.justPressed('pause') || app.input.justPressed('back')) pause();
   };
   view.hud.announce('HIT PARADE', 'red', `KNOCK DOWN ${target}`);
   sfx.whistle();

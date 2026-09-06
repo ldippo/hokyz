@@ -102,6 +102,16 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed Hit Parade pause fix: P/Escape opens Resume and explicit End challenge;
+paused sim/score/timer/save are retained. Timer follows simulation advancement,
+and a menu-resume callback cannot recount the previous hit. Final gates
+`.gaming/runs/1788709992132-oxjbOB/` pass build/143 tests/bot. Browser fixture
+`.gaming/hit-parade/1788710099180-EMQPCu/` passes timer freeze across300 ticks,
+resume without duplicate score, P/Escape, and explicit end/no unearned cash.
+Pause capture inspected in `.gaming/hit-parade/1788710070619-zqiDL3/`.
+Self-review prefers recoverable interruption. Dummy AI still uses Math.random;
+determinism, full challenge play and narrow layouts remain next work.
+
 Completed crowd-wave lifecycle fix: explicit active uniform gates periodic wave
 lift; idle/finished waves no longer deform spectators. Two tests cover lifecycle,
 no restart while active, restart after finish and disabled-animation materials.

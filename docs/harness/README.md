@@ -62,6 +62,11 @@ a failed meta write leaves the run recoverable, and a stale ended save cannot
 duplicate payout/records. Evidence is under `.gaming/endings/`. This is settlement
 recovery coverage, not proof of playing through an entire run.
 
+`node scripts/harness/hit-parade.mjs` prepares a reachable Hit Parade node and
+hit event, then tests real pause/menu input: frozen simulation/save/timer, no
+duplicate hit on Resume, Escape/P controls and explicit End challenge settlement.
+Evidence: `.gaming/hit-parade/`. It does not prove a human challenge victory.
+
 `node scripts/harness/championship.mjs` checks boss draft -> saved league offer ->
 bank, and boss draft -> extend Act 4 -> save/reload -> league loss -> champion
 summary. It prepares the last-boss checkpoint and terminal outcomes; actual UI,
