@@ -39,6 +39,40 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest moving-play diagnostic changes next priority to HIGH-SPEED STICK CLEARANCE.
+No runtime/asset changes this turn. scripts/harness/capture.mjs --arena --low
+--play-motion now records actual carrier tape-blade vertices, hand-anchor errors,
+full Skater state and rig poseState (stride/prevFacing/turnRate/snapT/wasCharging/
+celebrateT/fallSeed/headYaw/lean/roll/fall/spin/carryBlend). First low-lean/action/
+below-ice carrier samples get JSON and screenshots. Low-lean is only a state
+classification, NOT evidence the neutral solver actually applied.
+Initial .gaming/captures/1788728023612-ShFpQW/ and final
+.gaming/captures/1788728227538-E8HDKB/ pass diagnostic capture. Both120 sim/event
+samples exactly match each other and initial matches prior1788724359951-CWUBoo.
+63 carrier samples;12 low-lean; all blade distances.043–1.199m, grip<6.4e-8m,
+blade low minimum-.41136m. First low-lean t9.4 gap.369m despite blend1; some later
+low-lean samples match.1704m, some<.16m. No universal contact/collision claim.
+Initial low-lean/action and hit-puck crop inspected, final below-ice image inspected.
+Exact failing saved case:
+.gaming/captures/1788728227538-E8HDKB/play-carrier-below-ice.json at t6.8,
+carrier Deke Fontaine, speed16.0225, facing.0109647, lean.397083,roll-.017048,
+stride17.390798, lunge/fall/snap/deke/specialTimer all0. Normal turbo carrying,
+not a deliberate action exception. New pose fades out at this lean, so ordinary
+clearStickFromIce must handle it. Static reproduction on unchanged main:
+node scripts/harness/models.mjs --stride --stick --puck --carry --speed=16.0225 --roll=-0.017
+.gaming/models/1788728337611-4tMmPN/ FAILS phase9 blade-.409228m, screenshots/JSON
+retained. Earlier12m/s coverage missed this. No fix attempted yet.
+Next precise action: inspect clearStickFromIce angle search on this phase. It
+tests only max1.2rad first and restores base if still low; determine whether an
+intermediate rotation clears the ice before changing bounds. Do not assume that
+cause without measuring. Parent transforms already refresh via group.updateMatrixWorld;
+that hypothesized stale-parent cause was ruled out by source inspection.
+Preserve physical grips, torso silhouette, normal/deke/charge poses; validate
+failing16m/s case, prior12m/s/normal and moving capture. Full goal active.
+Gates .gaming/runs/1788728016400-ESWtwt pass build/214 tests/bots. This diagnostic
+PASS is not a visual-quality pass; self-review identifies the failure above.
+Unrelated README.md and docs/ROADMAP-v4.md changes remain untouched.
+
 Latest accepted runtime neutral carrier pose in src/render/skaterRig.ts: cache
 both L/R grips; ordinary solveArms still only solves L (R parents stick). New
 poseCarrier blends current stick world transform to model rest orientation rotated

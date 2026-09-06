@@ -102,6 +102,20 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed moving carrier diagnostic; found existing high-speed clearance failure.
+capture.mjs now records actual blade vertices, grip errors, full Skater/rig pose
+state and first low-lean/action/below-ice images. .gaming/captures/1788728023612-ShFpQW/
+and final1788728227538-E8HDKB pass capture:63 owned samples,12 low-lean; gaps
+.043–1.199m, hand error<6.4e-8m, lowest blade-.411m. Both120-sample traces preserve
+prior sim/events exactly. Initial low-lean/action/hit crop and final below-ice image
+inspected. Below-ice t6.8 is ordinary turbo16.0225m/s, not lunge/fall/special.
+Reproduced using models --stride --stick --puck --carry --speed=16.0225 --roll=-0.017:
+.gaming/models/1788728337611-4tMmPN/ fails phase9 at-.4092m. No runtime changes;
+this failure is now next priority. Gates .gaming/runs/1788728016400-ESWtwt pass
+build/214 tests/bots. Self-review rejects universal carrier-contact claims.
+Next: repair high-speed stick clearance against this exact failing fixture,
+preserving both grips and normal/deke silhouettes, then recapture moving play.
+
 Completed neutral carrier pose: cache both grips, independently solve both arms
 to a blade transform at production possession offset+.33m, ice height.003m.
 Possession blend uses frame-rate damping; charge/deke/release return to authored

@@ -75,6 +75,7 @@ try {
     if (process.argv.includes('--play-motion')) {
       const samples = [];
       let capturedHit = false;
+      const capturedCarrier = new Set();
       for (let frame = 0; frame < 120; frame++) {
         const sample = await page.evaluate(() => {
           const view = window.__hokyz.view;
@@ -85,13 +86,49 @@ try {
           view.render(1, 0.1);
           const st = view.sim.st;
           const projected = view.puck.mesh.position.clone().project(view.rig.camera);
+          let carrier = null;
+          const sk = st.puck.owner ? st.skaters[st.puck.owner] : null;
+          const model = sk ? view.skaters.get(sk.id) : null;
+          if (model?.bones?.has('stick')) {
+            const stick = model.bones.get('stick').bone;
+            let distance = Infinity, low = Infinity, vertices = 0;
+            model.model.traverse(mesh => {
+              if (!mesh.isSkinnedMesh || mesh.material.name !== 'tape') return;
+              const skin = mesh.geometry.attributes.skinIndex;
+              for (let i = 0; i < skin.count; i++) {
+                if (mesh.skeleton.bones[skin.getX(i)] !== stick) continue;
+                const p = mesh.localToWorld(mesh.getVertexPosition(i, model.group.position.clone()));
+                distance = Math.min(distance, Math.hypot(p.x-st.puck.pos.x,p.z-st.puck.pos.y));
+                low = Math.min(low,p.y);vertices++;
+              }
+            });
+            carrier = { id: sk.id, goalie: sk.isGoalie, speed: Math.hypot(sk.vel.x,sk.vel.y),
+              charging: sk.charging, deke: sk.deke, lean: model.lean, roll: model.roll,
+              lunge: sk.lunge, fall: model.fall, snap: model.snapT, fight: model.fightStance,
+              state: structuredClone(sk),
+              poseState: Object.fromEntries(['stride','prevFacing','turnRate','snapT','wasCharging','celebrateT','fallSeed','headYaw','lean','roll','fall','spin','carryBlend'].map(k=>[k,model[k]])),
+              blend: model.carryBlend, bladePuckDistance: distance, bladeLow: low, vertices,
+              gripErrors: model.grips.map(g => model.bones.get(`hand${g.side}`).bone
+                .getWorldPosition(model.group.position.clone()).distanceTo(stick.localToWorld(g.offset.clone()))) };
+          }
           return { t: st.t, phase: st.phase, puck: { ...st.puck.pos }, owner: st.puck.owner,
+            carrier,
             puckView: { z: st.puck.z, x: (projected.x + 1) * innerWidth / 2, y: (1 - projected.y) * innerHeight / 2,
               depth: projected.z, meshVisible: view.puck.mesh.visible, glowVisible: view.puck.glow.visible },
             events: events.filter(e => ['hit', 'shot', 'goal', 'pass'].includes(e.type)),
             skaters: st.order.map(id => { const s = st.skaters[id]; return { id, pos: { ...s.pos }, speed: Math.hypot(s.vel.x,s.vel.y), knockdown: s.knockdown }; }) };
         });
         samples.push(sample);
+        if (sample.carrier && !sample.carrier.goalie) {
+          const c=sample.carrier;
+          const pose=c.blend>.9&&c.lean<.24&&Math.abs(c.roll)<.15?'low-lean':'action';
+          for (const label of c.bladeLow<-.015?[pose,'below-ice']:[pose]) {
+            if (capturedCarrier.has(label)) continue;
+            await page.screenshot({path:join(dir,`play-carrier-${label}.png`)});
+            writeFileSync(join(dir,`play-carrier-${label}.json`),JSON.stringify(sample,null,2));
+            capturedCarrier.add(label);
+          }
+        }
         if (frame % 20 === 0) await page.screenshot({ path: join(dir, `play-motion-${frame}.png`) });
         if (!capturedHit && sample.events.some(e => e.type === 'hit')) {
           await page.screenshot({ path: join(dir, 'play-motion-hit.png') }); capturedHit = true;
@@ -103,6 +140,8 @@ try {
       writeFileSync(join(dir, 'play-motion.json'), JSON.stringify({ samples,
         scope: 'Natural seeded attract play; 12 simulated seconds sampled/rendered at 10Hz. No human input or hardware FPS claim.' }, null, 2));
       assert.ok(samples.at(-1).t > samples[0].t, 'Motion capture simulation did not advance');
+      const carriers=samples.filter(s=>s.carrier);
+      assert.ok(carriers.length>0&&carriers.every(s=>s.carrier.vertices>0&&Number.isFinite(s.carrier.bladePuckDistance)), 'Missing carrier blade geometry');
     }
     if (crowdMotion) {
       const states = [];

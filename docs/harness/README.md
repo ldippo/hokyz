@@ -246,6 +246,12 @@ Add `--play-motion` with `--arena` to continue another12 simulated seconds at10H
 retaining120 state/event samples, six periodic images and the first natural hit.
 Samples include puck height, projected screen position and visibility flags;
 the first hit also retains a200px browser crop centered on that projection.
+Owned-puck samples include actual blade-vertex distance/height, both hand-anchor
+errors, full carrier simulation state and relevant rig pose state for reproduction.
+First non-goalie action, low-lean and below-ice samples retain captures/JSON when
+observed. Low-lean is a state classification, not proof the neutral solver applied;
+unreachable targets may retain authored poses. PASS checks diagnostic geometry,
+not universal blade clearance/contact (goalies and action poses are included).
 Unlike arena-fixed, this advances camera/pose time. The first frame still inherits
 the unsmoothed fixed-camera setup; inspect later frames for settled framing.
 This is sampled AI attract play, not live human motion or target-GPU performance.
