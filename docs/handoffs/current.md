@@ -39,6 +39,28 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest reduced-motion UI fix: app.applyAccessPrefs sets #ui data-reduced-motion;
+styles.css uses inherited animation-name variables for pulse/pop/countdown/flash.
+Game preference OR OS reduce stops nonessential pulses/transitions/hover movement.
+still-announcement keeps1.6s information lifecycle with opacity only (no scale/
+rotation); countdown remains visible, flashes hidden. Existing renderer handling
+unchanged. map-focus --motion toggles off/app-only/OS-only/off, mounts temporary
+HUD-class fixtures to inspect animation keyframes/opacity then removes them.
+Baseline .gaming/map-focus/1788714608773-vOU064/ showed pulse in every mode. Final
+.gaming/map-focus/1788714726321-Pe1EZN/ passes pulse/transition suppression and
+restoration, announcement opacity1 at400ms/0 at1600ms/no transform frames,
+countdown visible/no zoom, status pulses/flash disabled, plus map focus/activation.
+Map screenshot inspected; static focus remains clear. Gates
+.gaming/runs/1788714710008-Jl3F2M/ build/152 tests/bot pass; baseline
+1788714609779-MyTMm6 also passes. Browser input/save/reduced-motion/match/passing
+regression .gaming/playtests/1788714727852-kjkYTI/ passes. Impeccable guided
+preserving information without motion. Self-review prefers accessibility; fixtures
+are CSS behavior evidence, not live human game feel or all renderer motion audit.
+Next precise action: capture pre-match introduction (matchup/modifiers/actions)
+at390x844/150% and desktop. Verify Back to Map and Drop the Puck reachable through
+actual keyboard/controller. Other run-shell/result checks do not cover this screen.
+Keep unrelated README.md/ROADMAP-v4.md edits unstaged. Full goal remains active.
+
 Latest visual fix: .node.available.focus now has static outer ring and ▶ marker,
 26px scroll margin. No animation added. New map-focus.mjs seeds map-focus-1,
 captures initial/keyboard-next/controller-previous/narrow150% and verifies Enter

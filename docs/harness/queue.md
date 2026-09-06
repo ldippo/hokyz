@@ -102,6 +102,20 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed reduced-motion UI pass: applyAccessPrefs exposes preference on #ui;
+CSS variables select stationary timed announcements and disable countdown zoom,
+flashes and looping pulses for app or OS preference. Transitions/hover movement
+stop; normal styles restore when both off. Baseline
+.gaming/map-focus/1788714608773-vOU064/ pulses in all modes. Final
+.gaming/map-focus/1788714726321-Pe1EZN/ --motion passes both modes/restoration,
+HUD fixtures visible announcement at400ms/expired1600ms, countdown visible, no
+transform keyframes/flash/status pulse, plus selection/activation. Map inspected.
+Build/152 tests/bot .gaming/runs/1788714710008-Jl3F2M/ and human-input regression
+.gaming/playtests/1788714727852-kjkYTI/ pass. Impeccable informed retaining timed
+information without motion. Self-review prefers accessibility; no hardware claim.
+Next: pre-match introduction/lineup screen narrow and150% text action reachability,
+then actual match start/back with keyboard/controller, preserving simulation.
+
 Completed map selection cue: static ice-colored outer ring plus pointer on
 .node.available.focus, with scroll margin preserving marker visibility. Baseline
 .gaming/map-focus/1788714361262-oSBXZo/ shows identical available nodes (outline/

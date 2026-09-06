@@ -102,6 +102,10 @@ and synthetic-pad selection, checks the ring/pointer cue, and activates the chos
 rival at narrow150% text. `--baseline` records without asserting cue styles.
 Evidence: `.gaming/map-focus/`. Reduced-motion preferences are requested, but
 this is not an audit of all existing UI animations or physical controllers.
+Add `--motion` to verify app/OS reduced-motion toggles and normal-mode restoration:
+map pulse/transition styles, plus mounted HUD-class fixtures for announcements,
+countdowns, flashes and status pulses. Announcement checks preserve reading time
+and expiry without transform keyframes; fixtures do not establish live match feel.
 
 `node scripts/harness/route.mjs` exercises event -> shop -> rest in one run,
 reloading between encounters. It preserves generated links while preparing the

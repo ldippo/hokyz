@@ -130,6 +130,7 @@ export class App {
   /** Accessibility prefs that live outside the renderer. */
   applyAccessPrefs(): void {
     const m = this.meta;
+    this.ui.dataset.reducedMotion = String(m.reducedMotion === true);
     if (m.keymap) this.input.keymap = { ...m.keymap } as typeof this.input.keymap;
     else this.input.resetKeys();
     this.input.rumbleEnabled = m.rumble !== false;
