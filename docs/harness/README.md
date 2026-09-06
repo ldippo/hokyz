@@ -185,6 +185,10 @@ Combine with `--remap` to verify offer glyphs and reactions after key swaps.
 human input and pinned initial duel RNG, checks clock freeze/loser ejection/2v3
 faceoff, then advances the remaining period naturally and verifies3v3 restoration.
 Only offer/consent and initial RNG are prepared; no health, clock or outcome edits.
+`--goalie-pull` holds actual Pass for the production wall-time threshold, verifies
+pull/extra-attacker/empty-net status, then releases and holds again to return the
+goalie and clear the status. Combine with `--gamepad` for synthetic-pad polling.
+Checks existing model presence; not sustained extra-attacker movement or hardware.
 Use `--baseline` to record without asserting. Evidence: `.gaming/controls-layout/`.
 
 After building, `pnpm harness:capture` starts its own Vite preview server on an

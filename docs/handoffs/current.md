@@ -39,6 +39,23 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest goalie-pull evidence (no game edits): playtest --goalie-pull holds actual
+Pass until production passHoldTime>=1.05s, steps real input, releases, holds again.
+Keyboard .gaming/playtests/1788718075396-iqy9oF and synthetic-pad
+1788718098837-NWPwrD pass pull event/goalie=null/4attackers/rolefalse/modelpresent/
+empty-net text, then return event/original HG/3attackers/roletrue/textcleared.
+Keyboard pulled capture inspected: readout visible, existing goalie model at
+initial crease position (only just toggled). Current arcade implementation
+converts goalie into attacker, not a bench substitution. No assertion of sustained
+attacking movement, goalie gear replacement, physical pad support or timing.
+Gates .gaming/runs/1788718076423-K3Ysgr build/184 tests/bot pass. Self-review
+supports real input toggles and state truthfulness, not full tactical quality.
+Next precise action: extend pull check through sustained play/continued hold,
+verify no repeated toggles and pulled goalie moves/participates as attacker,
+then return and verify recovery toward crease without possession/control loss.
+Consider ejection+pull equal-count case separately. Full goal active; unrelated
+README/ROADMAP edits preserved.
+
 Latest manpower HUD: pure src/ui/manpower.ts formats actual skater counts and
 sitting-this-period/empty-net reasons. Hud.update displays compact persistent
 text first in feedback flow, hides normal3v3, fights, shootouts and terminal

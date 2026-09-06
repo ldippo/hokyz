@@ -167,6 +167,30 @@ try {
   assert.ok(movedX > movement.x + 0.1, 'Human movement did not move the skater');
   checks.push('Match input moves the human skater in a fixed-step match');
   await page.screenshot({ path: join(out, 'human-match.png') });
+  if(process.argv.includes('--goalie-pull')) {
+    const original=await page.evaluate(()=>{const st=window.__hokyz.view.sim.st,t=st.teams[0];return {id:t.goalie,count:t.skaters.length,pos:{...st.skaters[t.goalie].pos}};});
+    const holdPass=async()=>{
+      await control(passKey,true);await page.evaluate(()=>window.__hokyz.input.poll());
+      // Production Input measures hold duration against wall time, not sim ticks.
+      await page.waitForFunction(()=>window.__hokyz.input.passHoldTime>=1.05);
+      const changed=await page.evaluate(()=>{
+        const app=window.__hokyz;app.input.poll();const events=app.view.sim.step({0:app.input.simInput()});app.view.afterStep(events);app.view.render(1,0);
+        const st=app.view.sim.st,t=st.teams[0],g=st.skaters[t.pulledGoalieId??t.goalie];
+        return {events,pulled:t.pulled,goalie:t.goalie,count:t.skaters.length,isGoalie:g.isGoalie,inLineup:t.skaters.includes(g.id),manpower:document.querySelector('.manpower').textContent,model:!!app.view.skaters.get(g.id)};
+      });
+      await control(passKey,false);
+      await page.evaluate(()=>{const app=window.__hokyz;app.input.poll();app.view.afterStep(app.view.sim.step({0:app.input.simInput()}));});
+      return changed;
+    };
+    const pulled=await holdPass();checks.push({goaliePulled:pulled});
+    assert.ok(pulled.pulled&&!pulled.isGoalie&&pulled.inLineup&&pulled.model);assert.equal(pulled.goalie,null);assert.equal(pulled.count,original.count+1);assert.match(pulled.manpower,/empty net/);
+    assert.ok(pulled.events.some(e=>e.type==='goaliePulled'&&e.pulled));
+    await page.screenshot({path:join(out,'goalie-pulled.png')});
+    const returned=await holdPass();checks.push({goalieReturned:returned});
+    assert.ok(!returned.pulled&&returned.isGoalie&&!returned.inLineup&&returned.model);assert.equal(returned.goalie,original.id);assert.equal(returned.count,original.count);assert.equal(returned.manpower,'');
+    assert.ok(returned.events.some(e=>e.type==='goaliePulled'&&!e.pulled));
+    await page.screenshot({path:join(out,'goalie-returned.png')});
+  }
   if(process.argv.includes('--fight')) {
     const captureFight=async stage=>{
       if(!process.argv.includes('--fight-layout'))return;

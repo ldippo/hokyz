@@ -102,6 +102,14 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed pull/return input evidence: --goalie-pull keyboard1788718075396-iqy9oF
+and synthetic-pad1788718098837-NWPwrD under .gaming/playtests pass real1.05s
+Pass hold,4attackers/empty-net/model presence, second hold3/original goalie/status
+clear. Pulled keyboard image inspected; goalie only at initial position. Gates
+1788718076423-K3Ysgr build/184 tests/bot pass. No game edits. Self-review supports
+toggles, not sustained tactical behavior/hardware. Next: prolonged hold/movement/
+crease return and possession/control contracts for pulled goalie.
+
 Completed durable manpower readout: actual counts with sitting/empty-net reasons,
 hidden normal3v3/fight/shootout/end, seven tests. Impeccable guided compact wording.
 Gates1788717922038-3i5tND build/184 tests/bot pass. Full fight browser
