@@ -484,7 +484,7 @@ export class SkaterRig {
     // stick-hand IK: keep both hands on the stick unless the arms are busy
     const armsFree = this.ikEnabled && !this.fightStance && this.celebrateT <= 0 && this.fall < 0.3 && sk.lunge <= 0 && !(sk.specialTimer > 0 && sk.specialKind === 'shockwave');
     if (armsFree && this.grips.length) {
-      if (!sk.isGoalie && this.fall < 0.02) this.clearStickFromIce();
+      if (this.fall < 0.02) this.clearStickFromIce();
       this.solveArms();
     }
     const carryTarget = armsFree && !sk.isGoalie && this.fall < .02 && sk.hasPuck && !sk.charging && sk.deke <= 0 && this.snapT <= 0 ? 1 : 0;

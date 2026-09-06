@@ -295,6 +295,11 @@ and per-frame blade displacement. It excludes the existing authored shot-release
 snap from the continuity bound; that frame remains in JSON. `--baseline` disables
 only the new carrier solver for comparison and skips the displacement assertion.
 These are prepared animation sequences, not hardware timing or full collision tests.
+`--puck --goalie-carry=<play-motion.json>` replays saved goalie carrier state and
+rig pose state at a normalized origin, captures each case, and checks cached blade
+clearance/hand anchors. `--baseline` records without those assertions. Cached bounds
+are conservative, so heights need not equal actual source blade vertices exactly.
+This is pose reproduction, not a new natural save or goalie-control input test.
 `--puck --reach-study` instead evaluates6132 yaw/tilt/placement transforms per
 skating, charge and drag pose, using four cardinal blade-center offsets around
 the puck. Reports shoulder reach, hands ahead of torso bounds, hand height no
@@ -309,6 +314,8 @@ blade/puck contact, transition continuity or other facing directions.
 Add `--shaft` to require both actual hand-bone origins within3cm of the physical
 shaft centerline in those poses. Asset generation supports `--skater-only`; skater
 grips are derived from shared shaft endpoints and assert rest-pose arm reach.
+The asset generator also supports `--goalie-only`; its wider paddle shares the
+shaft axis, preserving the skater asset when correcting goalie geometry.
 `--arena --low --crowd-motion` explicitly enables only crowd animation on the
 low-tier fixture, records idle/wave/settled images and uniforms, and checks three
 animated meshes plus wave activity 0/1/0. This override is a shader exercise, not

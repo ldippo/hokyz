@@ -102,6 +102,21 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed goalie stick clearance: free-arm goalies now use the existing clearance
+correction before opposite-hand IK. Saved butterfly carrying cases replayed with
+new models --goalie-carry=<trace>. Baseline1788728878612-KoR94R versus candidate
+1788728901695-3RClec inspected: blade emerges above ice, but exposed forked paddle.
+One visual repair aligns paddle to shaft via heel.lerp(top,.35),24 segments;
+--goalie-only exports98012tris/21bones, skater unchanged. Final saved poses
+1788729037590-SovUuj and goalie portrait1788729050996-1gO1Bv inspected/pass.
+Model paths under .gaming/models/. Final gates .gaming/runs/1788729025858-FAxzzT
+build/214 tests/bots and keyboard .gaming/playtests/1788729063539-FlTvaM pass.
+Intermediate moving capture1788728928511-CqBW9T (clearance fix, old paddle) has
+goalie blade heights.0116–.0133m versus-.253–-.391m;120 sim/events identical.
+Self-review prefers visible aligned paddle; glove-to-shaft anatomy and exact
+carrier contact remain unproven. Next inspect actual goalie blocker/shaft grip
+geometry; cached hand-anchor accuracy is not physical glove contact.
+
 Completed ordinary turbo16m/s clearance: scan1788728473258-chGPlX shows phase9
 low=-.0069m at1.2rad but+.0407m at1.25rad. Old endpoint failure restored a deeply
 buried pose. Expanded search endpoint to1.35rad, retaining minimal-clearance

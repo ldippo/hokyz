@@ -418,7 +418,8 @@ def build_skater(goalie=False):
     assign_mat(shaft, stick_m); vgroup_all(shaft, 'stick'); parts.append(shaft)
     bdir = Vector((1, 0.35, 0)).normalized()
     if goalie:
-        paddle = limb('paddle', heel + Vector((-0.3, -0.12, 0.28)), heel, 0.035, 0.035, verts=8)
+        # The paddle widens the lower shaft; it must share its axis, not branch.
+        paddle = limb('paddle', heel.lerp(top, 0.35), heel, 0.035, 0.035, verts=24)
         assign_mat(paddle, stick_m); vgroup_all(paddle, 'stick'); parts.append(paddle)
     bladeo = box('stickblade', (0,0,0), (0.34, 0.045, 0.065), bevel=0.012, seg=6)
     rotation = Matrix.Rotation(math.atan2(bdir.y, bdir.x), 4, 'Z')
@@ -441,6 +442,7 @@ def build_skater(goalie=False):
     tris = sum(len(p.vertices) - 2 for p in mesh.data.polygons)
     print('EXPORTED', path, 'tris', tris, 'bones', len(bones))
 
-build_skater(goalie=False)
+if '--goalie-only' not in argv:
+    build_skater(goalie=False)
 if '--skater-only' not in argv:
     build_skater(goalie=True)

@@ -39,6 +39,39 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest accepted goalie clearance and paddle fix: free-arm goalies with fall<.02
+now run existing clearStickFromIce before solveArms (src/render/skaterRig.ts).
+Saved natural goalie samples at11.1/11.2/11.3 all have butterfly.45, not standing.
+New models.mjs --puck --goalie-carry=<play-motion.json> replays full carrier.state
+and poseState at normalized origin, preserves facing, captures front-oblique view
+and asserts cached blade height/hand anchors. Baseline models1788728844108-knhV8X
+(rear view),1788728878612-KoR94R (front inspected): conservative low-.311/-.383/-.399.
+Candidate1788728901695-3RClec passes+.0063–.0068m, cached grips<7e-9m; image
+inspected and exposed pre-existing forked goalie paddle. One focused visual repair
+in assets/src/build_skater.py sets paddle start=heel.lerp(top,.35), end=heel,
+verts24 (was unrelated offset/8verts), sharing shaft axis. Added --goalie-only.
+Regenerated ONLY public/models/goalie.glb,98012tris/21bones/3477036bytes; old backup
+.gaming/goalie-paddle-IBgQTC/goalie.glb. Public/dist SHA256
+22343ffdd9866753f172983b3d15263c293178233a801d2f462c5aeaf11c98e8.
+Skater remains0a53d6f84cf6aeecbe954d5e6fd549ac635397887ed3dde1df007eaae6fb4930.
+Final saved poses .gaming/models/1788729037590-SovUuj/ pass; case2 inspected,
+aligned wider shaft/blade visible above ice. Final general model captures
+1788729050996-1gO1Bv goalie portrait inspected. Intermediate natural moving capture
+.gaming/captures/1788728928511-CqBW9T/ uses clearance fix but OLD paddle (loaded
+before asset rebuild); three goalie actual blade lows.01238/.01333/.01162m versus
+-.2534/-.3556/-.3906, all120 skater/puck/event samples unchanged. Do not claim it
+is moving evidence of final paddle mesh. Final asset is covered by saved-pose/
+portrait inspection and final keyboard .gaming/playtests/1788729063539-FlTvaM/.
+Baseline .gaming/runs/1788728802310-Xnlndq; initial candidate1788728894031-ypw5iv;
+final1788729025858-FAxzzT all build/214 tests/bots pass. No sim changes.
+Self-review prefers exposed blade and aligned paddle, retains padded butterfly
+silhouette. No full goalie control/physical glove-to-shaft or realistic anatomy
+claim. Next precise action: inspect goalie actual blocker-hand contact with shaft
+(generator still mirrors goalie targets, unlike corrected skater). Cached grip
+errors alone do not prove contact. Preserve catching glove purpose, goalie saves,
+butterfly stance and rounded detail if changing geometry. Full goal remains active;
+unrelated README.md and docs/ROADMAP-v4.md modifications preserved.
+
 Latest accepted fix: src/render/skaterRig.ts clearStickFromIce search endpoint
 1.2 ->1.35rad, still8-step minimum-clearance bisection. Measured phase9 scan
 .gaming/models/1788728473258-chGPlX/ (new --clearance-scan --baseline) shows

@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync, readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { resolve, join } from 'node:path';
 import { preview } from 'vite';
@@ -17,6 +17,33 @@ try {
     if (version === 'before') await page.route('**/models/*.glb', route => route.fulfill({ path: resolve('.gaming/models-before', new URL(route.request().url()).pathname.split('/').pop()), contentType: 'model/gltf-binary' }));
     await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/?rigview=1&capture=1&poses=idle,skate,charge,lunge,down&goalie=butterfly${process.argv.includes('--puck')?'&puck=1':''}`);
     await page.waitForFunction(() => window.__rigview, null, { timeout: 90000 });
+    const goalieTrace=process.argv.find(a=>a.startsWith('--goalie-carry='))?.slice('--goalie-carry='.length);
+    if(goalieTrace){
+      const source=JSON.parse(readFileSync(resolve(goalieTrace),'utf8'));
+      const cases=source.samples.filter(s=>s.carrier?.goalie&&s.carrier.state&&s.carrier.poseState);
+      assert.ok(cases.length>0,'No saved goalie carrier cases');
+      const samples=[];
+      for(const [index,saved] of cases.entries()){
+        const sample=await page.evaluate(saved=>{
+          const app=window.__hokyz,{entries,grig:rig,gState:st}=window.__rigview;
+          entries.forEach(e=>e.rig.group.visible=false);rig.group.visible=true;
+          Object.assign(st,saved.carrier.state);st.pos={x:0,y:-3.4};rig.snap(st);
+          Object.assign(rig,saved.carrier.poseState);rig.update(st,1,0,0);rig.group.updateMatrixWorld(true);
+          const stick=rig.bones.get('stick').bone;
+          const height=Math.min(...rig.stickContacts.map(p=>stick.localToWorld(p.clone()).y));
+          const grips=rig.grips.map(g=>rig.bones.get(`hand${g.side}`).bone.getWorldPosition(rig.group.position.clone()).distanceTo(stick.localToWorld(g.offset.clone())));
+          window.__rigview.placePuck(st);
+          app.rig.camera.position.copy(rig.group.position.clone().set(3,1.9,2.5).applyQuaternion(rig.group.quaternion).add(rig.group.position));app.rig.camera.lookAt(0,.65,-3.4);
+          document.querySelectorAll('#ui,.hud').forEach(el=>el.style.display='none');app.rig.render(0);
+          return {t:saved.t,height,grips,butterfly:st.butterfly,sourceHeight:saved.carrier.bladeLow};
+        },saved);
+        samples.push(sample);await page.screenshot({path:join(out,`goalie-carry-${index}.png`)});
+      }
+      writeFileSync(join(out,'goalie-carry.json'),JSON.stringify({source:goalieTrace,samples,scope:'Saved pose replay at normalized origin, not a new natural save or goalie-control input.'},null,2));
+      if(!process.argv.includes('--baseline'))assert.ok(samples.every(s=>s.height>=-.015&&s.grips.every(g=>g<.02)),'Goalie blade/grip failed');
+      if(errors.length)throw new Error(errors.join('\n'));
+      await page.close();continue;
+    }
     if(process.argv.includes('--reach-study')) {
       const study=await page.evaluate(()=>{
         const {rig,st}=window.__rigview.entries[0];
