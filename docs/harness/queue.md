@@ -102,6 +102,15 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed fight input evidence: --fight keyboard decline/overlay hide, accept,
+high/low/block all pass .gaming/playtests/1788717211731-wFrCzf. Initial invalid
+Pass-keydown probe1788717163981-oiN2S1 corrected to production release contract.
+--fight-layout --baseline1788717254119-l6mhCs captures offer/feint desktop and
+narrow150%; narrow fighter names/health clip, cue oversized (inspected). No game
+changes. Gates1788717165015-VXJh5C build/157 tests/bot pass. Self-review approves
+input contracts, not layout/natural fight difficulty. Next: responsive fight HUD;
+then reproduce suspected AI c.done-before-response omission in fight.ts.
+
 Completed shootout tracker: flow-separated from announcements, wrapped team rows,
 full goals/shots totals and recent5 symbols (full history aria-label). Cached
 updates. Impeccable guided layout. Natural baseline1788716895247-cmLyjr clips;

@@ -167,6 +167,47 @@ try {
   assert.ok(movedX > movement.x + 0.1, 'Human movement did not move the skater');
   checks.push('Match input moves the human skater in a fixed-step match');
   await page.screenshot({ path: join(out, 'human-match.png') });
+  if(process.argv.includes('--fight')) {
+    const captureFight=async stage=>{
+      if(!process.argv.includes('--fight-layout'))return;
+      for(const [width,height,scale] of [[1280,720,1],[390,844,1.5]]) {
+        await page.setViewportSize({width,height});
+        await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+        const boxes=await page.evaluate(scale=>{const app=window.__hokyz;app.meta.textScale=scale;app.applyAccessPrefs();app.view.render(1,0);return [...document.querySelectorAll('.fight,.fighter,.fname,.fcue')].map(el=>{const r=el.getBoundingClientRect();return {text:el.textContent,left:r.left,right:r.right,top:r.top,bottom:r.bottom};});},scale);
+        checks.push({fightLayout:{stage,width,height,scale,boxes}});
+        await page.screenshot({path:join(out,`fight-${stage}-${width}.png`)});
+        if(!process.argv.includes('--baseline'))assert.ok(boxes.every(b=>b.left>=0&&b.right<=width&&b.top>=0&&b.bottom<=height),JSON.stringify(boxes));
+      }
+      await page.setViewportSize({width:1280,height:720});
+      await page.evaluate(()=>{const app=window.__hokyz;app.meta.textScale=1;app.applyAccessPrefs();});
+    };
+    const offer=async()=>page.evaluate(()=>{
+      const app=window.__hokyz,st=app.view.sim.st,a=st.teams[0].controlledId,b=st.teams[1].skaters[0];
+      // Prepared offer with opponent consent; human choices use real keys below.
+      st.fight={a,b,stage:'offer',t:0,hp:[100,100],accepted:[null,true],cue:null,nextCue:0.6,winner:null,lastHit:null};st.phase='fight';
+      app.view.afterStep([{type:'fightOffer',a,b}]);app.view.director.stop();app.view.render(1,0);
+    });
+    const fightKey=async key=>{
+      await control(key,true);
+      // Pass/block uses release, matching the production pass input contract.
+      if(key===passKey){await page.evaluate(()=>window.__hokyz.input.poll());await control(key,false);}
+      const result=await page.evaluate(()=>{const app=window.__hokyz;app.input.poll();const events=app.view.sim.step({0:app.input.simInput()});app.view.afterStep(events);app.view.render(1,0);return {phase:app.view.sim.st.phase,fight:app.view.sim.st.fight,events,visible:document.querySelector('.fight').classList.contains('on')};});
+      await control(key,false);await page.evaluate(()=>window.__hokyz.input.poll());return result;
+    };
+    await offer();
+    await captureFight('offer');
+    const declined=await fightKey(passKey);checks.push({fightDecline:declined});
+    assert.equal(declined.phase,'play');assert.equal(declined.fight,null);
+    if(!process.argv.includes('--baseline'))assert.equal(declined.visible,false,'Fight HUD remains after declining');
+    await offer();const accepted=await fightKey(shotKey);checks.push({fightAccept:accepted});assert.equal(accepted.fight.stage,'duel');
+    for(const [kind,key] of [['high',shotKey],['low','l'],['feint',passKey]]) {
+      await page.evaluate(kind=>{const app=window.__hokyz,f=app.view.sim.st.fight;f.cue={kind,target:0,t:0,window:0.8,done:false,mash:0};app.view.render(1,0);},kind);
+      if(kind==='feint')await captureFight('feint');
+      const hit=await fightKey(key);assert.ok(hit.events.some(e=>e.type==='fightHit'&&e.attacker===hit.fight.a),`${kind} key did not land`);
+      checks.push({fightCue:{kind,events:hit.events}});
+    }
+    await page.evaluate(()=>{const app=window.__hokyz;app.view.sim.st.fight=null;app.view.sim.st.phase='play';app.view.render(1,0);});
+  }
   if(process.argv.includes('--charge-layout')) {
     await page.evaluate(()=>{
       const st=window.__hokyz.view.sim.st,sk=st.skaters[st.teams[0].controlledId];

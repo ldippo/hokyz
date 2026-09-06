@@ -39,6 +39,23 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest fight evidence (no game changes): playtest --fight prepares offer/opponent
+consent and cue states, but actual keyboard release/press drives decline/accept
+and high/low/block responses. First probe1788717163981-oiN2S1 used keydown for
+Pass, invalid for production release contract. Corrected1788717211731-wFrCzf
+passes decline->play/overlay hidden, accept->duel, all three human cue hits.
+Expanded --fight --fight-layout --baseline1788717254119-l6mhCs passes controls
+and records desktop/narrow150% offer/feint captures. Narrow feint inspected:
+fighter names/health offscreen, huge cue; width720px absolute fight causes it.
+Gates .gaming/runs/1788717165015-VXJh5C build/157 tests/bot pass. Self-review
+supports actual input contract, not natural fight frequency/difficulty. No claim
+of layout approval. Next precise action: responsive fight HUD, two fighter HP/
+names and central cue all visible, separate from announcement; preserve glyphs
+and cue timing, rerun --fight-layout without --baseline. Separately inspect AI
+fight branch: it sets c.done before shared response handling, possibly preventing
+AI hits. Reproduce headlessly before changing. Full goal active; unrelated edits
+preserved. Reviews are self-review.
+
 Latest shootout tracker polish: tracker moved into shared feedback flow above
 announcement, compact desktop2-column/narrowstack, explicit goals/shots totals,
 up to5 recent symbols (Last5 label after longer history). Full attempt sequence
