@@ -13,7 +13,13 @@ export class PuckMesh {
     this.shadow = new THREE.Mesh(new THREE.CircleGeometry(0.18, 12), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.4, depthWrite: false }));
     this.shadow.rotation.x = -Math.PI / 2;
     this.shadow.position.y = 0.011;
-    this.glow = new THREE.Mesh(new THREE.RingGeometry(0.2, 0.42, 20), new THREE.MeshBasicMaterial({ color: 0xffe14a, transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide }));
+    // This is a locating cue, not the physical puck: keep it readable through
+    // skates and hit spray, with a dark edge on bright ice and yellow jerseys.
+    this.glow = new THREE.Mesh(new THREE.RingGeometry(0.2, 0.42, 32), new THREE.MeshBasicMaterial({ color: 0xffe14a, transparent: true, opacity: 0.85, depthWrite: false, depthTest: false, side: THREE.DoubleSide }));
+    this.glow.renderOrder = 21;
+    const outline = new THREE.Mesh(new THREE.RingGeometry(0.16, 0.47, 32), new THREE.MeshBasicMaterial({ color: 0x151520, transparent: true, opacity: 0.85, depthWrite: false, depthTest: false, side: THREE.DoubleSide }));
+    outline.renderOrder = 20;
+    this.glow.add(outline);
     this.glow.rotation.x = -Math.PI / 2;
     this.glow.position.y = 0.012;
   }

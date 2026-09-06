@@ -39,6 +39,25 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest completed puck locator: src/render/puckMesh.ts gives the loose-puck ring
+a dark outline and depth-independent render order above hit spray/skates. Physical
+puck remains depth-tested; ownership hides the cue as before. Two tests in
+tests/render/puckMesh.test.ts verify layers, interpolation, airborne floor position
+and possession visibility. Capture adds puck z/projection/visibility plus200px
+first-hit crop. Baseline .gaming/captures/1788724222451-5PWakD shows occlusion at
+t11.4,screen821.97/496.67,z0; final1788724359951-CWUBoo full/crop inspected, cue
+now readable through pileup. All120 state/projection samples compare exactly equal.
+Final gates .gaming/runs/1788724402197-rlStYl pass build/213 tests/bots; baseline
+1788724215206-AQEk7V. Self-review prefers first-session puck finding and non-color
+edge contrast; Impeccable informed treatment. Locator intentionally overlays players
+and netting, stays ice-level when puck airborne; no human fun/GPU claim.
+Next precise action: audit loose-puck cue under reduced motion and airborne passes.
+Existing update pulses ring with time regardless of reduced-motion preference;
+confirm in browser, preserve a steady visible locator when that setting is enabled.
+Full goal remains active. Unrelated README/roadmap edits remain untouched.
+Browser input regression .gaming/playtests/1788724507764-Z01fha passes title/run,
+keyboard movement, passing/reception/follow-up shot and pause/resume with new cue.
+
 Latest gameplay-camera evidence: scripts/harness/capture.mjs --arena --low
 --play-motion records120 samples (t6.1..18.0) at10Hz plus six periodic images and
 first natural hit. .gaming/captures/1788723984986-GUkLYM passes: four passes,

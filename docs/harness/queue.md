@@ -102,6 +102,17 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed loose-puck locator: first-hit crop confirmed occlusion at screen821.97,
+496.67 (z0, mesh/glow flags true). Baseline .gaming/captures/1788724222451-5PWakD;
+after1788724359951-CWUBoo inspected full/crop shows clear gold ring with dark edge
+through pileup. Only locator ignores depth; physical puck unchanged and cue hides
+during possession. All120 simulation/projection samples exactly equal. Two new
+render tests cover layering/interpolated position/visibility. Final gates
+1788724402197-rlStYl pass build/213 tests/bots; baseline1788724215206-AQEk7V.
+Self-review prefers first-session puck finding and shape/contrast cue; Impeccable
+informed contrast treatment. No hardware/human difficulty claim. Locator deliberately
+overlays skates/netting; airborne cue remains on ice rather than following height.
+
 Completed gameplay-camera evidence pass: capture.mjs --arena --low --play-motion
 records120 samples over12sim seconds with six periodic captures and first hit.
 .gaming/captures/1788723984986-GUkLYM passes; four passes, two shots, two hits and

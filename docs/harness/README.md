@@ -244,6 +244,8 @@ software-renderer comparisons. The regular live captures/telemetry still run.
 High-quality capture can time out on software rendering; report that separately.
 Add `--play-motion` with `--arena` to continue another12 simulated seconds at10Hz,
 retaining120 state/event samples, six periodic images and the first natural hit.
+Samples include puck height, projected screen position and visibility flags;
+the first hit also retains a200px browser crop centered on that projection.
 Unlike arena-fixed, this advances camera/pose time. The first frame still inherits
 the unsmoothed fixed-camera setup; inspect later frames for settled framing.
 This is sampled AI attract play, not live human motion or target-GPU performance.

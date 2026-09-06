@@ -84,7 +84,10 @@ try {
           }
           view.render(1, 0.1);
           const st = view.sim.st;
+          const projected = view.puck.mesh.position.clone().project(view.rig.camera);
           return { t: st.t, phase: st.phase, puck: { ...st.puck.pos }, owner: st.puck.owner,
+            puckView: { z: st.puck.z, x: (projected.x + 1) * innerWidth / 2, y: (1 - projected.y) * innerHeight / 2,
+              depth: projected.z, meshVisible: view.puck.mesh.visible, glowVisible: view.puck.glow.visible },
             events: events.filter(e => ['hit', 'shot', 'goal', 'pass'].includes(e.type)),
             skaters: st.order.map(id => { const s = st.skaters[id]; return { id, pos: { ...s.pos }, speed: Math.hypot(s.vel.x,s.vel.y), knockdown: s.knockdown }; }) };
         });
@@ -92,6 +95,9 @@ try {
         if (frame % 20 === 0) await page.screenshot({ path: join(dir, `play-motion-${frame}.png`) });
         if (!capturedHit && sample.events.some(e => e.type === 'hit')) {
           await page.screenshot({ path: join(dir, 'play-motion-hit.png') }); capturedHit = true;
+          const x = Math.max(0, Math.min(1080, sample.puckView.x - 100));
+          const y = Math.max(0, Math.min(520, sample.puckView.y - 100));
+          await page.screenshot({ path: join(dir, 'play-motion-hit-puck.png'), clip: { x, y, width: 200, height: 200 } });
         }
       }
       writeFileSync(join(dir, 'play-motion.json'), JSON.stringify({ samples,
