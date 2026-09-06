@@ -300,6 +300,10 @@ rig pose state at a normalized origin, captures each case, and checks cached bla
 clearance/hand anchors. `--baseline` records without those assertions. Cached bounds
 are conservative, so heights need not equal actual source blade vertices exactly.
 This is pose reproduction, not a new natural save or goalie-control input test.
+`--puck --skater-carry=<play-motion.json> --sample-time=<seconds>` replays one
+saved non-goalie carrier frame, recording flat versus bank-following reach and
+actual blade-vertex distance. Add `--contact` for the neutral-pose15–19cm puck-edge
+check; do not use it to claim action poses or arbitrary saved times are neutral.
 Add `--shaft` to require the goalie blocker hand within3cm of the shaft axis,
 the catching hand more than20cm away, and only the right hand registered as a grip.
 These use bone origins, not exact glove-surface collision. `--standing` overrides

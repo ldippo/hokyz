@@ -39,6 +39,35 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest accepted bank-following pose: src/render/skaterRig.ts desired neutral stick
+rotation = rendered yaw * local AX_X(this.roll) * inverse stick.invRestWorld.
+Other weights, deep-lean fade, reach limits and goalie behavior unchanged.
+Generalized saved-pose replay: --skater-carry=<play-motion.json> --sample-time=9.4
+requires a matching non-goalie case, replays state/poseState at normalized origin,
+records flatReach/bankedReach and actual blade-vertex distance. --contact adds
+15–19cm neutral puck-edge gate; goalie command retained/tested. Replay's puck is
+production stickPoint on normalized skater state, not the source puck object.
+Baseline .gaming/models/1788729567987-LqMmKW shows upper hand flat target.634981m
+versus reach.5649999m; fallback gap.369712m. Candidate1788729650806-AwrJVt and
+final1788729716305-aRzLx3 show banked upper target.50255m, right.41715m, gap.169727m,
+cached blade y.003m and grip<1.5e-8m. Baseline/candidate images inspected, hands
+clear of face with blade by puck. Static roll±.12 runs1788729727264-YsN62F and
+1788729748874-9yhxv8 pass12 phases, gap~.169762m; positive-bank image inspected.
+Transitions1788729743850-oBMBnB,16m/s1788729756374-gfslid,goalie shaft regression
+1788729835267-QmUYaS pass. All model paths under .gaming/models/.
+Baseline gates .gaming/runs/1788729566572-FKE8zD; final1788729643329-ttID4a pass
+build/214 tests/bots. Keyboard .gaming/playtests/1788729717865-WBz1MS passes.
+Final moving .gaming/captures/1788729715139-CA2O7h/ passes, low-lean image inspected.
+All120 skater/puck/event samples identical to1788729291192-LJQyc1;63 carriers
+blade>=.002239m,grips<6.4e-8m. Original t9.4 gap now.169727m. Remaining low-lean
+t9.9/.10/.10.1 gaps.09856/.10398/.09511m; do NOT claim universal surface contact.
+Next precise action: inspect those saved states, compare actual puck position to
+stickPoint and measure whether carrier pose applied/rejected. Could be another
+reach fallback or puck-placement constraint; neither cause established yet.
+Preserve simulation and natural torso/hand silhouettes. No asset changes this
+turn. Self-review prefers bank-aware reach/contact; full goal/human feel/hardware
+performance remain unproven. Unrelated README/roadmap edits preserved.
+
 Latest accepted goalie hand-role fix: generator goalie shaft top(.18,-.19,1.10),
 heel(.70,-.24,.02), blocker hand=top.lerp(heel,.18), free catcher(.32,.32,1.10).
 Removed goalie target mirroring; all hand targets now assert <=.57m arm reach.

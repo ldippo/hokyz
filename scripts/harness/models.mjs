@@ -18,15 +18,20 @@ try {
     await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/?rigview=1&capture=1&poses=idle,skate,charge,lunge,down&goalie=butterfly${process.argv.includes('--puck')?'&puck=1':''}`);
     await page.waitForFunction(() => window.__rigview, null, { timeout: 90000 });
     const goalieTrace=process.argv.find(a=>a.startsWith('--goalie-carry='))?.slice('--goalie-carry='.length);
-    if(goalieTrace){
-      const source=JSON.parse(readFileSync(resolve(goalieTrace),'utf8'));
-      const cases=source.samples.filter(s=>s.carrier?.goalie&&s.carrier.state&&s.carrier.poseState);
-      assert.ok(cases.length>0,'No saved goalie carrier cases');
+    const skaterTrace=process.argv.find(a=>a.startsWith('--skater-carry='))?.slice('--skater-carry='.length);
+    if(goalieTrace||skaterTrace){
+      const trace=goalieTrace||skaterTrace,prefix=goalieTrace?'goalie-carry':'skater-carry';
+      const sampleTime=Number(process.argv.find(a=>a.startsWith('--sample-time='))?.split('=')[1]);
+      if(skaterTrace)assert.ok(Number.isFinite(sampleTime),'Skater replay requires --sample-time');
+      const source=JSON.parse(readFileSync(resolve(trace),'utf8'));
+      const cases=source.samples.filter(s=>s.carrier&&s.carrier.goalie===!!goalieTrace&&s.carrier.state&&s.carrier.poseState&&(!skaterTrace||Math.abs(s.t-sampleTime)<.01));
+      assert.ok(cases.length>0,'No saved carrier cases');
       const samples=[];
       for(const [index,saved] of cases.entries()){
         const sample=await page.evaluate(({saved,standing})=>{
-          const app=window.__hokyz,{entries,grig:rig,gState:st}=window.__rigview;
-          entries.forEach(e=>e.rig.group.visible=false);rig.group.visible=true;
+          const app=window.__hokyz,{entries,grig,gState}=window.__rigview;
+          const {rig,st}=saved.carrier.goalie?{rig:grig,st:gState}:entries[0];
+          entries.forEach(e=>e.rig.group.visible=false);grig.group.visible=false;rig.group.visible=true;
           Object.assign(st,saved.carrier.state);st.pos={x:0,y:-3.4};if(standing)st.butterfly=0;rig.snap(st);
           Object.assign(rig,saved.carrier.poseState);rig.update(st,1,0,0);rig.group.updateMatrixWorld(true);
           const stick=rig.bones.get('stick').bone;
@@ -36,16 +41,27 @@ try {
             const p=stick.worldToLocal(rig.bones.get(`hand${side}`).bone.getWorldPosition(rig.group.position.clone()));
             return [side,Math.hypot(p.x,p.z)];
           }));
-          window.__rigview.placePuck(st);
+          const puck=window.__rigview.placePuck(st);
+          const center=rig.stickContacts.reduce((sum,p)=>sum.add(p),rig.group.position.clone().set(0,0,0)).multiplyScalar(1/rig.stickContacts.length);
+          const measureReach=bank=>{
+            if(st.isGoalie)return [];
+            const rotation=rig.group.quaternion.clone().multiply(rig.group.quaternion.clone().setFromAxisAngle(rig.group.position.clone().set(1,0,0),bank)).multiply(rig.bones.get('stick').invRestWorld.clone().invert());
+            const origin=rig.group.position.clone().set(1.18,0,0).applyQuaternion(rig.group.quaternion).add(rig.group.position).sub(center.clone().applyQuaternion(rotation));
+            origin.y+=.003-Math.min(...rig.stickContacts.map(p=>p.clone().applyQuaternion(rotation).add(origin).y));
+            return rig.grips.map(g=>({side:g.side,distance:g.offset.clone().applyQuaternion(rotation).add(origin).distanceTo(rig.bones.get(`upperArm${g.side}`).bone.getWorldPosition(rig.group.position.clone())),max:g.upper+g.fore-.015}));
+          };
+          let bladeDistance=Infinity;
+          rig.model.traverse(mesh=>{if(!mesh.isSkinnedMesh||mesh.material.name!=='tape')return;const skin=mesh.geometry.attributes.skinIndex;for(let i=0;i<skin.count;i++){if(mesh.skeleton.bones[skin.getX(i)]!==stick)continue;const p=mesh.localToWorld(mesh.getVertexPosition(i,rig.group.position.clone()));bladeDistance=Math.min(bladeDistance,Math.hypot(p.x-puck.x,p.z-puck.y));}});
           app.rig.camera.position.copy(rig.group.position.clone().set(3,1.9,2.5).applyQuaternion(rig.group.quaternion).add(rig.group.position));app.rig.camera.lookAt(0,.65,-3.4);
           document.querySelectorAll('#ui,.hud').forEach(el=>el.style.display='none');app.rig.render(0);
-          return {t:saved.t,height,grips,gripSides:rig.grips.map(g=>g.side),shaftDistances,butterfly:st.butterfly,sourceHeight:saved.carrier.bladeLow};
+          return {t:saved.t,height,grips,gripSides:rig.grips.map(g=>g.side),shaftDistances,flatReach:measureReach(0),bankedReach:measureReach(rig.roll),bladeDistance,butterfly:st.butterfly,sourceHeight:saved.carrier.bladeLow};
         },{saved,standing:process.argv.includes('--standing')});
-        samples.push(sample);await page.screenshot({path:join(out,`goalie-carry-${index}.png`)});
+        samples.push(sample);await page.screenshot({path:join(out,`${prefix}-${index}.png`)});
       }
-      writeFileSync(join(out,'goalie-carry.json'),JSON.stringify({source:goalieTrace,samples,scope:'Saved pose replay at normalized origin, not a new natural save or goalie-control input.'},null,2));
-      if(!process.argv.includes('--baseline'))assert.ok(samples.every(s=>s.height>=-.015&&s.grips.every(g=>g<.02)),'Goalie blade/grip failed');
-      if(process.argv.includes('--shaft')&&!process.argv.includes('--baseline'))assert.ok(samples.every(s=>s.shaftDistances.R<.03&&s.shaftDistances.L>.2&&s.gripSides.join()==='R'),'Blocker must hold shaft and catcher must remain free');
+      writeFileSync(join(out,`${prefix}.json`),JSON.stringify({source:trace,samples,scope:'Saved pose replay at normalized origin, not new natural play or control input.'},null,2));
+      if(!process.argv.includes('--baseline'))assert.ok(samples.every(s=>s.height>=-.015&&s.grips.every(g=>g<.02)),'Carrier blade/grip failed');
+      if(skaterTrace&&process.argv.includes('--contact')&&!process.argv.includes('--baseline'))assert.ok(samples.every(s=>s.bladeDistance>=.15&&s.bladeDistance<=.19),'Saved neutral carrier misses puck edge');
+      if(goalieTrace&&process.argv.includes('--shaft')&&!process.argv.includes('--baseline'))assert.ok(samples.every(s=>s.shaftDistances.R<.03&&s.shaftDistances.L>.2&&s.gripSides.join()==='R'),'Blocker must hold shaft and catcher must remain free');
       if(errors.length)throw new Error(errors.join('\n'));
       await page.close();continue;
     }

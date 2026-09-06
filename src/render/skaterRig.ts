@@ -598,7 +598,9 @@ export class SkaterRig {
     for (const p of this.stickContacts) center.add(p);
     center.multiplyScalar(1 / this.stickContacts.length);
     const yaw = this.group.getWorldQuaternion(new THREE.Quaternion());
-    const desiredRotation = yaw.clone().multiply(ref.invRestWorld.clone().invert());
+    // Follow the body's bank so the upper grip remains reachable on turns.
+    const desiredRotation = yaw.clone().multiply(new THREE.Quaternion().setFromAxisAngle(AX_X, this.roll))
+      .multiply(ref.invRestWorld.clone().invert());
     // Blade heel meets the forward edge of the .16m puck, not its center.
     const blade = new THREE.Vector3(SKATER.possessionOffset + .33, 0, 0).applyQuaternion(yaw).add(this.group.position);
     const desiredPosition = blade.sub(center.clone().applyQuaternion(desiredRotation));

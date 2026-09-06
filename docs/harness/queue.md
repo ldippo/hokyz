@@ -102,6 +102,22 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed bank-following carrier pose: neutral stick rotation now follows torso
+roll before solving hands. Saved t9.4 flat upper-hand target.635m exceeded.565m
+reach; banked target.503m fits. Blade/puck-center distance.3697 -> .1697m, no arm
+stretch. Baseline models1788729567987-LqMmKW versus1788729650806-AwrJVt inspected;
+final saved replay/contact gate1788729716305-aRzLx3 passes. Left/right bank
+1788729727264-YsN62F/1788729748874-9yhxv8 pass12 phases (~.1698m distance), positive
+bank image inspected. Transitions1788729743850-oBMBnB,16m/s1788729756374-gfslid,
+goalie1788729835267-QmUYaS and keyboard1788729717865-WBz1MS pass. All model paths
+under .gaming/models/. Gates .gaming/runs/1788729643329-ttID4a build/214 tests/bots.
+Moving capture .gaming/captures/1788729715139-CA2O7h passes: original gap fixed,
+all63 carrier samples blade>=.0022m/grips<6.4e-8m,120 sim/events unchanged; low-lean
+image inspected. Self-review prefers banked contact; some other low-lean samples
+still show<.16m planar distance and need specific diagnosis, not blanket acceptance.
+Next inspect remaining saved t9.9–10.1 cases and actual puck placement versus
+neutral stickPoint before extending the solver.
+
 Completed goalie hand roles: shared shaft top(.18,-.19,1.10),heel(.70,-.24,.02),
 blocker at18%; catcher target(.32,.32,1.10), no target mirroring, assert both arms
 reachable. Only R is registered as a goalie grip; catcher no longer follows stick.
