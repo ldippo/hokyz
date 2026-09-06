@@ -181,6 +181,10 @@ decline/overlay removal, accept, and high/low/block cue responses. Cue states ar
 prepared, not naturally earned. Add `--fight-layout` to check desktop and
 narrow150% offer/feint geometry; `--baseline` records without bounds assertions.
 Combine with `--remap` to verify offer glyphs and reactions after key swaps.
+`--fight --fight-full` instead lets the accepted duel resolve naturally with idle
+human input and pinned initial duel RNG, checks clock freeze/loser ejection/2v3
+faceoff, then advances the remaining period naturally and verifies3v3 restoration.
+Only offer/consent and initial RNG are prepared; no health, clock or outcome edits.
 Use `--baseline` to record without asserting. Evidence: `.gaming/controls-layout/`.
 
 After building, `pnpm harness:capture` starts its own Vite preview server on an

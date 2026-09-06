@@ -39,6 +39,23 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest complete-fight evidence (no game edits): playtest --fight --fight-full
+uses prepared offer/opponent consent, actual keyboard decline/accept, then pins
+initial duel RNG41 and leaves human idle. No cue/health/outcome/clock edits.
+.gaming/playtests/1788717757979-TxnJbW passes: humanH1 loses, period1 resumes
+faceoff2v3, H1 ejected/removed at bench(-8,15.5); clock remains119.5s. Natural
+remaining period advances to2, H1 restored atcenter, lineup3v3. Both captures
+inspected. Simulation stepped directly with production input/afterStep; not live
+wall-clock/cinematic timing evidence. Existing passing/input/save checks pass
+after lifecycle. Gates .gaming/runs/1788717758995-LlafEl build/177 tests/bot pass.
+Explicit clock/2v3/3v3 assertions added from passing report after run; values
+verified in JSON. Self-review supports complete ejection/recovery, not human
+fight difficulty. Next precise action: inspect whether the player has a durable
+on-ice indication of being down a skater after fight announcement expires; current
+feedback only says LOSER SITS briefly. Design bounded manpower status if absent,
+verify ejection/restoration and goalie-pull distinctions; preserve rink visibility.
+Full goal active, unrelated README/ROADMAP modifications preserved.
+
 Latest gameplay fix: AI fight choice no longer marks cue done before shared
 damage branch. Optional cue.aiReacted tracks one non-mash decision separately;
 right/wrong responses resolve once, no-response waits for missed-window jab

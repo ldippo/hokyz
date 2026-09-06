@@ -102,6 +102,14 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed full fight lifecycle evidence: --fight --fight-full prepared offer,
+actual accept then natural idle duel/RNG41, loser ejection/2v3 faceoff, full
+remaining period/3v3 restoration. .gaming/playtests/1788717757979-TxnJbW passes,
+clock119.5 unchanged during fight; bench/restored images inspected. No game edits.
+Gates1788717758995-LlafEl build/177 tests/bot pass. Self-review supports lifecycle,
+not real-time/human difficulty. Next: durable manpower status after ejection,
+distinguishing goalie pulls/reinforcements and clearing on restoration.
+
 Completed AI fight response repair: separate aiReacted decision from done cue;
 damage/wrong/missed penalties now resolve once, no rerolling silence.8 targeted
 red-before cases and12 repeatable full AI duel seeds added. Final

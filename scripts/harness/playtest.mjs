@@ -201,11 +201,44 @@ try {
     assert.equal(declined.phase,'play');assert.equal(declined.fight,null);
     if(!process.argv.includes('--baseline'))assert.equal(declined.visible,false,'Fight HUD remains after declining');
     await offer();const accepted=await fightKey(shotKey);checks.push({fightAccept:accepted});assert.equal(accepted.fight.stage,'duel');
+    if(process.argv.includes('--fight-full')) {
+      const lifecycle=await page.evaluate(()=>{
+        const app=window.__hokyz,sim=app.view.sim,st=sim.st;
+        // Pin only the initial duel RNG; no health/outcome/clock or cue edits.
+        sim.rng.state=41;
+        const initialPeriod=st.period,initialClock=st.clock,events=[];
+        const tick=()=>{app.input.poll();const ev=sim.step({0:app.input.simInput()});app.view.afterStep(ev);events.push(...ev.filter(e=>['fightCue','fightHit','fightEnd','faceoff','period'].includes(e.type)));};
+        for(let i=0;i<1200&&st.phase!=='faceoff';i++)tick();
+        const end=events.find(e=>e.type==='fightEnd');
+        const loser=end?.loser?st.skaters[end.loser]:null;
+        const bench={phase:st.phase,period:st.period,clock:st.clock,loser:loser?.id,ejected:loser?.ejected,inLineup:loser?st.teams[loser.team].skaters.includes(loser.id):null,lineups:st.teams.map(t=>t.skaters.length),position:loser?{...loser.pos}:null};
+        app.view.render(1,0);
+        window.__fightLifecycle={initialPeriod,initialClock,end,bench,events};
+        return window.__fightLifecycle;
+      });
+      checks.push({fightLifecycle:lifecycle});
+      assert.equal(lifecycle.bench.phase,'faceoff');assert.ok(lifecycle.end?.loser,'Named idle duel should have a loser');
+      assert.ok(lifecycle.bench.ejected&&!lifecycle.bench.inLineup);
+      assert.equal(lifecycle.bench.clock,lifecycle.initialClock,'Fight consumed the hockey clock');
+      assert.deepEqual(lifecycle.bench.lineups,[2,3]);
+      await page.screenshot({path:join(out,'fight-benched.png')});
+      const restored=await page.evaluate(()=>{
+        const app=window.__hokyz,sim=app.view.sim,old=window.__fightLifecycle;
+        for(let i=0;i<20000&&sim.st.period===old.initialPeriod;i++){app.input.poll();app.view.afterStep(sim.step({0:app.input.simInput()}));}
+        const st=sim.st,sk=st.skaters[old.end.loser];app.view.render(1,0);
+        return {period:st.period,ejected:sk.ejected,inLineup:st.teams[sk.team].skaters.includes(sk.id),lineups:st.teams.map(t=>t.skaters.length),position:{...sk.pos}};
+      });
+      checks.push({fightRestored:restored});
+      assert.equal(restored.period,lifecycle.initialPeriod+1);assert.ok(!restored.ejected&&restored.inLineup);
+      assert.deepEqual(restored.lineups,[3,3]);
+      await page.screenshot({path:join(out,'fight-restored.png')});
+    } else {
     for(const [kind,key] of [['high',shotKey],['low','l'],['feint',passKey]]) {
       await page.evaluate(kind=>{const app=window.__hokyz,f=app.view.sim.st.fight;f.cue={kind,target:0,t:0,window:0.8,done:false,mash:0};app.view.render(1,0);},kind);
       if(kind==='feint')await captureFight('feint');
       const hit=await fightKey(key);assert.ok(hit.events.some(e=>e.type==='fightHit'&&e.attacker===hit.fight.a),`${kind} key did not land`);
       checks.push({fightCue:{kind,events:hit.events}});
+    }
     }
     await page.evaluate(()=>{const app=window.__hokyz;app.view.sim.st.fight=null;app.view.sim.st.phase='play';app.view.render(1,0);});
   }
