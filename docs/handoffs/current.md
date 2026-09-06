@@ -39,6 +39,27 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest visual fix: styles.css/runMap.ts run shell wraps topbar summary/actions,
+uses minmax(0,1fr) main column,44px body-font unskewed buttons, bounded cards/menus,
+smaller wrapping titles, stacked roster text. At<=900px shell scrolls vertically,
+roster follows main content; route map retains horizontal scroll. No state changes.
+run-probe.mjs called by rest/shop --layout checks all action/card-title/description
+boxes reachable after scrolling and no outer overflow at1280x720,390x844,390x844
+150%. Baseline .gaming/rest/1788713469227-cQtMGQ/ and
+.gaming/shop/1788713470507-hyznmq/ clipped Save & Quit, Manage lineup and large-text
+choices. Final .gaming/rest/1788713565918-8r8iaO/ and
+.gaming/shop/1788713567257-nmkQGY/ pass all nine geometry cases and existing
+save/reload/train/skip/purchase/hire/reroll regressions. Inspected narrow150% rest/
+shop and desktop map captures; randomized rosters/offers differ from baseline,
+same scenario types/viewports. Gates .gaming/runs/1788713550541-57gopL/ pass
+build/152 tests/bot; baseline1788713471415-SZEBSD also passes. Impeccable guided
+stacking and action readability. Self-review prefers first-session/accessibility
+access; no keyboard/gamepad traversal claim from geometry or mouse-only checks.
+Next precise action: verify actual keyboard/synthetic-controller focus traversal
+and activation through narrow stacked header, map/choices, roster and back flows;
+check focus scrolling exposes selected nodes/actions. Preserve state tests and
+unrelated README.md/ROADMAP-v4.md changes. Full goal remains active.
+
 Latest fix: skills.startShootout now consumes matchSeed before commitRng. Browser
 shootout-full checks final committed draw against actual MatchSim seed using its
 production RNG constructor and one mulberry32 draw rewind. Initial probe

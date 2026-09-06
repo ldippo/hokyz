@@ -66,7 +66,7 @@ export function topBar(app: App, run: RunState, extra?: HTMLElement): HTMLElemen
   const e = runEffects(run);
   const lives = e.extraLives - run.livesUsed;
   return h('div', { class: 'topbar' },
-    h('div', { style: 'display:flex;align-items:center' },
+    h('div', { class: 'topbar-summary' },
       h('span', { class: 'title' }, `${run.act >= 4 ? `OVERTIME LEAGUE · ACT ${run.act}` : `ACT ${run.act}`} · ${run.teamName}`),
       h('span', { class: 'stat' }, h('small', {}, 'CASH'), String(run.cash)),
       h('span', { class: 'stat' }, h('small', {}, 'RECORD'), `${run.matchesWon}-${run.matchesPlayed - run.matchesWon}`),
@@ -74,7 +74,7 @@ export function topBar(app: App, run: RunState, extra?: HTMLElement): HTMLElemen
       run.ascension ? h('span', { class: 'stat' }, h('small', {}, 'ASC'), String(run.ascension)) : null,
       h('span', { class: 'stat', style: 'color:#8fa3d9;font-size:13px' }, h('small', {}, 'SEED'), run.seedText || String(run.seed), h('button', { class: 'linkbtn', title: 'Copy a link that starts a run on this seed', onClick: () => { void copyText(seedLink(run.seedText || String(run.seed))).then((ok) => app.toast(ok ? 'Seed link copied' : 'Copy failed')); } }, '🔗')),
     ),
-    h('div', { style: 'display:flex;gap:10px' }, extra ?? null, btn('Save & Quit', () => { app.saveRun(); app.disposeView(); titleScreen(app); })),
+    h('div', { class: 'topbar-actions' }, extra ?? null, btn('Save & Quit', () => { app.saveRun(); app.disposeView(); titleScreen(app); })),
   );
 }
 

@@ -88,6 +88,10 @@ Evidence: `.gaming/shop/`. This is shop persistence coverage, not full-run play.
 `node scripts/harness/rest.mjs` prepares injured rosters at ascensions0/4 and a
 rest node, then verifies stable Save & Quit/Continue offers, healing policy,
 one training or skip, and completed reload. Evidence: `.gaming/rest/`.
+Add `--layout` to `rest.mjs` (map and rest) or `shop.mjs` (resumed shop) to capture
+1280x720,390x844 and narrow150%-text layouts. Checks actions/card text reachable
+after scrolling and no outer overflow. `--baseline` records without asserting.
+These are geometry/pointer persistence checks, not full keyboard/gamepad traversal.
 
 `node scripts/harness/route.mjs` exercises event -> shop -> rest in one run,
 reloading between encounters. It preserves generated links while preparing the

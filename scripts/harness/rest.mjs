@@ -3,6 +3,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { preview } from 'vite';
 import { chromium } from 'playwright';
+import { runProbe } from './run-probe.mjs';
 
 mkdirSync('.gaming/rest', { recursive:true });
 const out = mkdtempSync(resolve('.gaming/rest', `${Date.now()}-`));
@@ -21,9 +22,11 @@ try {
     await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/`); await ready();
     await page.getByRole('button',{name:'New Run',exact:true}).click();
     await page.locator('.cards [data-nav]').first().click();
+    if (process.argv.includes('--layout') && ascension===0) writeFileSync(join(out,'map-layout.json'),JSON.stringify(await runProbe(page,out,'map'),null,2));
     await page.evaluate(ascension=>{ const run=window.__hokyz.run; run.ascension=ascension; run.maps[0].rows[0][0].type='rest'; run.roster.forEach(sk=>sk.hp=25); run.goalie.hp=25; },ascension);
     await page.locator('.node.available.match').first().click();
     const initial = await snapshot();
+    if (process.argv.includes('--layout') && ascension===0) writeFileSync(join(out,'rest-layout.json'),JSON.stringify(await runProbe(page,out,'rest'),null,2));
     assert.equal(initial.goalie, ascension===4 ? 25 : 100);
     assert.ok(initial.hp.every(hp=>hp===(ascension===4 ? 25 : 100)));
     const descriptions = await page.locator('.map-scroll .cards .desc').allTextContents();

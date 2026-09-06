@@ -3,6 +3,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { preview } from 'vite';
 import { chromium } from 'playwright';
+import { runProbe } from './run-probe.mjs';
 
 mkdirSync('.gaming/shop', { recursive: true });
 const out = mkdtempSync(resolve('.gaming/shop', `${Date.now()}-`));
@@ -46,6 +47,7 @@ try {
   assert.deepEqual(await snapshot(), changed, 'Reload lost purchases, hired player, reroll state or RNG');
   assert.equal(await page.getByRole('button', { name:/Reroll perks/ }).textContent(), rerollLabel);
   assert.equal(await page.locator('.cards .card').filter({ hasText:'free agent' }).count(), 0);
+  if (process.argv.includes('--layout')) writeFileSync(join(out,'shop-layout.json'),JSON.stringify(await runProbe(page,out,'shop'),null,2));
   await page.screenshot({ path:join(out,'resumed-shop.png') });
   checks.push('Initial offers, purchase, hire and escalating reroll survive reload with identical cash/RNG');
   await page.getByRole('button', { name:'Leave Shop', exact:true }).click();

@@ -102,6 +102,19 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed responsive run-shell: wrapped header, standard44px actions, bounded
+cards/menus/titles, roster text wrapping, minmax main column; <=900px stacks
+roster below scrollable choices/map. Baselines rest1788713469227-cQtMGQ and
+shop1788713470507-hyznmq show offscreen Save/Quit/Manage and150% choice clipping.
+Final .gaming/rest/1788713565918-8r8iaO/ and
+.gaming/shop/1788713567257-nmkQGY/ pass nine desktop/narrow/150% geometry cases
+plus persistence/training/skip/purchase/hire/reroll. Narrow rest/shop and desktop
+map captures inspected. Randomized content differs; same viewport/screen types.
+Gates .gaming/runs/1788713550541-57gopL/ build/152 tests/bot pass. Impeccable
+informed structural stacking and readable actions. Self-review prefers accessible
+choices; no human-feel/hardware claim. Next: explicit keyboard/controller focus
+traversal and activation across the stacked run shell, especially map scrolling.
+
 Completed shootout RNG fix: draw matchSeed before commitRng in skills.ts. Browser
 regression .gaming/shootout-full/1788713289828-VW3mDc/ showed next run draw
 398546513 reused consumed match seed. Corrected state records that draw and next
