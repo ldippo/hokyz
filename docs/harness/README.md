@@ -67,6 +67,13 @@ hit event, then tests real pause/menu input: frozen simulation/save/timer, no
 duplicate hit on Resume, Escape/P controls and explicit End challenge settlement.
 Evidence: `.gaming/hit-parade/`. It does not prove a human challenge victory.
 
+`node scripts/harness/hit-parade-full.mjs` runs idle and scripted pursuit through
+all 60 simulated seconds, using DOM movement/check keys and natural timer expiry.
+Requires idle loss/no reward and pursuit victory/cash/draft/zero-cash skip.
+Evidence: `.gaming/hit-parade-full/`. Only the reachable node is prepared; no hit
+events, score or terminal outcome are injected. Scripted pursuit is not human
+difficulty or real-time performance evidence.
+
 `node scripts/harness/championship.mjs` checks boss draft -> saved league offer ->
 bank, and boss draft -> extend Act 4 -> save/reload -> league loss -> champion
 summary. It prepares the last-boss checkpoint and terminal outcomes; actual UI,

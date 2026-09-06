@@ -39,6 +39,20 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest evidence: scripts/harness/hit-parade-full.mjs exercises idle and chase
+through 60 actual simulated seconds with DOM key events (WASD/Shift/K), nearest
+standing dummy pursuit and natural timer expiry. Only reachable node is prepared;
+no scores/hits/terminal outcomes injected. Idle0/8, pursuit41/8 in two runs.
+Requires idle loss/no reward, pursuit victory/+60cash/pending draft/skip no extra
+cash. Final .gaming/hit-parade-full/1788710587394-xEcwfX/ passes; first reward
+capture .gaming/hit-parade-full/1788710509062-sMyivE/chase-result.png inspected.
+Build/147 tests/bot .gaming/runs/1788710525593-Cgz9HN/ pass. No game code changed.
+Self-review confirms connected challenge flow, not human difficulty/fun: perfect
+nearest-target tracking is not representative input, so no thresholds tuned.
+Next precise action: reuse natural skills result and a prepared match result to
+check all cards/table columns/actions at390px/150% text and desktop, fix evidenced
+layout issues. Then broader full-run progression and physical hardware checks.
+
 Latest gameplay change: src/sim/hitParade.ts HitParadeDummies owns seeded wander/
 turbo inputs, preserving prior ranges/probability and boundary return. It ignores
 duplicate/nonadvancing timestamps. skills.ts derives its seed from matchSeed,

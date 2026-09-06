@@ -102,6 +102,17 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed full Hit Parade browser play evidence. New hit-parade-full.mjs prepares
+only the reachable node, then plays 60 simulated seconds via DOM movement/check
+keys and natural timer expiry. Idle loses0/8 without reward; seeded nearest-target
+pursuit wins41/8, receives60 cash/draft and skips without extra cash. Both repeated
+runs agree. Final `.gaming/hit-parade-full/1788710587394-xEcwfX/` passes; first
+reward capture `.gaming/hit-parade-full/1788710509062-sMyivE/chase-result.png`
+inspected. Build/147 tests/bot `.gaming/runs/1788710525593-Cgz9HN/` pass.
+No game tuning. Self-review confirms connected hit/scoring/reward flow; scripted
+target tracking cannot establish fair/fun human difficulty. Next: narrow/large
+text skill reward and match-result layouts, then broader full-run/hardware.
+
 Completed seeded Hit Parade steering: extracted DOM-free HitParadeDummies with
 challenge-local RNG, duplicate-time guard, existing target ranges and turbo odds.
 Skills uses a derived match seed and commits run RNG after consuming that seed.
