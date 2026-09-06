@@ -50,7 +50,7 @@ export function runOverScreen(app: App): void {
   const el = h('div', { class: 'screen transparent' },
     h('div', { class: 'result' },
       h('h2', { class: run.won ? 'win' : 'lose' }, run.won ? '🏆 CHAMPIONS' : 'RUN OVER'),
-      h('div', { class: 'score-line' }, run.won ? (run.act >= 4 ? (run.row >= (run.maps[run.act - 1]?.rows.length ?? 99) ? `Overtime League: cleared through Act ${run.act}. Trophy banked.` : `Overtime League run ended in Act ${run.act}, stop ${run.row + 1}. The trophy stays.`) : 'You beat the act-3 boss. Legend status: confirmed.') : `Knocked out in Act ${run.act}, stop ${run.row + 1}.`),
+      h('div', { class: 'result-description' }, run.won ? (run.act >= 4 ? (run.row >= (run.maps[run.act - 1]?.rows.length ?? 99) ? `Overtime League: cleared through Act ${run.act}. Trophy banked.` : `Overtime League run ended in Act ${run.act}, stop ${run.row + 1}. The trophy stays.`) : 'You beat the act-3 boss. Legend status: confirmed.') : `Knocked out in Act ${run.act}, stop ${run.row + 1}.`),
       h('table', { class: 'box' },
         h('tbody', {},
           h('tr', {}, h('td', {}, 'Record'), h('td', { class: 'num' }, `${run.matchesWon}-${run.matchesPlayed - run.matchesWon}`)),

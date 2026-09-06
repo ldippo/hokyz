@@ -39,6 +39,23 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest visual pass: src/ui/styles.css bounds result content to 860px/actions to
+440px, allows screen scroll, strengthens dark background/contrast, uses readable
+body type/actions and responsive tables. League/runOver explanatory copy now uses
+result-description rather than oversized score-line. Impeccable product-register
+guidance informed typography/contrast. New result-layout.mjs exercises 8 cases:
+league/summary x desktop normal, desktop125%, narrow normal, narrow125%. Baseline
+.gaming/result-layout/1788707781676-7ySsWP/ had clipped actions in 6/8 cases;
+candidate .gaming/result-layout/1788707860332-S4bygF/ passes all. Inspected desktop
+league, narrow125% league/summary against baseline; text and values now fit.
+Build/137 tests/bot gates passed .gaming/runs/1788707847426-FJ6tHB/.
+Self-review prefers readable results/accessibility. No gameplay changes. Shared
+result styles also apply to match and skills results; those table/card variants
+need explicit narrow-size evidence next. A long feat toast can show faintly under
+summary content in this stopped-loop fixture; toast presentation merits follow-up.
+Next: inspect match/skills result narrow layouts and actual Settings text-size /
+remapping flows, then gamepad and target-hardware/full-run evidence.
+
 Latest P3 validation: added node scripts/harness/championship.mjs. Starts a real
 new run, prepares last-boss checkpoint, supplies terminal outcomes, then uses real
 reward/league/save/reload/summary UI. Checks boss draft (four offers) before league

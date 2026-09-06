@@ -14,7 +14,7 @@ export function leagueOfferScreen(app: App): void {
   const el = h('div', { class: 'screen transparent' },
     h('div', { class: 'result' },
       h('h2', { class: 'win' }, run.league ? `ACT ${run.act} CLEARED` : '🏆 CHAMPIONS'),
-      h('div', { class: 'score-line' }, run.league ? `The Overtime League rolls on. Nobody has to know when you stopped.` : 'You beat the act-3 boss. The trophy is yours either way.'),
+      h('div', { class: 'result-description' }, run.league ? `The Overtime League rolls on. Nobody has to know when you stopped.` : 'You beat the act-3 boss. The trophy is yours either way.'),
       h('p', { class: 'screen-sub', style: 'max-width:560px' }, `OVERTIME LEAGUE · ACT ${nextAct}: a fresh map at a higher tier, any boss can show up with an extra phase, cash pays +${25 * league}%. Injuries and perks carry over${injured ? ` (${injured} skater${injured > 1 ? 's' : ''} currently out)` : ''}. Lose and the run ends, but the win is already banked.`),
       h('div', { class: 'menu' },
         btn('Bank the Trophy', () => { bankRun(run); app.saveRun(); runOverScreen(app); }, 'primary'),

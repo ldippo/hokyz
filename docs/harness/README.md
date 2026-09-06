@@ -61,6 +61,11 @@ summary. It prepares the last-boss checkpoint and terminal outcomes; actual UI,
 reward/league transitions and settlement run normally. Evidence is under
 `.gaming/championship/`. It does not certify playing through the prior acts.
 
+`node scripts/harness/result-layout.mjs` captures league and summary screens at
+1280x900 / normal text, 1280x720 / 125%, and 390x844 / normal and 125%. Checks
+each action is reachable within the viewport after scrolling. `--baseline`
+records clipping without asserting. Evidence: `.gaming/result-layout/`.
+
 After building, `pnpm harness:capture` starts its own Vite preview server on an
 ephemeral loopback port, uses Playwright Chromium, and writes title/rink screenshots
 and telemetry under `.gaming/captures/`. Install Chromium once with

@@ -102,6 +102,18 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed visual iteration: bounded result/league layouts, opaque dark broadcast
+backdrop, readable prose separate from actual scores, smaller unskewed actions,
+responsive tables and scroll access. Baseline
+`.gaming/result-layout/1788707781676-7ySsWP/` found clipped actions in six of
+eight cases. Candidate `.gaming/result-layout/1788707860332-S4bygF/` passes all
+eight desktop/narrow/125%-text cases. Desktop league and narrow large-text
+league/summary captures inspected against baseline. Build/137 tests/bot gates:
+`.gaming/runs/1788707847426-FJ6tHB/`. Impeccable guided bounded typography,
+neutral backdrop and restrained action hierarchy. Self-review prefers readability
+for first-session/accessibility users; gameplay unchanged. Next: match-result
+table at narrow sizes, remapping/gamepad, and full-run/hardware evidence.
+
 Completed iteration: championship routing evidence. Prepare last-boss checkpoint
 and terminal outcomes, then use real UI to verify boss loot before league offer,
 offer reload, bank versus Act 4 extension, saved league resumption and championship

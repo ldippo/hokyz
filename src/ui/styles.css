@@ -132,6 +132,61 @@ table.box th { text-align: left; color: #8fa3d9; font-weight: normal; letter-spa
 table.box td { padding: 5px 10px; border-bottom: 1px solid rgba(43,51,82,0.5); font-variant-numeric: tabular-nums; }
 table.box td.num { text-align: right; }
 
+/* Post-match decisions stay readable against the moving, brightly lit rink. */
+.screen:has(> .result) {
+  justify-content: flex-start;
+  overflow: auto;
+  padding: 32px 24px;
+  background: oklch(15% 0.01 265 / 0.96);
+}
+.screen > .result {
+  width: 100%;
+  max-width: 860px;
+  flex: 0 0 auto;
+  margin: auto 0;
+  padding: 8px 0;
+  overflow-wrap: anywhere;
+}
+.result h2 { font-size: 3rem; line-height: 1.12; letter-spacing: 0.035em; }
+.result .score-line { font-size: 2rem; margin: 16px 0 24px; }
+.result .result-description {
+  max-width: 58ch;
+  margin: 20px auto 28px;
+  font-size: 1.25rem;
+  line-height: 1.5;
+  color: oklch(91% 0.01 265);
+}
+.result .screen-sub {
+  margin: 16px auto 24px;
+  color: oklch(81% 0.015 265);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  letter-spacing: normal;
+  text-transform: none;
+}
+.result .menu { width: 100%; max-width: 440px; min-width: 0; margin: 28px auto 0; gap: 12px; }
+.result .btn {
+  font-family: var(--font-body); font-size: 1rem; font-weight: 700;
+  letter-spacing: 0.02em; text-transform: none;
+  padding: 14px 18px; min-height: 48px;
+  transform: none; border-width: 2px;
+}
+.result .btn:hover, .result .btn.focus { transform: none; }
+.result table.box { width: 100%; min-width: 0; margin-top: 24px; font-size: 0.9375rem; }
+.result table.box th { color: oklch(81% 0.015 265); letter-spacing: 0.03em; }
+.result table.box td, .result table.box th { padding: 10px 8px; }
+.result .cards { flex-wrap: wrap; }
+@media (max-width: 600px) {
+  .screen:has(> .result) { padding: 24px 16px; }
+  .result h2 { font-size: 2rem; }
+  .result .result-description { font-size: 1.0625rem; }
+  .result .score-line { font-size: 1.5rem; }
+  .result table.box { font-size: 0.8125rem; }
+  .result table.box td, .result table.box th { padding: 8px 4px; }
+  .result table.box th { font-size: 0.6875rem; }
+}
+
 /* Run map */
 .run-shell { position: absolute; inset: 0; display: grid; grid-template-rows: auto 1fr; background: radial-gradient(ellipse at 50% 20%, rgba(30,50,110,0.92), rgba(12,12,20,0.98) 70%); }
 .topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; background: linear-gradient(180deg, rgba(20,24,40,0.9), rgba(10,12,20,0.9)); border-bottom: 2px solid #2b3352; font-family: var(--font-display); letter-spacing: 0.08em; }
