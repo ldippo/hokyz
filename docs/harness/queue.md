@@ -102,6 +102,16 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed on-ice controller contract validation: playtest.mjs --gamepad reuses
+the production match fixtures with synthetic analog sticks/A/B/Start. Also checks
+dead zone, analog magnitude, independent aim, turbo/deke/special edges and
+disconnect release. `.gaming/playtests/1788708953817-5FESBe/` passes; keyboard
+regression `.gaming/playtests/1788708955188-Z2OeTW/` passes. Build/141 tests/bot:
+`.gaming/runs/1788708913724-eFPNGj/`. No game-code change. Self-review supports
+input contracts, not physical-controller latency or human game feel. Inspected
+first controller capture shows crowd visual noise; inspect high-quality arena
+next before deciding a graphical change. Match/skills narrow layouts remain open.
+
 Completed Controls navigation fix: enable Nav outside capture; retain selected
 row through rebind/cancel, reset focus, and allow controller B to cancel capture
 without leaving Controls. During capture other menu inputs are ignored.

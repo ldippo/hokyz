@@ -39,6 +39,22 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest P3 evidence: playtest.mjs --gamepad drives existing fixed-step match
+fixtures via synthetic standard pad and production polling. Checks analog
+movement/right-stick aim, pass->moving receiver->control switch->shot, far aim
+while moving near, and Start pause/resume. Additional contract snapshots cover
+dead zone, magnitude, turbo/deke/special edge/hold and disconnect release in
+gamepad-input.json. Final .gaming/playtests/1788708953817-5FESBe/ passes;
+keyboard regression .gaming/playtests/1788708955188-Z2OeTW/ passes. Gates
+.gaming/runs/1788708913724-eFPNGj/ (build/141 tests/bot pass). No game-code edits.
+Self-review supports controller mapping, not real hardware or human game feel.
+Inspected first controller capture .gaming/playtests/1788708899057-SCREBB/
+human-pass-received.png: smoother players are readable, but bright blocky crowd
+draws attention from ice. Next precise action: inspect a high-quality live arena
+capture and crowd implementation, improve evidenced visual noise/detail while
+preserving player/puck readability and performance. Match/skills narrow results,
+full-run play and physical hardware remain open; full goal is not complete.
+
 Latest P3 functional fix: Controls now enables Nav, stores selected row across
 render/capture, resets focus to Reset after reset, and handles back as cancel
 while capturing versus exit while idle. Nav.update ignores navigation during

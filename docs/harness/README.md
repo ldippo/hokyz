@@ -42,6 +42,10 @@ possession. `human-passing.json` retains the pass/switch/shot event evidence.
 Add `--remap` when invoking `node scripts/harness/playtest.mjs` to swap Pass and
 Shoot through Controls, test protected Enter/cancel, reload persistence and
 Settings help, then exercise the match fixtures with the swapped keys.
+Use `--gamepad` to drive match fixtures through a synthetic standard pad and
+production polling: analog movement/aim, pass/reception/shot, Start pause/resume,
+dead zone, turbo/deke/special edges and disconnect release. Menu setup still uses
+keyboard/mouse. This does not prove physical pad compatibility or latency.
 
 `node scripts/harness/rewards.mjs` (after building) uses a terminal-win fixture
 through the real match outcome UI, reloads at result and draft screens, verifies

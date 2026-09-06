@@ -10,6 +10,7 @@ mkdirSync('.gaming/playtests', { recursive: true });
 const out = mkdtempSync(resolve('.gaming/playtests', `${Date.now()}-`));
 const checks = [], errors = [];
 const remap = process.argv.includes('--remap');
+const gamepad = process.argv.includes('--gamepad');
 const passKey = remap ? 'k' : 'j', shotKey = remap ? 'j' : 'k';
 let server, browser, page;
 try {
@@ -96,6 +97,47 @@ try {
   await page.getByRole('button', { name: 'Drop the Puck', exact: true }).click();
   assert.equal(await page.evaluate(() => window.__hokyz.view.shakeMul), 0, 'Match startup lost reduced-motion preference');
   checks.push('Reduced motion survives Settings to match startup');
+  if (gamepad) await page.evaluate(() => {
+    window.__testPad = { connected: true, axes: [0,0,0,0], buttons: Array.from({ length: 16 }, () => ({ pressed: false, value: 0 })) };
+    navigator.getGamepads = () => [window.__testPad];
+  });
+  const control = async (key, down) => {
+    if (!gamepad) return page.keyboard[down ? 'down' : 'up'](key);
+    await page.evaluate(({ key, down, passKey, shotKey }) => {
+      const pad = window.__testPad;
+      const button = key === passKey ? 0 : key === shotKey ? 1 : key === 'p' ? 9 : null;
+      if (button !== null) pad.buttons[button] = { pressed: down, value: down ? 1 : 0 };
+      else if (key === 'd') pad.axes[0] = down ? 1 : 0;
+      else if (key === 's') pad.axes[1] = down ? 1 : 0;
+      else if (key === 'ArrowUp') pad.axes[3] = down ? -1 : 0;
+      else throw new Error(`Unmapped test control: ${key}`);
+    }, { key, down, passKey, shotKey });
+  };
+  if (gamepad) {
+    const inputs = await page.evaluate(() => {
+      const pad = window.__testPad, input = window.__hokyz.input;
+      pad.axes = [0.1,0.1,0.1,0.1]; input.poll();
+      const deadZone = input.simInput();
+      pad.axes = [0.5,0,0,-0.7];
+      for (const index of [2,3,7]) pad.buttons[index] = { pressed: true, value: 1 };
+      input.poll(); const active = input.simInput();
+      input.poll(); const held = input.simInput();
+      pad.connected = false; input.poll(); const disconnected = input.simInput();
+      pad.connected = true; pad.axes = [0,0,0,0];
+      pad.buttons.forEach(button => { button.pressed = false; button.value = 0; });
+      input.poll();
+      return { deadZone, active, held, disconnected };
+    });
+    assert.deepEqual(inputs.deadZone.move, { x: 0, y: 0 });
+    assert.deepEqual(inputs.active.move, { x: 0.5, y: 0 });
+    assert.deepEqual(inputs.active.aim, { x: 0, y: -0.7 });
+    assert.ok(inputs.active.turbo && inputs.active.deke && inputs.active.special);
+    assert.ok(inputs.held.turbo && !inputs.held.deke && !inputs.held.special);
+    assert.deepEqual(inputs.disconnected.move, { x: 0, y: 0 });
+    assert.equal(inputs.disconnected.turbo, false);
+    writeFileSync(join(out, 'gamepad-input.json'), JSON.stringify(inputs, null, 2));
+    checks.push('Synthetic pad dead zone, analog magnitude, separate aim, turbo/deke/special edges and disconnect release');
+  }
   const movement = await page.evaluate(() => {
     const app = window.__hokyz, sim = app.view.sim;
     for (let i = 0; i < 900 && sim.st.phase !== 'play'; i++) sim.step();
@@ -113,7 +155,7 @@ try {
     sim.st.puck.vel = { x: 0, y: 0 };
     return { id: sk.id, x: sk.pos.x };
   });
-  await page.keyboard.down('d');
+  await control('d', true);
   const movedX = await page.evaluate(() => {
     const app = window.__hokyz, sim = app.view.sim;
     app.input.poll();
@@ -121,9 +163,9 @@ try {
     app.view.render(1, 0);
     return sim.st.skaters[sim.st.teams[0].controlledId].pos.x;
   });
-  await page.keyboard.up('d');
+  await control('d', false);
   assert.ok(movedX > movement.x + 0.1, 'Human movement did not move the skater');
-  checks.push('Real keyboard input moves the human skater in a fixed-step match');
+  checks.push('Match input moves the human skater in a fixed-step match');
   await page.screenshot({ path: join(out, 'human-match.png') });
   // Prepared open-ice start only; pass flight, AI receiving, possession and
   // control transfer below all use the production simulation and keyboard input.
@@ -148,9 +190,9 @@ try {
     app.input.poll();
     return { passerId, receiverId };
   });
-  await page.keyboard.down('d'); await page.keyboard.down(passKey);
+  await control('d', true); await control(passKey, true);
   await page.evaluate(() => window.__hokyz.input.poll());
-  await page.keyboard.up(passKey);
+  await control(passKey, false);
   const passEvent = await page.evaluate(() => {
     const app = window.__hokyz;
     app.input.poll();
@@ -160,7 +202,7 @@ try {
   });
   assert.equal(passEvent?.from, passing.passerId, 'Keyboard pass did not release from carrier');
   assert.equal(passEvent?.to, passing.receiverId, 'Keyboard direction selected wrong receiver');
-  await page.keyboard.up('d');
+  await control('d', false);
   const reception = await page.evaluate(({ receiverId }) => {
     const app = window.__hokyz, sim = app.view.sim, events = [];
     let ticks = 0;
@@ -177,14 +219,14 @@ try {
   assert.equal(reception.controlled, passing.receiverId, 'Reception did not transfer human control');
   assert.ok(reception.switches.some(event => event.to === passing.receiverId), 'No reception switch event');
   await page.screenshot({ path: join(out, 'human-pass-received.png') });
-  await page.keyboard.down(shotKey);
+  await control(shotKey, true);
   await page.evaluate(() => {
     const app = window.__hokyz;
     for (let i = 0; i < 18; i++) {
       app.input.poll(); app.view.afterStep(app.view.sim.step({ 0: app.input.simInput() }));
     }
   });
-  await page.keyboard.up(shotKey);
+  await control(shotKey, false);
   const followupShot = await page.evaluate(() => {
     const app = window.__hokyz;
     app.input.poll();
@@ -194,7 +236,7 @@ try {
   });
   assert.equal(followupShot?.shooter, passing.receiverId, 'Shoot input did not reach the new controlled receiver');
   writeFileSync(join(out, 'human-passing.json'), JSON.stringify({ passing, passEvent, reception, followupShot }, null, 2));
-  checks.push('Keyboard pass to moving AI receiver, automatic control switch and follow-up shot without resetting possession');
+  checks.push('Pass to moving AI receiver, automatic control switch and follow-up shot without resetting possession');
   // Isolate shot direction from contact/possession changes in a prepared fixture.
   await page.evaluate(() => {
     const app = window.__hokyz, st = app.view.sim.st;
@@ -205,23 +247,29 @@ try {
     st.puck.owner = sk.id; st.puck.pos = { ...sk.pos };
     app.input.poll();
   });
-  await page.keyboard.down('s');
-  await page.keyboard.down('ArrowUp');
-  await page.keyboard.down(shotKey);
+  await control('s', true);
+  await control('ArrowUp', true);
+  await control(shotKey, true);
   await page.evaluate(() => window.__hokyz.input.poll());
-  await page.keyboard.up(shotKey);
+  await control(shotKey, false);
   const shot = await page.evaluate(() => {
     const app = window.__hokyz;
     app.input.poll();
     return app.view.sim.step({ 0: app.input.simInput() }).find((event) => event.type === 'shot');
   });
   assert.ok(shot?.zone.startsWith('far-'), `Aim controls ignored: ${JSON.stringify(shot)}`);
-  await page.keyboard.up('s'); await page.keyboard.up('ArrowUp');
-  checks.push('Keyboard shot aims far while skating near in prepared possession fixture');
-  await page.keyboard.press('p');
+  await control('s', false); await control('ArrowUp', false);
+  checks.push('Shot aims far while skating near in prepared possession fixture');
+  await control('p', true);
   await page.evaluate(() => { const app = window.__hokyz; app.input.poll(); app.onTick(); });
+  await control('p', false);
   assert.equal(await page.getByRole('button', { name: 'Resume', exact: true }).count(), 1);
-  await page.getByRole('button', { name: 'Resume', exact: true }).click();
+  if (gamepad) {
+    await page.evaluate(() => window.__hokyz.input.poll());
+    await control('p', true);
+    await page.evaluate(() => { const app = window.__hokyz; app.input.poll(); app.onTick(); });
+    await control('p', false);
+  } else await page.getByRole('button', { name: 'Resume', exact: true }).click();
   assert.equal(await page.evaluate(() => window.__hokyz.paused), false);
   checks.push('Pause and resume work in a human match');
 } catch (error) {
@@ -238,6 +286,7 @@ finally {
   if (server) await new Promise((resolve) => server.httpServer.close(resolve));
 }
 writeFileSync(join(out, 'report.json'), JSON.stringify({ pass: !errors.length, checks, errors,
+  matchInput: gamepad ? 'Synthetic standard gamepad, production polling' : 'Browser keyboard',
   scope: 'Built WebGL game, keyboard/menu interactions and fixed-step human match fixtures; not a full run or hardware performance test' }, null, 2) + '\n');
 console.log(`${errors.length ? 'FAIL' : 'PASS'} browser playtest: ${out}`);
 if (errors.length) { console.error(errors.join('\n')); process.exitCode = 1; }
