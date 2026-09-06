@@ -39,6 +39,25 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest completed preview RNG fix: previewMatch in runState builds against a shallow
+run copy. matchIntroScreen commits returned RNG state only on Drop the Puck and
+saves before start; existing buildMatch consumers remain unchanged. Three tests in
+tests/run/matchPreview.test.ts verify non-mutation/reload, original setup and RNG
+equivalence, and fresh home lineup/identity with stable away stats/seed. Generated
+opponent IDs remain identity-only and are excluded from semantic comparisons.
+Baseline .gaming/intro-navigation/1788723537049-mq2qAY shows preview advanced RNG
+9644582643 ->101790767766. Final1788723615559-ddxsh8 passes unchanged Back/reload/
+Escape state and real start/save; start RNG exactly equals old first preview RNG.
+Intro screenshot inspected. Gates .gaming/runs/1788723585836-f3wePZ pass build/
+207 tests/bot; baseline1788723518185-v0nZqJ. Natural earned boss replay
+.gaming/natural-route/1788723625852-irSik5 retains2-6 loss and passes settlement.
+Self-review prefers predictable route preparation without accidental rerolls.
+No save migration, balance tuning or human difficulty claim. Next precise action:
+return to boss explanation audit: verify Velocity Blur ICE STORM description
+("Everyone falls easier") against slipperyIce physics and hit resolution before
+editing copy or balance. Current preview uses REF BRIBED from the earned event.
+This supersedes older next actions; full goal remains active.
+
 Latest completed fix: pre-match Back could softlock every row after the first,
 including reload, because availableNodes read currentNodeId (the preview) instead
 of the completed predecessor. src/run/runState.ts now reads the last path entry,

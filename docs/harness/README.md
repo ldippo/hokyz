@@ -171,9 +171,11 @@ the source checkpoint's provenance, not merely on the presence of a save file.
 
 `node scripts/harness/intro-navigation.mjs --resume=<full-checkpoint.json>` checks
 an earned later-row pre-match preview: pointer Back, reload/Continue and keyboard
-Escape retain connected map choices and completed path. The first available node
+Escape retain connected map choices, completed path and run RNG; Drop the Puck
+then consumes and persists setup RNG. The first available node
 must be a hockey match. Evidence: `.gaming/intro-navigation/`; `--baseline` records
-without recovery assertions. This does not assert preview RNG or roster stability.
+without recovery assertions. Unit tests separately cover roster-stat/seed stability
+and fresh home lineup selection. Generated identity-only opponent IDs may change.
 
 `node scripts/harness/hit-parade-full.mjs` runs idle and scripted pursuit through
 all 60 simulated seconds, using DOM movement/check keys and natural timer expiry.

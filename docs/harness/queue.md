@@ -102,6 +102,17 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (in-progress)
 
+Completed non-consuming match previews: previewMatch builds against a shallow run
+copy; Drop the Puck commits its resulting RNG state. Three tests verify unchanged
+run/reload, original setup equivalence, and updated home lineup with stable away
+stats/seed (identity-only generated IDs excluded). Baseline browser1788723537049-
+mq2qAY advanced RNG9644582643 ->101790767766 just on preview. Final1788723615559-
+ddxsh8 preserves RNG through Back/reload/Escape and commits exactly101790767766
+on real start; intro capture inspected. Evidence under .gaming/intro-navigation/.
+Gates1788723585836-f3wePZ pass build/207 tests/bots; natural boss replay
+1788723625852-irSik5 still loses2-6 and settles. Self-review prefers no accidental
+rerolls for roguelite players. No save migration or gameplay balance change.
+
 Completed pre-match Back softlock fix: availableNodes now uses the completed path
 for connectivity rather than the unplayed preview. Four regressions failed before;
 seven tests now cover later rows, completion and subsequent acts. Baseline browser

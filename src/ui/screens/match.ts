@@ -1,7 +1,7 @@
 import type { App } from '../../app';
 import { btn, esc, h } from '../dom';
 import type { MapNode } from '../../run/mapGen';
-import { applyMatchOutcome, buildMatch, completeNode, prepareDraft, type MatchOutcome } from '../../run/runState';
+import { applyMatchOutcome, buildMatch, previewMatch, completeNode, prepareDraft, type MatchOutcome } from '../../run/runState';
 import { MatchSim } from '../../sim/match';
 import { PERK_BY_ID } from '../../run/perks';
 import { runMapScreen } from './runMap';
@@ -17,7 +17,7 @@ import type { MetaProfile } from '../../run/meta';
 
 export function matchIntroScreen(app: App, node: MapNode): void {
   const run = app.run!;
-  const bundle = buildMatch(run, node);
+  const { bundle, rngState } = previewMatch(run, node);
   app.saveRun();
   const rival = RIVAL_BY_ID[bundle.away.rivalId];
   const mut = node.mutatorId ? MUTATOR_BY_ID[node.mutatorId] : null;
@@ -32,7 +32,11 @@ export function matchIntroScreen(app: App, node: MapNode): void {
     ),
     h('div', {}, h('span', { class: 'mod-tag' }, `AI: ${diffName}`), mut ? h('span', { class: 'mod-tag', title: mut.desc }, `MUTATOR: ${mut.name} — ${mut.desc}`) : null, run.flags.easyNext ? h('span', { class: 'mod-tag' }, 'REF BRIBED') : null, run.flags.hardNext ? h('span', { class: 'mod-tag' }, 'REF ANGRY') : null),
     bundle.mods.bossPhases.length ? h('div', { style: 'max-width:640px;margin-top:10px' }, ...bundle.mods.bossPhases.map((p) => h('div', { class: 'perk-chip epic', style: 'margin-top:6px' }, h('b', {}, `👑 ${p.label}`), h('div', {}, p.desc)))) : null,
-    h('div', { class: 'menu' }, btn('Drop the Puck', () => startRunMatch(app, node, bundle), 'primary'), btn('Back to Map', () => runMapScreen(app))),
+    h('div', { class: 'menu' }, btn('Drop the Puck', () => {
+      run.rngState = rngState;
+      app.saveRun();
+      startRunMatch(app, node, bundle);
+    }, 'primary'), btn('Back to Map', () => runMapScreen(app))),
   ));
   const nav = app.showScreen(el);
   if (nav) nav.onBack = () => runMapScreen(app);

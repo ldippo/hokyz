@@ -21,7 +21,7 @@ try {
   },checkpoint);
   const ready=async()=>{await page.waitForFunction(()=>window.__hokyz?.assetsLoaded&&window.__hokyz?.view,null,{timeout:90000});await page.evaluate(()=>window.__hokyz.loop.stop());};
   const resume=async()=>{await ready();await page.getByRole('button',{name:'Continue Run',exact:true}).click();};
-  const state=()=>page.evaluate(()=>{const r=window.__hokyz.run;return {act:r.act,row:r.row,path:r.path,available:[...document.querySelectorAll('.node.available')].map(n=>({title:n.title,text:n.textContent}))};});
+  const state=()=>page.evaluate(()=>{const r=window.__hokyz.run;return {act:r.act,row:r.row,path:r.path,rngState:r.rngState,available:[...document.querySelectorAll('.node.available')].map(n=>({title:n.title,text:n.textContent}))};});
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/`);await resume();
   const before=await state();assert.ok(before.row>0&&before.available.length>0);
   await page.locator('.node.available').first().click();
@@ -38,9 +38,15 @@ try {
     await page.locator('.node.available').first().click();
     await page.keyboard.press('Escape');await page.evaluate(()=>window.__hokyz.simStep());
     assert.deepEqual(await state(),before,'Keyboard Back lost connected choices');
+    await page.locator('.node.available').first().click();
+    await page.getByRole('button',{name:'Drop the Puck',exact:true}).click();
+    const started=await page.evaluate(()=>({rngState:window.__hokyz.run.rngState,savedRngState:JSON.parse(localStorage.getItem('hokyz.run.v1')).rngState,human:window.__hokyz.humanPlaying}));
+    assert.notEqual(started.rngState,before.rngState,'Match start did not consume setup RNG');
+    assert.equal(started.savedRngState,started.rngState);assert.equal(started.human,true);
+    checks.push({started});
   }
   assert.deepEqual(errors,[]);
 }catch(e){errors.push(String(e));process.exitCode=1;await page?.screenshot({path:join(out,'failure.png')}).catch(()=>{});}
 finally{await browser?.close();await new Promise(resolve=>server.httpServer.close(resolve));}
-writeFileSync(join(out,'report.json'),JSON.stringify({pass:!errors.length,source,checks,errors,scope:'Earned checkpoint restored; pointer Back, reload and keyboard Back preserve map choices. No match outcome or preview RNG stability claim.'},null,2));
+writeFileSync(join(out,'report.json'),JSON.stringify({pass:!errors.length,baseline:process.argv.includes('--baseline'),source,checks,errors,scope:'Earned checkpoint restored; normal mode asserts pointer/reload/keyboard Back preserve choices and RNG, then start consumes and persists RNG. Baseline records only. No human difficulty claim.'},null,2));
 console.log(out,errors.length?errors:'PASS intro navigation');

@@ -226,6 +226,13 @@ export interface MatchSetupBundle {
   seed: number;
 }
 
+/** Preview without spending run randomness; commit rngState only on match start. */
+export function previewMatch(run: RunState, node: MapNode): { bundle: MatchSetupBundle; rngState: number } {
+  const previewRun = { ...run };
+  const bundle = buildMatch(previewRun, node);
+  return { bundle, rngState: previewRun.rngState };
+}
+
 export function buildMatch(run: RunState, node: MapNode): MatchSetupBundle {
   const rng = runRng(run);
   const rival = RIVAL_BY_ID[node.rivalId ?? 'bruisers'];
