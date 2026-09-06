@@ -39,6 +39,24 @@ remains active. No timed burst requested. Queue: docs/harness/queue.md.
 
 ## Next
 
+Latest P3 fix: earned match drafts now persist before the result screen. Added
+optional pendingDraft, prepareDraft/claimDraft in runState; match callback prepares
+reward after advancing node, before save; runMap routes pending reward before
+level-ups or league offer; draftScreen reuses choices and resolves pick/skip once.
+Offer telemetry is counted once across reloads. Old saves remain loadable.
+Three tests in tests/run/draftResume.test.ts cover stable choices/RNG, once-only
+claims and skip cash, invalid picks and legacy no-pending saves. Browser command:
+node scripts/harness/rewards.mjs uses a terminal-win fixture then real result /
+reload / Continue / draft / reload / pick-or-skip interactions. No fabricated
+claim of human victory or full-run completion.
+Baseline .gaming/runs/1788706390294-HYk76Z/; final build/135 tests/bot gates:
+.gaming/runs/1788706637028-1ElBlU/. Final browser reward recovery:
+.gaming/rewards/1788706647393-2Sr4uZ/ passes both paths, including stable offer
+telemetry. Resumed draft screenshot inspected; choices and Skip visible.
+Self-review prefers preserved earned rewards for roguelite/first-session players.
+Next precise action: inspect skills-node reward persistence (it has a separate
+inline draft), then complete-act/run-over routing and larger-text/remapping.
+
 Latest validation chunk: scripts/harness/playtest.mjs now exercises real keyboard
 pass release, natural moving-AI pickup, automatic control switch and a follow-up
 shot in a continuous fixed-step sequence. Only the initial open-ice state is

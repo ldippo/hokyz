@@ -102,6 +102,18 @@ then complete-run progression, settings/reduced-motion and hardware limitations.
 
 ## P3: Full-game polish and validation (ready, depends on P1 and P2)
 
+Completed iteration: durable post-match rewards. Source inspection found wins
+advance/save the map before draft choices exist in the save, so reload can skip
+earned loot. Persist pending choices before showing results; route Continue to
+the pending draft before level-ups/league/map. Claim/skip must resolve once,
+preserve choices/RNG on reload, and avoid recounting offer telemetry. Verify
+unit persistence tests and browser result/draft reload for pick and skip.
+Final `.gaming/runs/1788706637028-1ElBlU/` passes build/135 tests/bot gates;
+`.gaming/rewards/1788706647393-2Sr4uZ/` passes both browser paths including
+once-only telemetry. Resumed draft capture inspected. Self-review: prefer-after
+for roguelite reward integrity; no claim of full-run victory or accessibility.
+Next: skills-node rewards and complete-act/run routing, then accessibility.
+
 Exercise title, quick match, new run, progression, pause/settings and reduced motion.
 Fix issues found; inspect final graphics and evaluate the relevant player
 perspectives with concrete evidence. Track remaining hardware-only validation

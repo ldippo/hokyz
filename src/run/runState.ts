@@ -32,6 +32,8 @@ export interface RunState {
   roster: SkaterDef[]; // index 0 = captain; first 3 healthy = lineup
   goalie: SkaterDef;
   perks: string[];
+  /** Earned reward survives reloads until explicitly picked or skipped. */
+  pendingDraft?: { id: string; type: MapNode['type']; perkIds: string[]; offeredLogged?: boolean };
   cash: number;
   livesUsed: number;
   matchesWon: number;
@@ -475,6 +477,24 @@ export function draftPerks(run: RunState, count: number, rarityBonus = 0): Perk[
   }
   commitRng(run, rng);
   return picks;
+}
+
+export function prepareDraft(run: RunState, node: Pick<MapNode, 'id' | 'type'>): Perk[] {
+  if (!run.pendingDraft) {
+    const count = node.type === 'boss' || node.type === 'elite' ? 4 : 3;
+    const bonus = node.type === 'boss' ? 1.5 : node.type === 'elite' ? 0.8 : 0;
+    run.pendingDraft = { id: node.id, type: node.type, perkIds: draftPerks(run, count, bonus).map(p => p.id) };
+  }
+  return run.pendingDraft.perkIds.map(id => PERK_BY_ID[id]).filter(Boolean);
+}
+
+export function claimDraft(run: RunState, perkId: string | null): boolean {
+  const pending = run.pendingDraft;
+  if (!pending || (perkId !== null && (!pending.perkIds.includes(perkId) || !PERK_BY_ID[perkId] || run.perks.includes(perkId)))) return false;
+  if (perkId === null) run.cash += 25;
+  else run.perks.push(perkId);
+  delete run.pendingDraft;
+  return true;
 }
 
 /** Skaters with unspent level-ups. */

@@ -40,6 +40,12 @@ It also exercises keyboard pass release to a moving AI receiver, natural pickup,
 automatic control transfer, and a follow-up keyboard shot without resetting
 possession. `human-passing.json` retains the pass/switch/shot event evidence.
 
+`node scripts/harness/rewards.mjs` (after building) uses a terminal-win fixture
+through the real match outcome UI, reloads at result and draft screens, verifies
+identical choices and once-only offer telemetry, then checks perk-pick and cash-skip
+persistence. Evidence goes in `.gaming/rewards/`. This is reward/save recovery
+coverage, not proof of a complete run or a human-played victory.
+
 After building, `pnpm harness:capture` starts its own Vite preview server on an
 ephemeral loopback port, uses Playwright Chromium, and writes title/rink screenshots
 and telemetry under `.gaming/captures/`. Install Chromium once with

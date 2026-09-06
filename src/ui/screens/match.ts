@@ -1,7 +1,7 @@
 import type { App } from '../../app';
 import { btn, esc, h } from '../dom';
 import type { MapNode } from '../../run/mapGen';
-import { applyMatchOutcome, buildMatch, completeNode, type MatchOutcome } from '../../run/runState';
+import { applyMatchOutcome, buildMatch, completeNode, prepareDraft, type MatchOutcome } from '../../run/runState';
 import { MatchSim } from '../../sim/match';
 import { PERK_BY_ID } from '../../run/perks';
 import { runMapScreen } from './runMap';
@@ -52,6 +52,7 @@ function startRunMatch(app: App, node: MapNode, bundle: ReturnType<typeof buildM
   playMatch(app, sim, perkNames, (outcome) => {
     const res = applyMatchOutcome(run, node, outcome);
     if (!res.ended) completeNode(run, node);
+    if (outcome.won && !res.ended) prepareDraft(run, node);
     const rivalId = node.rivalId ?? 'unknown';
     app.meta.rivalRecord ??= {};
     const rr = (app.meta.rivalRecord[rivalId] ??= { w: 0, l: 0 });

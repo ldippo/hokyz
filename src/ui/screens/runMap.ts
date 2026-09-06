@@ -19,6 +19,7 @@ import { pendingLevelUps } from '../../run/runState';
 import { skillsScreen } from './skills';
 import { rosterScreen } from './roster';
 import { MUTATOR_BY_ID } from '../../run/mutators';
+import { draftScreen } from './draft';
 
 function xpPct(xp: number, level: number): number {
   if (level >= MAX_LEVEL) return 100;
@@ -82,6 +83,10 @@ export function runMapScreen(app: App): void {
   const run = app.run!;
   if (run.over) {
     runOverScreen(app);
+    return;
+  }
+  if (run.pendingDraft) {
+    draftScreen(app, run.pendingDraft);
     return;
   }
   if (run.leagueOffer) {
